@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MockApiService } from "@/services/mock-api"
-import { Strain } from "@/types/domain"
+import { ApiService, Strain } from "@/services/api"
 import { Loader2, Search, Filter } from "lucide-react"
 import {
     Table,
@@ -23,8 +22,11 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
     const [search, setSearch] = React.useState("")
 
     React.useEffect(() => {
-        MockApiService.getStrains().then(data => {
+        ApiService.getStrains().then(data => {
             setStrains(data)
+            setLoading(false)
+        }).catch(err => {
+            console.error('Failed to load strains:', err)
             setLoading(false)
         })
     }, [])
@@ -36,7 +38,7 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
 
     const filteredStrains = strains.filter(s =>
         s.identifier.toLowerCase().includes(search.toLowerCase()) ||
-        s.sampleCode.toLowerCase().includes(search.toLowerCase())
+        (s.sample?.code && s.sample.code.toLowerCase().includes(search.toLowerCase()))
     )
 
     if (loading) {
@@ -91,7 +93,7 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                                             <Badge variant="secondary" className="ml-2 text-[10px]">SEQ</Badge>
                                         )}
                                     </TableCell>
-                                    <TableCell>{strain.sampleCode}</TableCell>
+                                    <TableCell>{strain.sample?.code || '-'}</TableCell>
 
                                     {showTaxonomy && (
                                         <TableCell>

@@ -25,7 +25,11 @@ export interface Strain {
     id: number;
     identifier: string;
     sampleId: number;
-    sampleCode?: string;
+    sample?: {
+        id: number;
+        code: string;
+        siteName?: string;
+    };
     taxonomy16s?: Record<string, any>;
     otherTaxonomy?: string;
     indexerInitials?: string;
@@ -40,6 +44,7 @@ export interface Strain {
     pigmentSecretion: boolean;
     amylase?: string;
     isolationRegion?: string;
+    iuk?: string;
     features?: string;
     comments?: string;
 }
@@ -55,16 +60,16 @@ export const ApiService = {
 
     async getSamples(): Promise<Sample[]> {
         // TODO: Implement when Samples API is ready
-        // const response = await fetch(`${API_BASE_URL}/api/v1/samples`);
-        // return response.json();
         return [];
     },
 
     async getStrains(): Promise<Strain[]> {
-        // TODO: Implement when Strains API is ready
-        // const response = await fetch(`${API_BASE_URL}/api/v1/strains`);
-        // return response.json();
-        return [];
+        const response = await fetch(`${API_BASE_URL}/api/v1/strains`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch strains: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.data; // API returns { data: [...], meta: {...} }
     },
 
     async getStorageBoxes(): Promise<any[]> {

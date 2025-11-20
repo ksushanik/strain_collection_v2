@@ -1,0 +1,79 @@
+import { IsString, IsInt, IsBoolean, IsOptional, IsEnum, IsObject } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateStrainDto {
+    @IsString()
+    identifier: string;
+
+    @IsInt()
+    @Type(() => Number)
+    sampleId: number;
+
+    @IsOptional()
+    @IsObject()
+    taxonomy16s?: Record<string, any>;
+
+    @IsOptional()
+    @IsString()
+    otherTaxonomy?: string;
+
+    @IsOptional()
+    @IsString()
+    indexerInitials?: string;
+
+    @IsOptional()
+    @IsString()
+    collectionRcam?: string;
+
+    @IsBoolean()
+    @Type(() => Boolean)
+    seq: boolean;
+
+    @IsOptional()
+    @IsString()
+    biochemistry?: string;
+
+    @IsOptional()
+    @IsString()
+    genome?: string;
+
+    @IsOptional()
+    @IsString()
+    antibioticActivity?: string;
+
+    @IsOptional()
+    @IsEnum(['POSITIVE', 'NEGATIVE', 'VARIABLE'])
+    gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
+
+    @IsBoolean()
+    @Type(() => Boolean)
+    phosphates: boolean;
+
+    @IsBoolean()
+    @Type(() => Boolean)
+    siderophores: boolean;
+
+    @IsBoolean()
+    @Type(() => Boolean)
+    pigmentSecretion: boolean;
+
+    @IsOptional()
+    @IsEnum(['POSITIVE', 'NEGATIVE'])
+    amylase?: 'POSITIVE' | 'NEGATIVE';
+
+    @IsOptional()
+    @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
+    isolationRegion?: string;
+
+    @IsOptional()
+    @IsString()
+    iuk?: string;
+
+    @IsOptional()
+    @IsString()
+    features?: string;
+
+    @IsOptional()
+    @IsString()
+    comments?: string;
+}
