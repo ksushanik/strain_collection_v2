@@ -18,7 +18,10 @@ export interface Sample {
     lng?: number;
     description?: string;
     collectedAt: string;
-    photoCount?: number;
+    _count?: {
+        strains: number;
+        photos: number;
+    };
 }
 
 export interface Strain {
@@ -59,8 +62,12 @@ export const ApiService = {
     },
 
     async getSamples(): Promise<Sample[]> {
-        // TODO: Implement when Samples API is ready
-        return [];
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch samples: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.data; // API returns { data: [...], meta: {...} }
     },
 
     async getStrains(): Promise<Strain[]> {
