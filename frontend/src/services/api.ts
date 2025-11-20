@@ -67,7 +67,7 @@ export const ApiService = {
             throw new Error(`Failed to fetch samples: ${response.statusText}`);
         }
         const data = await response.json();
-        return data.data; // API returns { data: [...], meta: {...} }
+        return data.data;
     },
 
     async getStrains(): Promise<Strain[]> {
@@ -76,16 +76,22 @@ export const ApiService = {
             throw new Error(`Failed to fetch strains: ${response.statusText}`);
         }
         const data = await response.json();
-        return data.data; // API returns { data: [...], meta: {...} }
+        return data.data;
     },
 
     async getStorageBoxes(): Promise<any[]> {
-        // TODO: Implement when Storage API is ready
-        return [];
+        const response = await fetch(`${API_BASE_URL}/api/v1/storage/boxes`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch storage boxes: ${response.statusText}`);
+        }
+        return response.json();
     },
 
-    async getBoxCells(boxId: number): Promise<any[]> {
-        // TODO: Implement when Storage API is ready
-        return [];
+    async getBoxCells(boxId: number): Promise<any> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/storage/boxes/${boxId}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch box cells: ${response.statusText}`);
+        }
+        return response.json();
     }
 };

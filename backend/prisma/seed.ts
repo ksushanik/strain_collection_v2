@@ -107,6 +107,78 @@ async function main() {
         ],
     });
 
+    // 5. Create Storage Boxes with Cells
+    console.log('Creating storage boxes...');
+    const box1 = await prisma.storageBox.create({
+        data: {
+            displayName: 'Freezer Box -80°C #1',
+            rows: 9,
+            cols: 9,
+            description: 'Main freezer storage for long-term preservation',
+            cells: {
+                create: Array.from({ length: 81 }, (_, i) => ({
+                    row: Math.floor(i / 9) + 1,
+                    col: (i % 9) + 1,
+                    cellCode: `${String.fromCharCode(65 + Math.floor(i / 9))}${(i % 9) + 1}`,
+                })),
+            },
+        },
+    });
+
+    const box2 = await prisma.storageBox.create({
+        data: {
+            displayName: 'Fridge Box +4°C #1',
+            rows: 10,
+            cols: 10,
+            description: 'Working collection for active research',
+            cells: {
+                create: Array.from({ length: 100 }, (_, i) => ({
+                    row: Math.floor(i / 10) + 1,
+                    col: (i % 10) + 1,
+                    cellCode: `${String.fromCharCode(65 + Math.floor(i / 10))}${(i % 10) + 1}`,
+                })),
+            },
+        },
+    });
+
+    // 6. Allocate strains to storage cells
+    console.log('Allocating strains to storage...');
+    const strains = await prisma.strain.findMany();
+    const box1Cells = await prisma.storageCell.findMany({
+        where: { boxId: box1.id },
+        take: 2,
+    });
+
+    if (strains.length >= 2 && box1Cells.length >= 2) {
+        // Allocate first strain to A1
+        await prisma.strainStorage.create({
+            data: {
+                strainId: strains[0].id,
+                cellId: box1Cells[0].id,
+                isPrimary: true,
+            },
+        });
+
+        await prisma.storageCell.update({
+            where: { id: box1Cells[0].id },
+            data: { status: 'OCCUPIED' },
+        });
+
+        // Allocate second strain to A2
+        await prisma.strainStorage.create({
+            data: {
+                strainId: strains[1].id,
+                cellId: box1Cells[1].id,
+                isPrimary: true,
+            },
+        });
+
+        await prisma.storageCell.update({
+            where: { id: box1Cells[1].id },
+            data: { status: 'OCCUPIED' },
+        });
+    }
+
     console.log('✅ Seeding completed!');
 }
 

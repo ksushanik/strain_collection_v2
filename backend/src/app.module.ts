@@ -5,9 +5,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
 import { StrainsModule } from './strains/strains.module';
 import { SamplesModule } from './samples/samples.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
-  imports: [PrismaModule, SettingsModule, StrainsModule, SamplesModule],
+  imports: [PrismaModule, SettingsModule, StrainsModule, SamplesModule, StorageModule],
   controllers: [AppController],
   providers: [AppService],
 })
