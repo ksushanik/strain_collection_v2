@@ -1,0 +1,129 @@
+@startuml
+left to right direction
+hide empty attributes
+skinparam rectangle {
+  BackgroundColor #f8f8f8
+  BorderColor #333
+}
+
+entity "samples" as samples {
+  *id : integer
+  code : varchar
+  sample_type : enum
+  site_name : varchar
+  lat : decimal
+  lng : decimal
+  description : text
+  collected_at : date
+  created_at : timestamp
+  updated_at : timestamp
+  custom_fields : jsonb
+}
+
+entity "sample_photos" as sample_photos {
+  *id : integer
+  sample_id : integer
+  url : text
+  meta : jsonb
+  created_at : timestamp
+}
+
+entity "strains" as strains {
+  *id : integer
+  identifier : varchar
+  sample_id : integer
+  taxonomy_16s : jsonb
+  other_taxonomy : text
+  indexer_initials : varchar
+  collection_rcam : text
+  seq : boolean
+  biochemistry : text
+  genome : text
+  antibiotic_activity : text
+  gram_stain : enum
+  phosphates : boolean
+  siderophores : boolean
+  pigment_secretion : boolean
+  iuk : varchar
+  amylase : enum
+  isolation_region : enum
+  features : text
+  comments : text
+  created_at : timestamp
+  updated_at : timestamp
+  custom_fields : jsonb
+}
+
+entity "media" as media {
+  *id : integer
+  name : varchar
+  composition : text
+  created_at : timestamp
+}
+
+entity "strain_media" as strain_media {
+  *strain_id : integer
+  *media_id : integer
+  notes : text
+}
+
+entity "storage_boxes" as storage_boxes {
+  *id : integer
+  display_name : varchar
+  rows : smallint
+  cols : smallint
+  description : text
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "storage_cells" as storage_cells {
+  *id : integer
+  box_id : integer
+  row : smallint
+  col : smallint
+  cell_code : varchar
+  status : enum
+}
+
+entity "strain_storage" as strain_storage {
+  *id : integer
+  strain_id : integer
+  cell_id : integer
+  is_primary : boolean
+  allocated_at : timestamp
+}
+
+entity "ui_bindings" as ui_bindings {
+  *id : integer
+  menu_label : varchar
+  profile_key : enum
+  enabled_field_packs : json
+  updated_at : timestamp
+}
+
+entity "legend_content" as legend_content {
+  *id : integer
+  content : text
+  updated_at : timestamp
+}
+
+entity "audit_log" as audit_log {
+  *id : integer
+  action : enum
+  entity_type : varchar
+  entity_id : integer
+  user_id : integer
+  batch_id : varchar
+  comment : text
+  created_at : timestamp
+}
+
+samples ||--o{ sample_photos : has
+samples ||--o{ strains : has
+strains ||--o{ strain_media : uses
+media ||--o{ strain_media : used_by
+storage_boxes ||--o{ storage_cells : contains
+storage_cells ||--o{ strain_storage : holds
+strains ||--o{ strain_storage : stored_in
+@enduml

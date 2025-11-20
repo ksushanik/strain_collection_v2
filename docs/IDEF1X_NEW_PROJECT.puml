@@ -1,0 +1,154 @@
+@startuml
+left to right direction
+hide empty methods
+hide stereotype
+skinparam rectangle {
+  BackgroundColor #f8f8f8
+  BorderColor #333
+}
+
+' =========================
+' Entities (IDEF1X semantics)
+' =========================
+entity "samples" as samples {
+  id : integer <<PK>>
+  code : varchar <<AK1>>
+  sample_type : enum
+  site_name : varchar
+  lat : decimal
+  lng : decimal
+  description : text
+  collected_at : date
+  created_at : timestamp
+  updated_at : timestamp
+  custom_fields : jsonb
+}
+
+entity "sample_photos" as sample_photos {
+  id : integer <<PK>>
+  sample_id : integer <<FK>>
+  url : text
+  meta : jsonb
+  created_at : timestamp
+}
+
+entity "strains" as strains {
+  id : integer <<PK>>
+  identifier : varchar <<AK1>>
+  sample_id : integer <<FK>>
+  taxonomy_16s : jsonb
+  other_taxonomy : text
+  indexer_initials : varchar
+  collection_rcam : text
+  seq : boolean
+  biochemistry : text
+  genome : text
+  antibiotic_activity : text
+  gram_stain : enum
+  phosphates : boolean
+  siderophores : boolean
+  pigment_secretion : boolean
+  iuk : varchar
+  amylase : enum
+  isolation_region : enum
+  features : text
+  comments : text
+  created_at : timestamp
+  updated_at : timestamp
+  custom_fields : jsonb
+}
+
+entity "media" as media {
+  id : integer <<PK>>
+  name : varchar <<AK1>>
+  composition : text
+  created_at : timestamp
+}
+
+entity "strain_media" as strain_media {
+  strain_id : integer <<PK,FK>>
+  media_id : integer <<PK,FK>>
+  notes : text
+}
+
+entity "storage_boxes" as storage_boxes {
+  id : integer <<PK>>
+  display_name : varchar
+  rows : smallint
+  cols : smallint
+  description : text
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "storage_cells" as storage_cells {
+  box_id : integer <<PK,FK>>
+  row : smallint <<PK>>
+  col : smallint <<PK>>
+  cell_code : varchar <<AK1>>
+  status : enum
+}
+
+entity "strain_storage" as strain_storage {
+  box_id : integer <<PK,FK>>
+  row : smallint <<PK>>
+  col : smallint <<PK>>
+  strain_id : integer <<FK>>
+  is_primary : boolean
+  allocated_at : timestamp
+}
+
+entity "ui_bindings" as ui_bindings {
+  id : integer <<PK>>
+  menu_label : varchar
+  profile_key : enum
+  enabled_field_packs : json
+  legend_id : integer <<FK>>
+  updated_at : timestamp
+}
+
+entity "legend_content" as legend_content {
+  id : integer <<PK>>
+  content : text
+  updated_at : timestamp
+}
+
+entity "audit_log" as audit_log {
+  id : integer <<PK>>
+  action : enum
+  entity_type : varchar
+  entity_id : integer
+  user_id : integer
+  batch_id : varchar
+  comment : text
+  created_at : timestamp
+}
+
+' =========================
+' Relationships (IDEF1X: solid = identifying, dotted = non-identifying)
+' =========================
+' samples → strains: non-identifying (strain PK independent, sample_id FK)
+samples ||..o{ strains : sample contains strains
+
+' samples → sample_photos: non-identifying (photo PK independent)
+samples ||..o{ sample_photos : sample has photos
+
+' strains ↔ media: identifying on both sides via associative entity (composite PK)
+strains ||--o{ strain_media : strain uses media
+media   ||--o{ strain_media : media used by strain
+
+' storage_boxes → storage_cells: identifying (cell PK includes box_id)
+storage_boxes ||--o{ storage_cells : box contains cells
+
+' storage_cells → strain_storage: identifying (occupancy PK equals cell identity)
+storage_cells ||--o{ strain_storage : cell occupancy
+
+' strains → strain_storage: non-identifying (FK, not part of PK)
+strains ||..o{ strain_storage : stored in cells
+
+legend_content ||..o{ ui_bindings : legend
+samples ||..o{ audit_log : logged
+strains ||..o{ audit_log : logged
+storage_cells ||..o{ audit_log : logged
+
+@enduml

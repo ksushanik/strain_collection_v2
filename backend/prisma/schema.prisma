@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Core Domain Entities ---
+
+model Sample {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique // Constructed code, e.g. "24-PL-Rose"
+  sampleType    SampleType @map("sample_type")
+  siteName      String    @map("site_name")
+  lat           Float?
+  lng           Float?
+  description   String?
+  collectedAt   DateTime  @map("collected_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  customFields  Json?     @map("custom_fields")
+
+  // Relations
+  photos        SamplePhoto[]
+  strains       Strain[]
+
+  @@map("samples")
+}
+
+model SamplePhoto {
+  id        Int      @id @default(autoincrement())
+  sampleId  Int      @map("sample_id")
+  url       String
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sample    Sample   @relation(fields: [sampleId], references: [id])
+
+  @@map("sample_photos")
+}
+
+model Strain {
+  id                  Int       @id @default(autoincrement())
+  identifier          String    @unique
+  sampleId            Int       @map("sample_id")
+  
+  // Taxonomy
+  taxonomy16s         Json?     @map("taxonomy_16s")
+  otherTaxonomy       String?   @map("other_taxonomy")
+  
+  // Indexing
+  indexerInitials     String?   @map("indexer_initials")
+  collectionRcam      String?   @map("collection_rcam")
+  
+  // Characteristics
+  seq                 Boolean   @default(false)
+  biochemistry        String?
+  genome              String?
+  antibioticActivity  String?   @map("antibiotic_activity")
+  gramStain           GramStain? @map("gram_stain")
+  
+  // Growth
+  phosphates          Boolean   @default(false)
+  siderophores        Boolean   @default(false)
+  pigmentSecretion    Boolean   @default(false) @map("pigment_secretion")
+  amylase             Amylase?
+  isolationRegion     IsolationRegion? @map("isolation_region")
+  iuk                 String? // Indole acetic acid (IUK in Russian context often refers to IAA)
+
+  features            String?
+  comments            String?
+  
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  customFields        Json?     @map("custom_fields")
+
+  // Relations
+  sample              Sample    @relation(fields: [sampleId], references: [id])
+  media               StrainMedia[]
+  storage             StrainStorage[]
+
+  @@map("strains")
+}
+
+model Media {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  composition String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  strains     StrainMedia[]
+
+  @@map("media")
+}
+
+model StrainMedia {
+  strainId Int @map("strain_id")
+  mediaId  Int @map("media_id")
+  notes    String?
+
+  strain   Strain @relation(fields: [strainId], references: [id])
+  media    Media  @relation(fields: [mediaId], references: [id])
+
+  @@id([strainId, mediaId])
+  @@map("strain_media")
+}
+
+// --- Storage System ---
+
+model StorageBox {
+  id          Int      @id @default(autoincrement())
+  displayName String   @map("display_name")
+  rows        Int      // 9 or 10
+  cols        Int      // 9 or 10
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  cells       StorageCell[]
+
+  @@map("storage_boxes")
+}
+
+model StorageCell {
+  id        Int         @id @default(autoincrement())
+  boxId     Int         @map("box_id")
+  row       Int
+  col       Int
+  cellCode  String      @map("cell_code") // e.g. "A1"
+  status    CellStatus  @default(FREE)
+
+  box       StorageBox  @relation(fields: [boxId], references: [id])
+  strain    StrainStorage?
+
+  @@unique([boxId, row, col])
+  @@map("storage_cells")
+}
+
+model StrainStorage {
+  id          Int      @id @default(autoincrement())
+  strainId    Int      @map("strain_id")
+  cellId      Int      @unique @map("cell_id") // One cell = max one strain
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  allocatedAt DateTime @default(now()) @map("allocated_at")
+
+  strain      Strain      @relation(fields: [strainId], references: [id])
+  cell        StorageCell @relation(fields: [cellId], references: [id])
+
+  @@map("strain_storage")
+}
+
+// --- Flexible Structure & Settings ---
+
+model UiBinding {
+  id                Int      @id @default(autoincrement())
+  menuLabel         String   @map("menu_label")
+  profileKey        ProfileKey @map("profile_key")
+  routeSlug         String   @unique @map("route_slug")
+  icon              String?
+  enabledFieldPacks Json     @map("enabled_field_packs") // List of strings
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("ui_bindings")
+}
+
+model LegendContent {
+  id        Int      @id @default(autoincrement())
+  content   String   // Markdown
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("legend_content")
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    Int      @map("entity_id")
+  batchId     String?  @map("batch_id")
+  userId      String?  @map("user_id")
+  comment     String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("audit_log")
+}
+
+// --- Enums ---
+
+enum SampleType {
+  PLANT
+  ANIMAL
+  WATER
+  SOIL
+  OTHER
+}
+
+enum GramStain {
+  POSITIVE
+  NEGATIVE
+  VARIABLE
+}
+
+enum Amylase {
+  POSITIVE
+  NEGATIVE
+}
+
+enum IsolationRegion {
+  RHIZOSPHERE
+  ENDOSPHERE
+  PHYLLOSPHERE
+  SOIL
+  OTHER
+}
+
+enum CellStatus {
+  FREE
+  OCCUPIED
+}
+
+enum ProfileKey {
+  SAMPLE
+  STRAIN
+  MEDIA
+  STORAGE
+}

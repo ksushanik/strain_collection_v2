@@ -1,0 +1,66 @@
+@startuml
+skinparam activity {
+  BackgroundColor #f9f9f9
+  BorderColor #333
+}
+
+' Page 1: End-to-end core flow
+start
+:UOB-1 Создать образец\n(ввод №, тип, вид, место, координаты, дата, фото);
+:UOB-2 Валидация образца;
+if (Образец валиден?) then (да)
+  :UOB-3 Регистрация штаммов\n(по образцу);
+else (нет)
+  :UOB-1 Исправление данных образца;
+endif
+note right
+Sample[state: valid | invalid]
+end note
+fork
+  :UOB-4 Привязка сред роста\n(штамм → среда);
+fork again
+  :UOB-5 Назначение мест хранения\n(штамм → ячейки 9×9/10×10, is_primary);
+end fork
+note right
+StorageCell[state: free | occupied]
+end note
+:UOB-6 Обновление аналитики\n(сводные метрики);
+:UOB-7 Запись аудита\n(CRUD/allocate/unallocate/bulk);
+note right
+AuditEntry[state: created]
+end note
+stop
+
+@enduml
+
+@startuml
+skinparam activity {
+  BackgroundColor #f9f9f9
+  BorderColor #333
+}
+'
+' Page 2: Admin configuration flow
+start
+:UOB-8 Админ: настройка биндингов меню\n(ярлык → профиль);
+:UOB-9 Админ: включение/выключение пакетов полей;
+:UOB-10 Обновление легенды;
+:UOB-11 Применение настроек в UI;
+stop
+
+@enduml
+
+@startuml
+skinparam activity {
+  BackgroundColor #f9f9f9
+  BorderColor #333
+}
+'
+' Page 3: Browsing & navigation
+start
+:UOB-12 Поиск и фильтрация\n(образцы/штаммы/среды);
+:UOB-13 Открытие карточки образца\n(плитка → детально, карта, фото);
+:UOB-14 Переход к штамму\n(из карточки образца);
+:UOB-15 Переход к ячейке хранения\n(из штамма/из хранилища);
+stop
+
+@enduml
