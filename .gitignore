@@ -38,3 +38,7 @@ postgres_data/
 # Temporary files
 *.tmp
 .temp/
+
+# Documentation - Internal prompts
+docs/LLM_PROMPT_NEW_PROJECT.md
+docs/промт_для_нового_проекта.md
