@@ -66,7 +66,7 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                     <Filter className="mr-2 h-4 w-4" />
                     Filters
                 </Button>
-                <Button size="sm">Create Strain</Button>
+                <Button size="sm" onClick={() => router.push('/strains/new')}>Create Strain</Button>
             </div>
 
             <Card>

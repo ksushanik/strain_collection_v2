@@ -109,5 +109,45 @@ export const ApiService = {
             throw new Error(`Failed to fetch box cells: ${response.statusText}`);
         }
         return response.json();
+    },
+
+    async createStrain(data: Partial<Strain>): Promise<Strain> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/strains`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(`Failed to create strain: ${response.statusText}`);
+        return response.json();
+    },
+
+    async updateStrain(id: number, data: Partial<Strain>): Promise<Strain> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/strains/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(`Failed to update strain: ${response.statusText}`);
+        return response.json();
+    },
+
+    async createSample(data: Partial<Sample>): Promise<Sample> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(`Failed to create sample: ${response.statusText}`);
+        return response.json();
+    },
+
+    async updateSample(id: number, data: Partial<Sample>): Promise<Sample> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error(`Failed to update sample: ${response.statusText}`);
+        return response.json();
     }
 };
