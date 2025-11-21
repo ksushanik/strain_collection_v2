@@ -173,19 +173,6 @@ model LegendContent {
   @@map("legend_content")
 }
 
-model AuditLog {
-  id          Int      @id @default(autoincrement())
-  action      String
-  entityType  String   @map("entity_type")
-  entityId    Int      @map("entity_id")
-  batchId     String?  @map("batch_id")
-  userId      String?  @map("user_id")
-  comment     String?
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  @@map("audit_log")
-}
-
 // --- Authentication & RBAC ---
 
 enum Role {
@@ -206,6 +193,9 @@ model User {
   
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  auditLogs AuditLog[]
 
   @@map("users")
 }
@@ -262,3 +252,31 @@ enum ProfileKey {
   MEDIA
   STORAGE
 }
+
+// Audit Log model for tracking all user actions
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  action      AuditAction  // CREATE, UPDATE, DELETE
+  entity      String       // Strain, Sample, User, etc.
+  entityId    Int          @map("entity_id") // ID of the changed record
+  
+  changes     Json?    // Details of changes (before/after)
+  metadata    Json?    // Additional information (IP, user agent, etc.)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+

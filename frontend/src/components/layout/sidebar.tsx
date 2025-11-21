@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,9 +13,13 @@ import {
     Box,
     Settings,
     Menu,
-    Loader2
+    Loader2,
+    LogOut,
+    User
 } from "lucide-react"
 import { ApiService, UiBinding } from "@/services/api"
+import { useAuth } from "@/contexts/AuthContext"
+import { Separator } from "@/components/ui/separator"
 
 // Map string icon names to components
 const IconMap: Record<string, any> = {
@@ -28,6 +32,8 @@ const IconMap: Record<string, any> = {
 
 export function Sidebar() {
     const pathname = usePathname()
+    const router = useRouter()
+    const { user, logout } = useAuth()
     const [isCollapsed, setIsCollapsed] = React.useState(false)
     const [bindings, setBindings] = React.useState<UiBinding[]>([])
     const [loading, setLoading] = React.useState(true)
@@ -41,6 +47,11 @@ export function Sidebar() {
             setLoading(false)
         })
     }, [])
+
+    const handleLogout = () => {
+        logout()
+        router.push('/login')
+    }
 
     return (
         <div className={cn(
@@ -102,11 +113,11 @@ export function Sidebar() {
                 </nav>
             </div>
 
-            <div className="border-t p-4">
+            <div className="border-t">
                 <Link
                     href="/settings"
                     className={cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                         pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
                         isCollapsed && "justify-center px-2"
                     )}
@@ -114,6 +125,39 @@ export function Sidebar() {
                     <Settings className="h-4 w-4" />
                     {!isCollapsed && <span>Settings</span>}
                 </Link>
+
+                <Separator />
+
+                {user && (
+                    <div className="p-4 space-y-3">
+                        {!isCollapsed && (
+                            <div className="flex items-start gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                    <User className="h-4 w-4 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{user.name}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                            {user.role}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        <Button
+                            variant="outline"
+                            size={isCollapsed ? "icon" : "sm"}
+                            onClick={handleLogout}
+                            className={cn("w-full", isCollapsed && "h-8 w-8")}
+                        >
+                            <LogOut className="h-4 w-4" />
+                            {!isCollapsed && <span className="ml-2">Logout</span>}
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     )

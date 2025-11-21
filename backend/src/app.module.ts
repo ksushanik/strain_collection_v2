@@ -9,6 +9,9 @@ import { SamplesModule } from './samples/samples.module';
 import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+// import { AdminModule } from './admin/admin.module'; // Временно отключено из-за несовместимости AdminJS v7 с CommonJS
+import { CaslModule } from './casl/casl.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { AuthModule } from './auth/auth.module';
     StorageModule,
     UsersModule,
     AuthModule,
+    CaslModule,
+    AuditModule,
+    // AdminModule, // Временно отключено
   ],
   controllers: [AppController],
   providers: [AppService],
