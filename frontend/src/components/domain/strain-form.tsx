@@ -83,6 +83,10 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
             const payload = {
                 ...data,
                 sampleId: data.sampleId ? parseInt(data.sampleId) : undefined,
+                gramStain: data.gramStain || undefined,
+                amylase: data.amylase || undefined,
+                features: data.features || undefined,
+                comments: data.comments || undefined,
             }
 
             if (isEdit && initialData) {
@@ -157,7 +161,7 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
                                     <SelectContent>
                                         <SelectItem value="POSITIVE">Positive (+)</SelectItem>
                                         <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
-                                        <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                                        <SelectItem value="VARIABLE">Variable</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -171,9 +175,17 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Amylase</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Activity level" {...field} />
-                                </FormControl>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select result" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="POSITIVE">Positive (+)</SelectItem>
+                                        <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}

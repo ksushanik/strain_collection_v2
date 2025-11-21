@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
 import { MainLayout } from "@/components/layout/main-layout"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -53,10 +53,18 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
         <MainLayout>
             <div className="p-8 space-y-6">
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-4 w-4" />
+                <div className="flex items-center gap-4 mb-6">
+                    <Button variant="outline" size="sm" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4 mr-1" />
+                        Back
                     </Button>
+                    <Button variant="default" size="sm" onClick={() => router.push(`/strains/${strain.id}/edit`)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit Strain
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">{strain.identifier}</h1>
                         <p className="text-muted-foreground">

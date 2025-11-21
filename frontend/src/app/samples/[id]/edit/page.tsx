@@ -1,0 +1,63 @@
+"use client"
+
+import * as React from "react"
+import { MainLayout } from "@/components/layout/main-layout"
+import { SampleForm } from "@/components/domain/sample-form"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ApiService, Sample } from "@/services/api"
+import { Loader2 } from "lucide-react"
+
+export default function EditSamplePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params)
+    const [sample, setSample] = React.useState<Sample | null>(null)
+    const [loading, setLoading] = React.useState(true)
+
+    React.useEffect(() => {
+        ApiService.getSample(parseInt(id))
+            .then(setSample)
+            .catch(console.error)
+            .finally(() => setLoading(false))
+    }, [id])
+
+    if (loading) {
+        return (
+            <MainLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </MainLayout>
+        )
+    }
+
+    if (!sample) {
+        return (
+            <MainLayout>
+                <div className="p-8 text-center text-muted-foreground">
+                    Sample not found
+                </div>
+            </MainLayout>
+        )
+    }
+
+    return (
+        <MainLayout>
+            <div className="p-8 max-w-3xl mx-auto">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold tracking-tight">Edit Sample</h1>
+                    <p className="text-muted-foreground">
+                        Update sample details.
+                    </p>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Sample Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <SampleForm initialData={sample} isEdit />
+                    </CardContent>
+                </Card>
+            </div>
+        </MainLayout>
+    )
+}
