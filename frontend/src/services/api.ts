@@ -70,6 +70,14 @@ export const ApiService = {
         return data.data;
     },
 
+    async getSample(id: number): Promise<Sample> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch sample: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
     async getStrains(): Promise<Strain[]> {
         const response = await fetch(`${API_BASE_URL}/api/v1/strains`);
         if (!response.ok) {
@@ -77,6 +85,14 @@ export const ApiService = {
         }
         const data = await response.json();
         return data.data;
+    },
+
+    async getStrain(id: number): Promise<Strain> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/strains/${id}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch strain: ${response.statusText}`);
+        }
+        return response.json();
     },
 
     async getStorageBoxes(): Promise<any[]> {

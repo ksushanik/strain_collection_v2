@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
 
 export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
+    const router = useRouter()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
@@ -34,7 +36,6 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
-    const showBio = enabledPacks.includes("biochemistry")
 
     const filteredStrains = strains.filter(s =>
         s.identifier.toLowerCase().includes(search.toLowerCase()) ||
@@ -81,12 +82,15 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                                 {showTaxonomy && <TableHead>Taxonomy (16S)</TableHead>}
                                 {showGrowth && <TableHead>Gram Stain</TableHead>}
                                 {showGrowth && <TableHead>Characteristics</TableHead>}
-                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredStrains.map((strain) => (
-                                <TableRow key={strain.id}>
+                                <TableRow
+                                    key={strain.id}
+                                    className="cursor-pointer hover:bg-muted/50"
+                                    onClick={() => router.push(`/strains/${strain.id}`)}
+                                >
                                     <TableCell className="font-medium">
                                         {strain.identifier}
                                         {strain.seq && (
@@ -123,10 +127,6 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                                             </div>
                                         </TableCell>
                                     )}
-
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm">View</Button>
-                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
