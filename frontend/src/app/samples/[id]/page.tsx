@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { PhotoUpload } from "@/components/domain/photo-upload"
 
 interface SampleWithStrains extends Sample {
     strains: Array<{
@@ -26,7 +27,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
     const [sample, setSample] = React.useState<SampleWithStrains | null>(null)
     const [loading, setLoading] = React.useState(true)
 
-    React.useEffect(() => {
+    const loadSample = React.useCallback(() => {
         if (!id) return;
         ApiService.getSample(parseInt(id))
             .then((data: any) => {
@@ -38,6 +39,10 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                 setLoading(false)
             })
     }, [id])
+
+    React.useEffect(() => {
+        loadSample()
+    }, [loadSample])
 
     if (loading) {
         return (
@@ -127,15 +132,17 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                             </CardContent>
                         </Card>
 
-                        {/* Photos Placeholder */}
+                        {/* Photos */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Photos ({sample.photos?.length || 0})</CardTitle>
+                                <CardTitle>Sample Photos</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="h-32 bg-muted/30 rounded-md border border-dashed flex items-center justify-center">
-                                    <p className="text-sm text-muted-foreground">No photos uploaded</p>
-                                </div>
+                                <PhotoUpload
+                                    sampleId={sample.id}
+                                    existingPhotos={sample.photos || []}
+                                    onPhotosChange={loadSample}
+                                />
                             </CardContent>
                         </Card>
                     </div>

@@ -13,7 +13,7 @@ import { StorageView } from "@/components/domain/storage-view"
 
 export default function DynamicPage() {
     const params = useParams()
-    const slug = params.slug as string
+    const slug = params?.slug as string
 
     const [binding, setBinding] = React.useState<UiBinding | null>(null)
     const [loading, setLoading] = React.useState(true)

@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateSampleDto } from './dto/create-sample.dto';
 import { UpdateSampleDto } from './dto/update-sample.dto';
 import { SampleQueryDto } from './dto/sample-query.dto';
+import { ImageKitService } from '../services/imagekit.service';
 
 @Injectable()
 export class SamplesService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private imagekitService: ImageKitService,
+    ) { }
 
     async findAll(query: SampleQueryDto) {
         const { sampleType, search, page = 1, limit = 50 } = query;
@@ -96,12 +100,62 @@ export class SamplesService {
     }
 
     async remove(id: number) {
-        await this.findOne(id); // Check existence
+        const sample = await this.prisma.sample.findUnique({ where: { id } });
+        if (!sample) {
+            throw new NotFoundException(`Sample with ID ${id} not found`);
+        }
+        return this.prisma.sample.delete({ where: { id } });
+    }
 
-        await this.prisma.sample.delete({
-            where: { id },
+    async uploadPhoto(sampleId: number, file: Express.Multer.File) {
+        // Verify sample exists
+        const sample = await this.prisma.sample.findUnique({ where: { id: sampleId } });
+        if (!sample) {
+            throw new NotFoundException(`Sample with ID ${sampleId} not found`);
+        }
+
+        // Upload to ImageKit
+        const uploadResponse = await this.imagekitService.uploadImage(
+            file.buffer,
+            file.originalname,
+            'sample-photos',
+        );
+
+        // Save metadata to database
+        return this.prisma.samplePhoto.create({
+            data: {
+                sampleId,
+                url: uploadResponse.url,
+                meta: {
+                    fileId: uploadResponse.fileId,
+                    originalName: file.originalname,
+                    size: uploadResponse.size,
+                    width: uploadResponse.width,
+                    height: uploadResponse.height,
+                    fileType: uploadResponse.fileType,
+                },
+            },
         });
+    }
 
-        return { message: `Sample with ID ${id} deleted successfully` };
+    async deletePhoto(photoId: number) {
+        const photo = await this.prisma.samplePhoto.findUnique({ where: { id: photoId } });
+        if (!photo) {
+            throw new NotFoundException(`Photo with ID ${photoId} not found`);
+        }
+
+        // Extract fileId from meta
+        const meta = photo.meta as any;
+        if (meta?.fileId) {
+            try {
+                await this.imagekitService.deleteImage(meta.fileId);
+            } catch (error) {
+                console.error('Failed to delete from ImageKit:', error);
+                // Continue with database deletion even if ImageKit deletion fails
+            }
+        }
+
+        // Delete from database
+        return this.prisma.samplePhoto.delete({ where: { id: photoId } });
     }
 }

@@ -18,10 +18,26 @@ export interface Sample {
     lng?: number;
     description?: string;
     collectedAt: string;
+    photos?: SamplePhoto[];
     _count?: {
         strains: number;
         photos: number;
     };
+}
+
+export interface SamplePhoto {
+    id: number;
+    sampleId: number;
+    url: string;
+    meta?: {
+        fileId: string;
+        originalName: string;
+        size: number;
+        width?: number;
+        height?: number;
+        fileType?: string;
+    };
+    createdAt: string;
 }
 
 export interface Strain {
@@ -95,6 +111,7 @@ export const ApiService = {
         return response.json();
     },
 
+
     async getStorageBoxes(): Promise<any[]> {
         const response = await fetch(`${API_BASE_URL}/api/v1/storage/boxes`);
         if (!response.ok) {
@@ -149,5 +166,40 @@ export const ApiService = {
         });
         if (!response.ok) throw new Error(`Failed to update sample: ${response.statusText}`);
         return response.json();
-    }
+    },
+
+    async deleteSample(id: number): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to delete sample: ${response.statusText}`);
+        }
+    },
+
+    async uploadSamplePhoto(sampleId: number, file: File): Promise<SamplePhoto> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${sampleId}/photos`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to upload photo: ${errorText}`);
+        }
+        return response.json();
+    },
+
+    async deleteSamplePhoto(photoId: number): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}/api/v1/samples/photos/${photoId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to delete photo: ${response.statusText}`);
+        }
+    },
 };

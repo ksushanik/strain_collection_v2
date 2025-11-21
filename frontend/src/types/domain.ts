@@ -66,3 +66,13 @@ export interface StorageCell {
     status: 'FREE' | 'OCCUPIED' | 'RESERVED';
     strainIdentifier?: string;
 }
+
+export type Role = 'ADMIN' | 'MANAGER' | 'USER';
+
+export interface User {
+    id: number;
+    email: string;
+    name?: string;
+    role: Role;
+    groupId?: number;
+}
