@@ -17,7 +17,12 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 
-export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
+interface StrainListProps {
+    enabledPacks: string[]
+    returnPath?: string
+}
+
+export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const router = useRouter()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [loading, setLoading] = React.useState(true)
@@ -66,7 +71,9 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                     <Filter className="mr-2 h-4 w-4" />
                     Filters
                 </Button>
-                <Button size="sm" onClick={() => router.push('/strains/new')}>Create Strain</Button>
+                <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
+                    Create Strain
+                </Button>
             </div>
 
             <Card>
@@ -89,7 +96,7 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                                 <TableRow
                                     key={strain.id}
                                     className="cursor-pointer hover:bg-muted/50"
-                                    onClick={() => router.push(`/strains/${strain.id}`)}
+                                    onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
                                 >
                                     <TableCell className="font-medium">
                                         {strain.identifier}
@@ -103,7 +110,7 @@ export function StrainList({ enabledPacks }: { enabledPacks: string[] }) {
                                         <TableCell>
                                             {strain.taxonomy16s ? (
                                                 <span className="italic">
-                                                    {strain.taxonomy16s.genus} {strain.taxonomy16s.species}
+                                                    {(strain.taxonomy16s as any)?.genus} {(strain.taxonomy16s as any)?.species}
                                                 </span>
                                             ) : (
                                                 <span className="text-muted-foreground">-</span>

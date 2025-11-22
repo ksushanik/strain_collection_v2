@@ -1,17 +1,19 @@
 "use client"
 
 import * as React from "react"
+import { Suspense } from "react"
 import { ApiService, Strain } from "@/services/api"
 import { MainLayout } from "@/components/layout/main-layout"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
-export default function StrainDetailPage({ params }: { params: Promise<{ id: string }> }) {
+function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
-    const { id } = React.use(params)
+    const searchParams = useSearchParams()
+    const returnTo = searchParams?.get("returnTo") || undefined
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
 
@@ -52,13 +54,18 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
     return (
         <MainLayout>
             <div className="p-8 space-y-6">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-6">
-                    <Button variant="outline" size="sm" onClick={() => router.back()}>
+                    <Button variant="outline" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
                         <ArrowLeft className="h-4 w-4 mr-1" />
                         Back
                     </Button>
-                    <Button variant="default" size="sm" onClick={() => router.push(`/strains/${strain.id}/edit`)}>
+                    <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() =>
+                            router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
+                        }
+                    >
                         <Edit className="h-4 w-4 mr-1" />
                         Edit Strain
                     </Button>
@@ -68,7 +75,7 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">{strain.identifier}</h1>
                         <p className="text-muted-foreground">
-                            Sample: {strain.sample?.code || 'Unknown'} • ID: {strain.id}
+                            Sample: {strain.sample?.code || 'Unknown'}  ID: {strain.id}
                         </p>
                     </div>
                     <div className="ml-auto flex gap-2">
@@ -82,7 +89,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
-                    {/* Taxonomy */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -94,9 +100,9 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                             {strain.taxonomy16s && (
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <span className="font-medium">Genus:</span>
-                                    <span>{strain.taxonomy16s.genus}</span>
+                                    <span>{(strain.taxonomy16s as any)?.genus}</span>
                                     <span className="font-medium">Species:</span>
-                                    <span>{strain.taxonomy16s.species}</span>
+                                    <span>{(strain.taxonomy16s as any)?.species}</span>
                                 </div>
                             )}
                             {strain.otherTaxonomy && (
@@ -108,7 +114,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Growth Characteristics */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -137,7 +142,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Genetics */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -163,7 +167,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Additional Info */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -192,8 +195,47 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                             </div>
                         </CardContent>
                     </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Archive className="h-5 w-5" />
+                                Storage Locations
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            {strain.storage && strain.storage.length > 0 ? (
+                                strain.storage.map((s) => (
+                                    <button
+                                        key={s.id}
+                                        className="w-full text-left flex items-center justify-between rounded border p-2 hover:bg-muted/60"
+                                        onClick={() =>
+                                            window.location.href = `/dynamic/storage?boxId=${s.cell.box.id}&cell=${s.cell.cellCode}`
+                                        }
+                                    >
+                                        <div>
+                                            <div className="font-medium">{s.cell.box.displayName}</div>
+                                            <div className="text-muted-foreground text-xs">Cell: {s.cell.cellCode}</div>
+                                        </div>
+                                        {s.isPrimary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-muted-foreground">Not allocated</p>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </MainLayout>
+    )
+}
+
+export default function StrainDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params)
+    return (
+        <Suspense fallback={<div className="p-8">Loading...</div>}>
+            <StrainDetailContent id={id} />
+        </Suspense>
     )
 }

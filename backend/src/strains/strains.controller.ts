@@ -12,6 +12,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StrainsService } from './strains.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
@@ -22,6 +23,8 @@ import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 
 @Controller('api/v1/strains')
+@ApiTags('Strains')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StrainsController {

@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MediaService } from './media.service';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
@@ -19,6 +20,8 @@ import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 
 @Controller('api/v1/media')
+@ApiTags('Media')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}

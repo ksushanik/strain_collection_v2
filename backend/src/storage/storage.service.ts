@@ -13,9 +13,22 @@ export class StorageService {
         _count: {
           select: { cells: true },
         },
+        cells: {
+          select: { status: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
-    });
+    }).then((boxes) =>
+      boxes.map((box) => {
+        const occupied = box.cells.filter((c) => c.status === 'OCCUPIED').length;
+        return {
+          ...box,
+          occupiedCells: occupied,
+          freeCells: box._count.cells - occupied,
+          cells: undefined,
+        };
+      }),
+    );
   }
 
   async findBox(id: number) {
@@ -23,6 +36,10 @@ export class StorageService {
       where: { id },
       include: {
         cells: {
+          orderBy: [
+            { row: 'asc' },
+            { col: 'asc' },
+          ],
           include: {
             strain: {
               include: {
@@ -98,9 +115,30 @@ export class StorageService {
       throw new NotFoundException(`Strain with ID ${strainId} not found`);
     }
 
-    // Check if cell is already occupied
+    // If occupied: update primary flag if same strain, else reassign
     if (cell.strain) {
-      throw new BadRequestException(`Cell is already occupied`);
+      const existing = await this.prisma.strainStorage.findUnique({
+        where: { cellId: cell.id },
+      });
+
+      if (existing && existing.strainId === strainId) {
+        await this.prisma.strainStorage.update({
+          where: { id: existing.id },
+          data: { isPrimary },
+        });
+        return this.prisma.strainStorage.findUnique({
+          where: { id: existing.id },
+          include: {
+            strain: { select: { id: true, identifier: true } },
+            cell: { include: { box: { select: { id: true, displayName: true } } } },
+          },
+        });
+      }
+
+      // Reassign: remove old allocation, create new
+      await this.prisma.strainStorage.delete({
+        where: { cellId: cell.id },
+      });
     }
 
     // Update cell status and create allocation

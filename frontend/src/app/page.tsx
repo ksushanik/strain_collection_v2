@@ -3,24 +3,30 @@
 import * as React from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { ApiService } from "@/services/api"
-import { Loader2, Microscope, Beaker, Archive } from "lucide-react"
+import { Loader2, Microscope, Beaker, Archive, Boxes } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Home() {
   const [stats, setStats] = React.useState({
     totalStrains: 0,
     totalSamples: 0,
+    totalBoxes: 0,
+    occupiedCells: 0,
+    freeCells: 0,
+    recent: [] as { id: number; identifier: string; sample?: { id: number; code: string | null } }[],
     loading: true,
   })
 
   React.useEffect(() => {
-    Promise.all([
-      ApiService.getStrains(),
-      ApiService.getSamples(),
-    ]).then(([strains, samples]) => {
+    ApiService.getAnalyticsOverview()
+      .then((res) => {
       setStats({
-        totalStrains: strains.length,
-        totalSamples: samples.length,
+        totalStrains: res.totalStrains,
+        totalSamples: res.totalSamples,
+        totalBoxes: res.totalBoxes,
+        occupiedCells: res.occupiedCells,
+        freeCells: res.freeCells,
+        recent: res.recentAdditions,
         loading: false,
       })
     }).catch(err => {
@@ -37,7 +43,7 @@ export default function Home() {
           Microbiological Data Management System
         </p>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total Strains</CardTitle>
@@ -72,11 +78,49 @@ export default function Home() {
               <Archive className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-muted-foreground">-</div>
-              <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
+              {stats.loading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : (
+                <>
+                  <div className="text-3xl font-bold">{stats.occupiedCells}/{stats.occupiedCells + stats.freeCells}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Occupied / Total cells</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Storage Boxes</CardTitle>
+              <Boxes className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {stats.loading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : (
+                <div className="text-3xl font-bold">{stats.totalBoxes}</div>
+              )}
             </CardContent>
           </Card>
         </div>
+
+        {!stats.loading && stats.recent.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-3">Recent Strains</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {stats.recent.map((r) => (
+                <Card key={r.id}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{r.identifier}</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      Sample: {r.sample?.code || 'Unknown'}
+                    </p>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </MainLayout>
   )

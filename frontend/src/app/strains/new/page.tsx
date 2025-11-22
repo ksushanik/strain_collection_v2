@@ -1,10 +1,15 @@
 "use client"
 
+import { Suspense } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { StrainForm } from "@/components/domain/strain-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSearchParams } from "next/navigation"
 
-export default function CreateStrainPage() {
+function CreateStrainPageContent() {
+    const searchParams = useSearchParams()
+    const returnTo = searchParams?.get("returnTo") || undefined
+
     return (
         <MainLayout>
             <div className="p-8 max-w-3xl mx-auto">
@@ -20,10 +25,18 @@ export default function CreateStrainPage() {
                         <CardTitle>Strain Details</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <StrainForm />
+                        <StrainForm returnTo={returnTo} />
                     </CardContent>
                 </Card>
             </div>
         </MainLayout>
+    )
+}
+
+export default function CreateStrainPage() {
+    return (
+        <Suspense fallback={<div className="p-8">Loading...</div>}>
+            <CreateStrainPageContent />
+        </Suspense>
     )
 }

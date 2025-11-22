@@ -80,6 +80,18 @@ export interface Strain {
     iuk?: string;
     features?: string;
     comments?: string;
+    storage?: {
+        id: number;
+        isPrimary: boolean;
+        cell: {
+            id: number;
+            cellCode: string;
+            box: {
+                id: number;
+                displayName: string;
+            };
+        };
+    }[];
 }
 
 export const ApiService = {
@@ -133,10 +145,24 @@ export const ApiService = {
         cols: number;
         description?: string;
         _count?: { cells: number };
+        occupiedCells?: number;
+        freeCells?: number;
     }[]> {
         const response = await request(`/api/v1/storage/boxes`);
         if (!response.ok) {
             throw new Error(`Failed to fetch storage boxes: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async createStorageBox(data: { displayName: string; rows: number; cols: number; description?: string }) {
+        const response = await request(`/api/v1/storage/boxes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to create storage box: ${response.statusText}`);
         }
         return response.json();
     },
@@ -160,6 +186,46 @@ export const ApiService = {
         if (!response.ok) {
             throw new Error(`Failed to fetch box cells: ${response.statusText}`);
         }
+        return response.json();
+    },
+
+    async allocateCell(boxId: number, cellCode: string, data: { strainId: number; isPrimary?: boolean }) {
+        const response = await request(`/api/v1/storage/boxes/${boxId}/cells/${cellCode}/allocate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ strainId: data.strainId, isPrimary: data.isPrimary ?? false }),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to allocate cell: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async unallocateCell(boxId: number, cellCode: string) {
+        const response = await request(`/api/v1/storage/boxes/${boxId}/cells/${cellCode}/unallocate`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to unallocate cell: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async getAnalyticsOverview(): Promise<{
+        totalStrains: number;
+        totalSamples: number;
+        totalBoxes: number;
+        occupiedCells: number;
+        freeCells: number;
+        recentAdditions: {
+            id: number;
+            identifier: string;
+            createdAt: string;
+            sample?: { id: number; code: string | null };
+        }[];
+    }> {
+        const response = await request(`/api/v1/analytics/overview`);
+        if (!response.ok) throw new Error(`Failed to fetch analytics: ${response.statusText}`);
         return response.json();
     },
 

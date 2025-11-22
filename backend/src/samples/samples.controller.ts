@@ -15,6 +15,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SamplesService } from './samples.service';
 import { CreateSampleDto } from './dto/create-sample.dto';
 import { UpdateSampleDto } from './dto/update-sample.dto';
@@ -25,6 +26,8 @@ import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 
 @Controller('api/v1/samples')
+@ApiTags('Samples')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class SamplesController {
@@ -67,6 +70,7 @@ export class SamplesController {
 
   @Post(':id/photos')
   @CheckPolicies((ability) => ability.can('create', 'Photo'))
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB

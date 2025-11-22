@@ -6,12 +6,13 @@ export class AnalyticsService {
   constructor(private prisma: PrismaService) {}
 
   async overview() {
-    const [totalStrains, totalSamples, totalCells, occupiedCells, recentStrains] =
+    const [totalStrains, totalSamples, totalCells, occupiedCells, totalBoxes, recentStrains] =
       await Promise.all([
         this.prisma.strain.count(),
         this.prisma.sample.count(),
         this.prisma.storageCell.count(),
         this.prisma.storageCell.count({ where: { status: 'OCCUPIED' } }),
+        this.prisma.storageBox.count(),
         this.prisma.strain.findMany({
           orderBy: { createdAt: 'desc' },
           take: 5,
@@ -29,6 +30,7 @@ export class AnalyticsService {
     return {
       totalStrains,
       totalSamples,
+      totalBoxes,
       occupiedCells,
       freeCells: totalCells - occupiedCells,
       recentAdditions: recentStrains,

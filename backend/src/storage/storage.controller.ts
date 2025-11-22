@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StorageService } from './storage.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
 import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
@@ -18,6 +19,8 @@ import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 
 @Controller('api/v1/storage')
+@ApiTags('Storage')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StorageController {

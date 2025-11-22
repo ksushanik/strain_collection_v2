@@ -64,8 +64,10 @@ export default function DynamicPage() {
                 </div>
 
                 {/* Dynamic Component Rendering - Note: profileKey is uppercase now */}
-                {binding.profileKey === 'STRAIN' && <StrainList enabledPacks={binding.enabledFieldPacks} />}
-                {binding.profileKey === 'SAMPLE' && <SampleList enabledPacks={binding.enabledFieldPacks} />}
+                {binding.profileKey === 'STRAIN' && (
+                    <StrainList enabledPacks={binding.enabledFieldPacks} returnPath={`/dynamic/${slug}`} />
+                )}
+                {binding.profileKey === 'SAMPLE' && <SampleList />}
                 {binding.profileKey === 'STORAGE' && <StorageView />}
             </div>
         </MainLayout>

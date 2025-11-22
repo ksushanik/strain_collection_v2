@@ -1,10 +1,13 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuditLogService } from './audit-log.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 
 @Controller('audit-logs')
+@ApiTags('Audit')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 export class AuditLogController {
   constructor(private auditLogService: AuditLogService) {}

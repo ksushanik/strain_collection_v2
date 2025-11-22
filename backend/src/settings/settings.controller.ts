@@ -1,10 +1,13 @@
 import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 
 @Controller('api/v1/settings')
+@ApiTags('Settings')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
