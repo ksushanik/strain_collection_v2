@@ -1,4 +1,4 @@
-import { IsOptional, IsEnum, IsString, IsInt } from 'class-validator';
+import { IsOptional, IsEnum, IsString, IsInt, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SampleQueryDto {
@@ -9,6 +9,14 @@ export class SampleQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsDateString()
+  dateTo?: string;
 
   @IsOptional()
   @IsInt()

@@ -13,11 +13,22 @@ export class SamplesService {
   ) {}
 
   async findAll(query: SampleQueryDto) {
-    const { sampleType, search, page = 1, limit = 50 } = query;
+    const { sampleType, search, dateFrom, dateTo, page = 1, limit = 50 } =
+      query;
 
     const where: any = {};
 
     if (sampleType) where.sampleType = sampleType;
+
+    if (dateFrom || dateTo) {
+      where.collectedAt = {};
+      if (dateFrom) {
+        where.collectedAt.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        where.collectedAt.lte = new Date(dateTo);
+      }
+    }
 
     if (search) {
       where.OR = [

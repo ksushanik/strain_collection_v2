@@ -8,6 +8,10 @@ export type Subjects =
   | 'Strain'
   | 'Sample'
   | 'Storage'
+  | 'Media'
+  | 'Settings'
+  | 'Legend'
+  | 'Analytics'
   | 'User'
   | 'Group'
   | 'AuditLog'
@@ -24,26 +28,35 @@ export class CaslAbilityFactory {
     );
 
     if (user.role === 'ADMIN') {
-      // ADMIN: полный доступ ко всему
+      // ADMIN: полный доступ
       can('manage', 'all');
     } else if (user.role === 'MANAGER') {
-      // MANAGER: читать все, управлять Strain/Sample/Storage, не может управлять Users/Groups/AuditLog
+      // MANAGER: читает всё, управляет доменами, кроме Users/Groups/AuditLog
       can('read', 'all');
       can(
         ['create', 'update', 'delete'],
-        ['Strain', 'Sample', 'Storage', 'Photo'],
+        ['Strain', 'Sample', 'Storage', 'Photo', 'Media'],
       );
 
       cannot('manage', 'User');
       cannot('manage', 'Group');
       cannot('read', 'AuditLog');
     } else if (user.role === 'USER') {
-      // USER: читать все, создавать Strain/Sample, редактировать только свои
-      can('read', ['Strain', 'Sample', 'Storage', 'Photo']);
+      // USER: читает домены, базовые create/update
+      can('read', [
+        'Strain',
+        'Sample',
+        'Storage',
+        'Photo',
+        'Media',
+        'Analytics',
+        'Legend',
+        'Settings',
+      ]);
       can('create', ['Strain', 'Sample', 'Photo']);
       can('update', ['Strain', 'Sample', 'Photo']); // Проверка владельца на backend
 
-      // Запреты
+      // Ограничения
       cannot('delete', 'all');
       cannot(['create', 'update'], 'Storage');
       cannot('manage', 'User');

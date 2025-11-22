@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto } from './dto/allocate-strain.dto';
+import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
@@ -41,15 +41,37 @@ export class StorageController {
     return this.storageService.createBox(createBoxDto);
   }
 
-  @Post('allocate')
+  @Post('boxes/:boxId/cells/:cellCode/allocate')
   @CheckPolicies((ability) => ability.can('update', 'Storage'))
-  allocateStrain(@Body() allocateDto: AllocateStrainDto) {
-    return this.storageService.allocateStrain(allocateDto);
+  allocateStrain(
+    @Param('boxId', ParseIntPipe) boxId: number,
+    @Param('cellCode') cellCode: string,
+    @Body() allocateDto: Omit<AllocateStrainDto, 'boxId' | 'cellCode'>,
+  ) {
+    return this.storageService.allocateStrain({ ...allocateDto, boxId, cellCode });
   }
 
-  @Delete('allocate/:id')
+  @Post('boxes/:boxId/bulk-allocate')
   @CheckPolicies((ability) => ability.can('update', 'Storage'))
-  deallocateStrain(@Param('id', ParseIntPipe) id: number) {
-    return this.storageService.deallocateStrain(id);
+  bulkAllocate(
+    @Param('boxId', ParseIntPipe) boxId: number,
+    @Body() payload: Omit<BulkAllocateStrainDto, 'boxId'>,
+  ) {
+    return this.storageService.bulkAllocate({
+      boxId,
+      allocations: (payload.allocations || []).map((a) => ({
+        ...a,
+        boxId,
+      })),
+    });
+  }
+
+  @Delete('boxes/:boxId/cells/:cellCode/unallocate')
+  @CheckPolicies((ability) => ability.can('update', 'Storage'))
+  deallocateStrain(
+    @Param('boxId', ParseIntPipe) boxId: number,
+    @Param('cellCode') cellCode: string,
+  ) {
+    return this.storageService.deallocateStrain(boxId, cellCode);
   }
 }

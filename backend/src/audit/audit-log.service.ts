@@ -7,11 +7,20 @@ export class AuditLogService {
 
   async log(params: {
     userId: number;
-    action: 'CREATE' | 'UPDATE' | 'DELETE';
+    action:
+      | 'CREATE'
+      | 'UPDATE'
+      | 'DELETE'
+      | 'ALLOCATE'
+      | 'UNALLOCATE'
+      | 'BULK_ALLOCATE'
+      | 'CONFIG';
     entity: string;
     entityId: number;
     changes?: any;
     metadata?: any;
+    batchId?: string;
+    comment?: string;
   }) {
     return this.prisma.auditLog.create({
       data: {
@@ -19,6 +28,8 @@ export class AuditLogService {
         action: params.action,
         entity: params.entity,
         entityId: params.entityId,
+        batchId: params.batchId,
+        comment: params.comment,
         changes: params.changes || {},
         metadata: params.metadata || {},
       },

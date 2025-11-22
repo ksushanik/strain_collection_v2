@@ -61,4 +61,23 @@ export class StrainsController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.strainsService.remove(id);
   }
+
+  @Post(':id/media')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  addMedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('mediaId', ParseIntPipe) mediaId: number,
+    @Body('notes') notes?: string,
+  ) {
+    return this.strainsService.addMedia(id, mediaId, notes);
+  }
+
+  @Delete(':id/media/:mediaId')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  removeMedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('mediaId', ParseIntPipe) mediaId: number,
+  ) {
+    return this.strainsService.removeMedia(id, mediaId);
+  }
 }

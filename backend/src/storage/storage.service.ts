@@ -1,11 +1,7 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto } from './dto/allocate-strain.dto';
+import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
 
 @Injectable()
 export class StorageService {
@@ -52,7 +48,11 @@ export class StorageService {
   }
 
   async createBox(createBoxDto: CreateStorageBoxDto) {
-    const { rows, cols, ...boxData } = createBoxDto;
+    const { rows, cols, storageType, ...boxData } = createBoxDto;
+
+    if (![9, 10].includes(rows) || ![9, 10].includes(cols)) {
+      throw new BadRequestException('Rows and cols must be either 9 or 10');
+    }
 
     // Create box with cells
     const box = await this.prisma.storageBox.create({
@@ -77,16 +77,16 @@ export class StorageService {
   }
 
   async allocateStrain(allocateDto: AllocateStrainDto) {
-    const { cellId, strainId } = allocateDto;
+    const { boxId, cellCode, strainId, isPrimary = false } = allocateDto;
 
     // Check if cell exists
-    const cell = await this.prisma.storageCell.findUnique({
-      where: { id: cellId },
-      include: { strain: true },
+    const cell = await this.prisma.storageCell.findFirst({
+      where: { boxId, cellCode },
+      include: { strain: true, box: true },
     });
 
     if (!cell) {
-      throw new NotFoundException(`Storage cell with ID ${cellId} not found`);
+      throw new NotFoundException(`Storage cell ${cellCode} in box ${boxId} not found`);
     }
 
     // Check if strain exists
@@ -105,14 +105,15 @@ export class StorageService {
 
     // Update cell status and create allocation
     await this.prisma.storageCell.update({
-      where: { id: cellId },
+      where: { id: cell.id },
       data: { status: 'OCCUPIED' },
     });
 
     const allocation = await this.prisma.strainStorage.create({
       data: {
         strainId,
-        cellId,
+        cellId: cell.id,
+        isPrimary,
       },
       include: {
         strain: {
@@ -137,26 +138,52 @@ export class StorageService {
     return allocation;
   }
 
-  async deallocateStrain(allocationId: number) {
+  async bulkAllocate(dto: BulkAllocateStrainDto) {
+    const { boxId, allocations } = dto;
+    const results = [];
+
+    for (const alloc of allocations) {
+      const allocation = await this.allocateStrain({
+        boxId,
+        cellCode: alloc.cellCode,
+        strainId: alloc.strainId,
+        isPrimary: alloc.isPrimary,
+      });
+      results.push(allocation);
+    }
+
+    return results;
+  }
+
+  async deallocateStrain(boxId: number, cellCode: string) {
+    const cell = await this.prisma.storageCell.findFirst({
+      where: { boxId, cellCode },
+    });
+
+    if (!cell) {
+      throw new NotFoundException(
+        `Storage cell ${cellCode} in box ${boxId} not found`,
+      );
+    }
+
     const allocation = await this.prisma.strainStorage.findUnique({
-      where: { id: allocationId },
-      include: { cell: true },
+      where: { cellId: cell.id },
     });
 
     if (!allocation) {
       throw new NotFoundException(
-        `Allocation with ID ${allocationId} not found`,
+        `No allocation found for cell ${cellCode} in box ${boxId}`,
       );
     }
 
     // Update cell status to FREE
     await this.prisma.storageCell.update({
-      where: { id: allocation.cellId },
+      where: { id: cell.id },
       data: { status: 'FREE' },
     });
 
     await this.prisma.strainStorage.delete({
-      where: { id: allocationId },
+      where: { id: allocation.id },
     });
 
     return { message: `Strain deallocated successfully` };

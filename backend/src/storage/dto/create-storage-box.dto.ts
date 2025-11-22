@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsEnum, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateStorageBoxDto {
@@ -14,10 +14,12 @@ export class CreateStorageBoxDto {
 
   @IsInt()
   @Type(() => Number)
+  @IsIn([9, 10])
   rows: number;
 
   @IsInt()
   @Type(() => Number)
+  @IsIn([9, 10])
   cols: number;
 
   @IsOptional()

@@ -39,6 +39,27 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsString()
+  sampleCode?: string;
+
+  @IsOptional()
+  @IsString()
+  antibioticActivity?: string;
+
+  @IsOptional()
+  @IsString()
+  genome?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  hasGenome?: boolean;
+
+  @IsOptional()
+  @IsString()
+  taxonomy?: string;
+
+  @IsOptional()
+  @IsString()
   search?: string;
 
   @IsOptional()

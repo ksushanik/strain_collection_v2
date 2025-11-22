@@ -7,7 +7,8 @@ export class SettingsService {
 
   async getUiBindings() {
     const bindings = await this.prisma.uiBinding.findMany({
-      orderBy: { id: 'asc' },
+      orderBy: [{ order: 'asc' } as any],
+      include: { legend: true },
     });
 
     return bindings.map((b) => ({
@@ -17,6 +18,8 @@ export class SettingsService {
       icon: b.icon || 'Box',
       enabledFieldPacks: b.enabledFieldPacks,
       routeSlug: b.routeSlug,
+      order: (b as any).order ?? 0,
+      legend: (b as any).legend,
     }));
   }
 
@@ -31,10 +34,36 @@ export class SettingsService {
         icon: b.icon || 'Box',
         enabledFieldPacks: b.enabledFieldPacks || [],
         routeSlug: b.routeSlug,
-        order: index,
+        order: b.order ?? index,
+        legendId: b.legendId ?? null,
       })),
     });
 
     return { updated: created.count };
+  }
+
+  async getLegend() {
+    const legend = await this.prisma.legendContent.findFirst({
+      orderBy: { id: 'asc' },
+    });
+    return legend;
+  }
+
+  async updateLegend(payload: { content: string }) {
+    const existing = await this.prisma.legendContent.findFirst({
+      orderBy: { id: 'asc' },
+    });
+
+    if (!existing) {
+      const created = await this.prisma.legendContent.create({
+        data: { content: payload.content },
+      });
+      return created;
+    }
+
+    return this.prisma.legendContent.update({
+      where: { id: existing.id },
+      data: { content: payload.content },
+    });
   }
 }
