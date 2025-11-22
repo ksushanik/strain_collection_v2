@@ -6,115 +6,126 @@ import { StrainQueryDto } from './dto/strain-query.dto';
 
 @Injectable()
 export class StrainsService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-    async findAll(query: StrainQueryDto) {
-        const { sampleId, seq, gramStain, phosphates, siderophores, pigmentSecretion, search, page = 1, limit = 50 } = query;
+  async findAll(query: StrainQueryDto) {
+    const {
+      sampleId,
+      seq,
+      gramStain,
+      phosphates,
+      siderophores,
+      pigmentSecretion,
+      search,
+      page = 1,
+      limit = 50,
+    } = query;
 
-        const where: any = {};
+    const where: any = {};
 
-        if (sampleId !== undefined) where.sampleId = sampleId;
-        if (seq !== undefined) where.seq = seq;
-        if (gramStain) where.gramStain = gramStain;
-        if (phosphates !== undefined) where.phosphates = phosphates;
-        if (siderophores !== undefined) where.siderophores = siderophores;
-        if (pigmentSecretion !== undefined) where.pigmentSecretion = pigmentSecretion;
+    if (sampleId !== undefined) where.sampleId = sampleId;
+    if (seq !== undefined) where.seq = seq;
+    if (gramStain) where.gramStain = gramStain;
+    if (phosphates !== undefined) where.phosphates = phosphates;
+    if (siderophores !== undefined) where.siderophores = siderophores;
+    if (pigmentSecretion !== undefined)
+      where.pigmentSecretion = pigmentSecretion;
 
-        if (search) {
-            where.OR = [
-                { identifier: { contains: search, mode: 'insensitive' } },
-                { features: { contains: search, mode: 'insensitive' } },
-                { comments: { contains: search, mode: 'insensitive' } },
-            ];
-        }
+    if (search) {
+      where.OR = [
+        { identifier: { contains: search, mode: 'insensitive' } },
+        { features: { contains: search, mode: 'insensitive' } },
+        { comments: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
-        const [strains, total] = await Promise.all([
-            this.prisma.strain.findMany({
-                where,
-                include: {
-                    sample: {
-                        select: { id: true, code: true, siteName: true },
-                    },
-                },
-                skip: (page - 1) * limit,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-            }),
-            this.prisma.strain.count({ where }),
-        ]);
+    const [strains, total] = await Promise.all([
+      this.prisma.strain.findMany({
+        where,
+        include: {
+          sample: {
+            select: { id: true, code: true, siteName: true },
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.strain.count({ where }),
+    ]);
 
-        return {
-            data: strains,
-            meta: {
-                total,
-                page,
-                limit,
-                totalPages: Math.ceil(total / limit),
+    return {
+      data: strains,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findOne(id: number) {
+    const strain = await this.prisma.strain.findUnique({
+      where: { id },
+      include: {
+        sample: true,
+        media: {
+          include: {
+            media: true,
+          },
+        },
+        storage: {
+          include: {
+            cell: {
+              include: {
+                box: true,
+              },
             },
-        };
+          },
+        },
+      },
+    });
+
+    if (!strain) {
+      throw new NotFoundException(`Strain with ID ${id} not found`);
     }
 
-    async findOne(id: number) {
-        const strain = await this.prisma.strain.findUnique({
-            where: { id },
-            include: {
-                sample: true,
-                media: {
-                    include: {
-                        media: true,
-                    },
-                },
-                storage: {
-                    include: {
-                        cell: {
-                            include: {
-                                box: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+    return strain;
+  }
 
-        if (!strain) {
-            throw new NotFoundException(`Strain with ID ${id} not found`);
-        }
+  async create(createStrainDto: CreateStrainDto) {
+    return this.prisma.strain.create({
+      data: createStrainDto,
+      include: {
+        sample: {
+          select: { id: true, code: true },
+        },
+      },
+    });
+  }
 
-        return strain;
-    }
+  async update(id: number, updateStrainDto: UpdateStrainDto) {
+    await this.findOne(id); // Check existence
 
-    async create(createStrainDto: CreateStrainDto) {
-        return this.prisma.strain.create({
-            data: createStrainDto,
-            include: {
-                sample: {
-                    select: { id: true, code: true },
-                },
-            },
-        });
-    }
+    return this.prisma.strain.update({
+      where: { id },
+      data: updateStrainDto,
+      include: {
+        sample: {
+          select: { id: true, code: true },
+        },
+      },
+    });
+  }
 
-    async update(id: number, updateStrainDto: UpdateStrainDto) {
-        await this.findOne(id); // Check existence
+  async remove(id: number) {
+    await this.findOne(id); // Check existence
 
-        return this.prisma.strain.update({
-            where: { id },
-            data: updateStrainDto,
-            include: {
-                sample: {
-                    select: { id: true, code: true },
-                },
-            },
-        });
-    }
+    await this.prisma.strain.delete({
+      where: { id },
+    });
 
-    async remove(id: number) {
-        await this.findOne(id); // Check existence
-
-        await this.prisma.strain.delete({
-            where: { id },
-        });
-
-        return { message: `Strain with ID ${id} deleted successfully` };
-    }
+    return { message: `Strain with ID ${id} deleted successfully` };
+  }
 }

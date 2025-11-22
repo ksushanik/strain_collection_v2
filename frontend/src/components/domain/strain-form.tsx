@@ -52,7 +52,6 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
     const router = useRouter()
     const [samples, setSamples] = React.useState<Sample[]>([])
     const [loading, setLoading] = React.useState(false)
-    const [samplesLoading, setSamplesLoading] = React.useState(true)
 
     const form = useForm<StrainFormValues>({
         resolver: zodResolver(strainSchema),
@@ -74,7 +73,6 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
         ApiService.getSamples()
             .then(setSamples)
             .catch(console.error)
-            .finally(() => setSamplesLoading(false))
     }, [])
 
     async function onSubmit(data: StrainFormValues) {

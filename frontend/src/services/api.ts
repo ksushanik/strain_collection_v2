@@ -1,5 +1,19 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+function authHeaders() {
+    if (typeof window === 'undefined') return {};
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function request(path: string, options: RequestInit = {}) {
+    const headers = {
+        ...(options.headers || {}),
+        ...authHeaders(),
+    } as Record<string, string>;
+    return fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+}
+
 export interface UiBinding {
     id: number;
     menuLabel: string;
@@ -49,7 +63,7 @@ export interface Strain {
         code: string;
         siteName?: string;
     };
-    taxonomy16s?: Record<string, any>;
+    taxonomy16s?: Record<string, unknown>;
     otherTaxonomy?: string;
     indexerInitials?: string;
     collectionRcam?: string;
@@ -70,7 +84,7 @@ export interface Strain {
 
 export const ApiService = {
     async getUiBindings(): Promise<UiBinding[]> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/settings/ui-bindings`);
+        const response = await request(`/api/v1/settings/ui-bindings`);
         if (!response.ok) {
             throw new Error(`Failed to fetch UI bindings: ${response.statusText}`);
         }
@@ -78,7 +92,7 @@ export const ApiService = {
     },
 
     async getSamples(): Promise<Sample[]> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples`);
+        const response = await request(`/api/v1/samples`);
         if (!response.ok) {
             throw new Error(`Failed to fetch samples: ${response.statusText}`);
         }
@@ -87,7 +101,7 @@ export const ApiService = {
     },
 
     async getSample(id: number): Promise<Sample> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`);
+        const response = await request(`/api/v1/samples/${id}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch sample: ${response.statusText}`);
         }
@@ -95,7 +109,7 @@ export const ApiService = {
     },
 
     async getStrains(): Promise<Strain[]> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/strains`);
+        const response = await request(`/api/v1/strains`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strains: ${response.statusText}`);
         }
@@ -104,7 +118,7 @@ export const ApiService = {
     },
 
     async getStrain(id: number): Promise<Strain> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/strains/${id}`);
+        const response = await request(`/api/v1/strains/${id}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strain: ${response.statusText}`);
         }
@@ -112,16 +126,37 @@ export const ApiService = {
     },
 
 
-    async getStorageBoxes(): Promise<any[]> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/storage/boxes`);
+    async getStorageBoxes(): Promise<{
+        id: number;
+        displayName: string;
+        rows: number;
+        cols: number;
+        description?: string;
+        _count?: { cells: number };
+    }[]> {
+        const response = await request(`/api/v1/storage/boxes`);
         if (!response.ok) {
             throw new Error(`Failed to fetch storage boxes: ${response.statusText}`);
         }
         return response.json();
     },
 
-    async getBoxCells(boxId: number): Promise<any> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/storage/boxes/${boxId}`);
+    async getBoxCells(boxId: number): Promise<{
+        id: number;
+        displayName: string;
+        rows: number;
+        cols: number;
+        description?: string;
+        cells: {
+            id: number;
+            row: number;
+            col: number;
+            cellCode: string;
+            status: 'FREE' | 'OCCUPIED';
+            strain?: { strain?: { id: number; identifier: string; seq: boolean } } | null;
+        }[];
+    }> {
+        const response = await request(`/api/v1/storage/boxes/${boxId}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch box cells: ${response.statusText}`);
         }
@@ -129,7 +164,7 @@ export const ApiService = {
     },
 
     async createStrain(data: Partial<Strain>): Promise<Strain> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/strains`, {
+        const response = await request(`/api/v1/strains`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -139,7 +174,7 @@ export const ApiService = {
     },
 
     async updateStrain(id: number, data: Partial<Strain>): Promise<Strain> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/strains/${id}`, {
+        const response = await request(`/api/v1/strains/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -149,7 +184,7 @@ export const ApiService = {
     },
 
     async createSample(data: Partial<Sample>): Promise<Sample> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples`, {
+        const response = await request(`/api/v1/samples`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -159,7 +194,7 @@ export const ApiService = {
     },
 
     async updateSample(id: number, data: Partial<Sample>): Promise<Sample> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`, {
+        const response = await request(`/api/v1/samples/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -169,7 +204,7 @@ export const ApiService = {
     },
 
     async deleteSample(id: number): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${id}`, {
+        const response = await request(`/api/v1/samples/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) {
@@ -181,7 +216,7 @@ export const ApiService = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples/${sampleId}/photos`, {
+        const response = await request(`/api/v1/samples/${sampleId}/photos`, {
             method: 'POST',
             body: formData,
         });
@@ -194,7 +229,7 @@ export const ApiService = {
     },
 
     async deleteSamplePhoto(photoId: number): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/api/v1/samples/photos/${photoId}`, {
+        const response = await request(`/api/v1/samples/photos/${photoId}`, {
             method: 'DELETE',
         });
 

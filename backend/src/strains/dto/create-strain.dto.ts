@@ -1,79 +1,91 @@
-import { IsString, IsInt, IsBoolean, IsOptional, IsEnum, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+  IsObject,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateStrainDto {
-    @IsString()
-    identifier: string;
+  @IsString()
+  identifier: string;
 
-    @IsInt()
-    @Type(() => Number)
-    sampleId: number;
+  @IsInt()
+  @Type(() => Number)
+  sampleId: number;
 
-    @IsOptional()
-    @IsObject()
-    taxonomy16s?: Record<string, any>;
+  @IsOptional()
+  @IsObject()
+  taxonomy16s?: Record<string, any>;
 
-    @IsOptional()
-    @IsString()
-    otherTaxonomy?: string;
+  @IsOptional()
+  @IsString()
+  otherTaxonomy?: string;
 
-    @IsOptional()
-    @IsString()
-    indexerInitials?: string;
+  @IsOptional()
+  @IsString()
+  indexerInitials?: string;
 
-    @IsOptional()
-    @IsString()
-    collectionRcam?: string;
+  @IsOptional()
+  @IsString()
+  collectionRcam?: string;
 
-    @IsBoolean()
-    @Type(() => Boolean)
-    seq: boolean;
+  @IsBoolean()
+  @Type(() => Boolean)
+  seq: boolean;
 
-    @IsOptional()
-    @IsString()
-    biochemistry?: string;
+  @IsOptional()
+  @IsString()
+  biochemistry?: string;
 
-    @IsOptional()
-    @IsString()
-    genome?: string;
+  @IsOptional()
+  @IsString()
+  genome?: string;
 
-    @IsOptional()
-    @IsString()
-    antibioticActivity?: string;
+  @IsOptional()
+  @IsString()
+  antibioticActivity?: string;
 
-    @IsOptional()
-    @IsEnum(['POSITIVE', 'NEGATIVE', 'VARIABLE'])
-    gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
+  @IsOptional()
+  @IsEnum(['POSITIVE', 'NEGATIVE', 'VARIABLE'])
+  gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
 
-    @IsBoolean()
-    @Type(() => Boolean)
-    phosphates: boolean;
+  @IsBoolean()
+  @Type(() => Boolean)
+  phosphates: boolean;
 
-    @IsBoolean()
-    @Type(() => Boolean)
-    siderophores: boolean;
+  @IsBoolean()
+  @Type(() => Boolean)
+  siderophores: boolean;
 
-    @IsBoolean()
-    @Type(() => Boolean)
-    pigmentSecretion: boolean;
+  @IsBoolean()
+  @Type(() => Boolean)
+  pigmentSecretion: boolean;
 
-    @IsOptional()
-    @IsEnum(['POSITIVE', 'NEGATIVE'])
-    amylase?: 'POSITIVE' | 'NEGATIVE';
+  @IsOptional()
+  @IsEnum(['POSITIVE', 'NEGATIVE'])
+  amylase?: 'POSITIVE' | 'NEGATIVE';
 
-    @IsOptional()
-    @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
-    isolationRegion?: 'RHIZOSPHERE' | 'ENDOSPHERE' | 'PHYLLOSPHERE' | 'SOIL' | 'OTHER';
+  @IsOptional()
+  @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
+  isolationRegion?:
+    | 'RHIZOSPHERE'
+    | 'ENDOSPHERE'
+    | 'PHYLLOSPHERE'
+    | 'SOIL'
+    | 'OTHER';
 
-    @IsOptional()
-    @IsString()
-    iuk?: string;
+  @IsOptional()
+  @IsString()
+  iuk?: string;
 
-    @IsOptional()
-    @IsString()
-    features?: string;
+  @IsOptional()
+  @IsString()
+  features?: string;
 
-    @IsOptional()
-    @IsString()
-    comments?: string;
+  @IsOptional()
+  @IsString()
+  comments?: string;
 }

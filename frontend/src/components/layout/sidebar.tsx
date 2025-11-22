@@ -22,7 +22,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { Separator } from "@/components/ui/separator"
 
 // Map string icon names to components
-const IconMap: Record<string, any> = {
+const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     "LayoutDashboard": LayoutDashboard,
     "Microscope": Microscope,
     "Leaf": Leaf,

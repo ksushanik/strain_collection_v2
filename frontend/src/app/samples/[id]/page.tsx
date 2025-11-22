@@ -18,7 +18,7 @@ interface SampleWithStrains extends Sample {
         seq: boolean;
         gramStain: string;
     }>;
-    photos: any[];
+    photos: import('@/services/api').SamplePhoto[];
 }
 
 export default function SampleDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,8 +30,8 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
     const loadSample = React.useCallback(() => {
         if (!id) return;
         ApiService.getSample(parseInt(id))
-            .then((data: any) => {
-                setSample(data)
+            .then((data) => {
+                setSample(data as SampleWithStrains)
                 setLoading(false)
             })
             .catch(err => {

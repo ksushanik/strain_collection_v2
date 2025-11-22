@@ -12,57 +12,57 @@ import { createAdminOptions } from './admin.options';
 AdminJS.registerAdapter({ Database, Resource });
 
 @Module({
-    imports: [
-        AdminJSModule.createAdminAsync({
-            imports: [PrismaModule, AuthModule, UsersModule],
-            inject: [PrismaService, AuthService],
-            useFactory: async (prisma: PrismaService, authService: AuthService) => {
-                const dmmf = (prisma as any)._baseDmmf;
-                const adminOptions = createAdminOptions(prisma, dmmf);
+  imports: [
+    AdminJSModule.createAdminAsync({
+      imports: [PrismaModule, AuthModule, UsersModule],
+      inject: [PrismaService, AuthService],
+      useFactory: async (prisma: PrismaService, authService: AuthService) => {
+        const dmmf = (prisma as any)._baseDmmf;
+        const adminOptions = createAdminOptions(prisma, dmmf);
 
-                return {
-                    adminJsOptions: {
-                        ...adminOptions,
-                    },
-                    auth: {
-                        authenticate: async (email: string, password: string) => {
-                            console.log('AdminJS: Attempting authentication for', email);
+        return {
+          adminJsOptions: {
+            ...adminOptions,
+          },
+          auth: {
+            authenticate: async (email: string, password: string) => {
+              console.log('AdminJS: Attempting authentication for', email);
 
-                            try {
-                                const user = await authService.validateUser(email, password);
+              try {
+                const user = await authService.validateUser(email, password);
 
-                                if (!user) {
-                                    console.log('AdminJS: Invalid credentials');
-                                    return null;
-                                }
+                if (!user) {
+                  console.log('AdminJS: Invalid credentials');
+                  return null;
+                }
 
-                                if (user.role !== 'ADMIN') {
-                                    console.log('AdminJS: User is not an admin', user.role);
-                                    return null;
-                                }
+                if (user.role !== 'ADMIN') {
+                  console.log('AdminJS: User is not an admin', user.role);
+                  return null;
+                }
 
-                                console.log('AdminJS: Authentication successful');
-                                return { email: user.email, role: user.role };
-                            } catch (error) {
-                                console.error('AdminJS: Authentication error', error);
-                                return null;
-                            }
-                        },
-                        cookieName: 'adminjs',
-                        cookiePassword:
-                            process.env.ADMIN_COOKIE_SECRET ||
-                            'admin_secret_change_in_production',
-                    },
-                    sessionOptions: {
-                        resave: false,
-                        saveUninitialized: false,
-                        secret:
-                            process.env.ADMIN_SESSION_SECRET ||
-                            'session_secret_change_in_production',
-                    },
-                };
+                console.log('AdminJS: Authentication successful');
+                return { email: user.email, role: user.role };
+              } catch (error) {
+                console.error('AdminJS: Authentication error', error);
+                return null;
+              }
             },
-        }),
-    ],
+            cookieName: 'adminjs',
+            cookiePassword:
+              process.env.ADMIN_COOKIE_SECRET ||
+              'admin_secret_change_in_production',
+          },
+          sessionOptions: {
+            resave: false,
+            saveUninitialized: false,
+            secret:
+              process.env.ADMIN_SESSION_SECRET ||
+              'session_secret_change_in_production',
+          },
+        };
+      },
+    }),
+  ],
 })
-export class AdminModule { }
+export class AdminModule {}

@@ -8,10 +8,35 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
+type BoxSummary = {
+  id: number;
+  displayName: string;
+  rows: number;
+  cols: number;
+  description?: string;
+  _count?: { cells: number };
+}
+
+type BoxDetail = {
+  id: number;
+  displayName: string;
+  rows: number;
+  cols: number;
+  description?: string;
+  cells: {
+    id: number;
+    row: number;
+    col: number;
+    cellCode: string;
+    status: 'FREE' | 'OCCUPIED';
+    strain?: { strain?: { id: number; identifier: string; seq: boolean } } | null;
+  }[];
+}
+
 export function StorageView() {
-  const [boxes, setBoxes] = React.useState<any[]>([])
+  const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
-  const [selectedBox, setSelectedBox] = React.useState<any | null>(null)
+  const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [loadingBox, setLoadingBox] = React.useState(false)
 
@@ -114,7 +139,7 @@ export function StorageView() {
                     gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(40px, 1fr))`
                   }}
                 >
-                  {selectedBox.cells?.map((cell: any) => {
+                  {selectedBox.cells?.map((cell) => {
                     const isOccupied = cell.status === 'OCCUPIED'
                     const strainId = cell.strain?.strain?.identifier
 

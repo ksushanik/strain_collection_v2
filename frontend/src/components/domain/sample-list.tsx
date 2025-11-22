@@ -10,7 +10,7 @@ import { Filter } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-export function SampleList({ enabledPacks }: { enabledPacks: string[] }) {
+export function SampleList() {
     const router = useRouter()
     const [samples, setSamples] = React.useState<Sample[]>([])
     const [loading, setLoading] = React.useState(true)

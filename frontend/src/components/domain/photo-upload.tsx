@@ -37,6 +37,20 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
     }, [existingPhotos])
 
     // Keyboard navigation
+    const goToPrevious = React.useCallback(() => {
+        setSelectedPhotoIndex((prev) => {
+            if (prev === null) return prev
+            return (prev - 1 + photos.length) % photos.length
+        })
+    }, [photos.length])
+
+    const goToNext = React.useCallback(() => {
+        setSelectedPhotoIndex((prev) => {
+            if (prev === null) return prev
+            return (prev + 1) % photos.length
+        })
+    }, [photos.length])
+
     React.useEffect(() => {
         if (selectedPhotoIndex === null) return
 
@@ -54,7 +68,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [selectedPhotoIndex, photos.length])
+    }, [selectedPhotoIndex, photos.length, goToNext, goToPrevious])
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault()
@@ -177,15 +191,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
         setSelectedPhotoIndex(null)
     }
 
-    const goToPrevious = () => {
-        if (selectedPhotoIndex === null) return
-        setSelectedPhotoIndex((selectedPhotoIndex - 1 + photos.length) % photos.length)
-    }
-
-    const goToNext = () => {
-        if (selectedPhotoIndex === null) return
-        setSelectedPhotoIndex((selectedPhotoIndex + 1) % photos.length)
-    }
+    
 
     const currentPhoto = selectedPhotoIndex !== null ? photos[selectedPhotoIndex] : null
 

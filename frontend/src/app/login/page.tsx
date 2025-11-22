@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
-const API_URL = 'http://localhost:3000'; // TODO: Move to env
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 function LoginForm() {
     const [email, setEmail] = useState('');
@@ -42,7 +42,7 @@ function LoginForm() {
             const data = await response.json();
             login(data.access_token, data.user);
             router.push(from);
-        } catch (err) {
+        } catch {
             setError('Failed to login. Please check your email and password.');
         } finally {
             setLoading(false);

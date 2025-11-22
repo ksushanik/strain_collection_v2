@@ -13,7 +13,7 @@ export default function SamplesPage() {
                         Browse and manage environmental samples.
                     </p>
                 </div>
-                <SampleList enabledPacks={[]} />
+                <SampleList />
             </div>
         </MainLayout>
     )

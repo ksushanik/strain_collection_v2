@@ -25,7 +25,7 @@ export interface Strain {
     identifier: string;
     sampleId: number;
     sampleCode: string; // Denormalized for display
-    taxonomy16s?: Record<string, any>;
+    taxonomy16s?: Record<string, unknown>;
     otherTaxonomy?: string;
     indexerInitials?: string;
     collectionRcam?: string;
