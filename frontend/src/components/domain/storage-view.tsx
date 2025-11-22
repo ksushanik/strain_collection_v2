@@ -71,8 +71,8 @@ export function StorageView() {
       console.error('Failed to load boxes:', err)
       setLoading(false)
     })
-    ApiService.getStrains()
-      .then(setStrains)
+    ApiService.getStrains({ limit: 500 })
+      .then(res => setStrains(res.data))
       .catch(err => console.error('Failed to load strains for allocation', err))
   }, [])
 

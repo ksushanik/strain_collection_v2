@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -25,27 +26,43 @@ interface StrainListProps {
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const router = useRouter()
     const [strains, setStrains] = React.useState<Strain[]>([])
+    const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
+    const [page, setPage] = React.useState(1)
+    const [filtersOpen, setFiltersOpen] = React.useState(false)
+    const [filters, setFilters] = React.useState({
+        sampleCode: "",
+        taxonomy: "",
+        genome: "",
+        hasGenome: false,
+        antibioticActivity: "",
+    })
 
     React.useEffect(() => {
-        ApiService.getStrains().then(data => {
-            setStrains(data)
+        setLoading(true)
+        ApiService.getStrains({
+            search,
+            sampleCode: filters.sampleCode || undefined,
+            taxonomy: filters.taxonomy || undefined,
+            genome: filters.genome || undefined,
+            hasGenome: filters.hasGenome ? true : undefined,
+            antibioticActivity: filters.antibioticActivity || undefined,
+            page,
+            limit: 10,
+        }).then(res => {
+            setStrains(res.data)
+            setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
             console.error('Failed to load strains:', err)
             setLoading(false)
         })
-    }, [])
+    }, [search, filters, page])
 
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
-
-    const filteredStrains = strains.filter(s =>
-        s.identifier.toLowerCase().includes(search.toLowerCase()) ||
-        (s.sample?.code && s.sample.code.toLowerCase().includes(search.toLowerCase()))
-    )
 
     if (loading) {
         return (
@@ -57,8 +74,8 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-                <div className="relative flex-1 max-w-sm">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="relative flex-1 min-w-[220px] max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search strains..."
@@ -67,14 +84,60 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <Button variant="outline" size="sm">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filters
-                </Button>
-                <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
-                    Create Strain
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
+                        <Filter className="mr-2 h-4 w-4" />
+                        Filters
+                    </Button>
+                    <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
+                        Create Strain
+                    </Button>
+                </div>
             </div>
+
+            {filtersOpen && (
+                <Card className="p-3 space-y-2">
+                    <div className="grid gap-2 md:grid-cols-3">
+                        <Input
+                            placeholder="Sample code"
+                            value={filters.sampleCode}
+                            onChange={(e) => { setFilters({ ...filters, sampleCode: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="Taxonomy or text search"
+                            value={filters.taxonomy}
+                            onChange={(e) => { setFilters({ ...filters, taxonomy: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="Genome contains"
+                            value={filters.genome}
+                            onChange={(e) => { setFilters({ ...filters, genome: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="Antibiotic activity contains"
+                            value={filters.antibioticActivity}
+                            onChange={(e) => { setFilters({ ...filters, antibioticActivity: e.target.value }); setPage(1); }}
+                        />
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="hasGenome"
+                                checked={filters.hasGenome}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, hasGenome: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="hasGenome" className="text-sm">Has genome</label>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setFilters({ sampleCode: "", taxonomy: "", genome: "", hasGenome: false, antibioticActivity: "" }); setPage(1); }}
+                        >
+                            Reset
+                        </Button>
+                    </div>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader className="p-4">
@@ -92,7 +155,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredStrains.map((strain) => (
+                            {strains.map((strain) => (
                                 <TableRow
                                     key={strain.id}
                                     className="cursor-pointer hover:bg-muted/50"
@@ -140,6 +203,30 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                     </Table>
                 </CardContent>
             </Card>
+
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div>
+                    Page {meta?.page ?? 1} of {meta?.totalPages ?? 1} ({meta?.total ?? strains.length} total)
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={(meta?.page ?? 1) <= 1 || loading}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                        Prev
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={meta ? meta.page >= meta.totalPages : true}
+                        onClick={() => setPage((p) => p + 1)}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
         </div>
     )
 }

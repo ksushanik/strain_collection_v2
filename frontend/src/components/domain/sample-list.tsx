@@ -9,21 +9,42 @@ import { Button } from "@/components/ui/button"
 import { Filter } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Input } from "@/components/ui/input"
 
 export function SampleList() {
     const router = useRouter()
     const [samples, setSamples] = React.useState<Sample[]>([])
+    const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const [search, setSearch] = React.useState("")
+    const [filtersOpen, setFiltersOpen] = React.useState(false)
+    const [page, setPage] = React.useState(1)
+    const [filters, setFilters] = React.useState({
+        site: "",
+        dateFrom: "",
+        dateTo: "",
+        sampleType: "",
+    })
 
     React.useEffect(() => {
-        ApiService.getSamples().then(data => {
-            setSamples(data)
+        setLoading(true)
+        ApiService.getSamples({
+            search,
+            site: filters.site || undefined,
+            dateFrom: filters.dateFrom || undefined,
+            dateTo: filters.dateTo || undefined,
+            sampleType: filters.sampleType || undefined,
+            page,
+            limit: 9,
+        }).then(res => {
+            setSamples(res.data)
+            setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
             console.error('Failed to load samples:', err)
             setLoading(false)
         })
-    }, [])
+    }, [search, filters, page])
 
     if (loading) {
         return (
@@ -35,13 +56,60 @@ export function SampleList() {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-end">
-                <Button variant="outline" size="sm" className="mr-2">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filters
-                </Button>
-                <Button size="sm" onClick={() => router.push('/samples/new')}>Create Sample</Button>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="relative flex-1 min-w-[220px] max-w-sm">
+                    <Input
+                        placeholder="Search samples..."
+                        className="pl-8"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                    />
+                    <MapPin className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex gap-2">
+                    <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
+                        <Filter className="mr-2 h-4 w-4" />
+                        Filters
+                    </Button>
+                    <Button size="sm" onClick={() => router.push('/samples/new')}>Create Sample</Button>
+                </div>
             </div>
+
+            {filtersOpen && (
+                <Card className="p-3 space-y-2">
+                    <div className="grid gap-2 md:grid-cols-4">
+                        <Input
+                            placeholder="Site name contains"
+                            value={filters.site}
+                            onChange={(e) => { setFilters({ ...filters, site: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="Sample type"
+                            value={filters.sampleType}
+                            onChange={(e) => { setFilters({ ...filters, sampleType: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            type="date"
+                            value={filters.dateFrom}
+                            onChange={(e) => { setFilters({ ...filters, dateFrom: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            type="date"
+                            value={filters.dateTo}
+                            onChange={(e) => { setFilters({ ...filters, dateTo: e.target.value }); setPage(1); }}
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setFilters({ site: "", sampleType: "", dateFrom: "", dateTo: "" }); setPage(1); }}
+                        >
+                            Reset
+                        </Button>
+                    </div>
+                </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {samples.map((sample) => (
@@ -83,6 +151,30 @@ export function SampleList() {
                         </Card>
                     </Link>
                 ))}
+            </div>
+
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div>
+                    Page {meta?.page ?? 1} of {meta?.totalPages ?? 1} ({meta?.total ?? samples.length} total)
+                </div>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={(meta?.page ?? 1) <= 1 || loading}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                        Prev
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={meta ? meta.page >= meta.totalPages : true}
+                        onClick={() => setPage((p) => p + 1)}
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -141,13 +141,29 @@ export const ApiService = {
         return response.json();
     },
 
-    async getSamples(): Promise<Sample[]> {
-        const response = await request(`/api/v1/samples`);
+    async getSamples(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+        sampleType?: string;
+        site?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }): Promise<PaginatedResponse<Sample>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.sampleType) query.set('sampleType', params.sampleType);
+        if (params?.site) query.set('site', params.site);
+        if (params?.dateFrom) query.set('dateFrom', params.dateFrom);
+        if (params?.dateTo) query.set('dateTo', params.dateTo);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/samples${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch samples: ${response.statusText}`);
         }
-        const data = await response.json();
-        return data.data;
+        return response.json();
     },
 
     async getSample(id: number): Promise<Sample> {
@@ -158,13 +174,35 @@ export const ApiService = {
         return response.json();
     },
 
-    async getStrains(): Promise<Strain[]> {
-        const response = await request(`/api/v1/strains`);
+    async getStrains(params?: {
+        search?: string;
+        sampleCode?: string;
+        taxonomy?: string;
+        genome?: string;
+        hasGenome?: boolean;
+        antibioticActivity?: string;
+        seq?: boolean;
+        gramStain?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<PaginatedResponse<Strain>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.sampleCode) query.set('sampleCode', params.sampleCode);
+        if (params?.taxonomy) query.set('taxonomy', params.taxonomy);
+        if (params?.genome) query.set('genome', params.genome);
+        if (params?.hasGenome !== undefined) query.set('hasGenome', String(params.hasGenome));
+        if (params?.antibioticActivity) query.set('antibioticActivity', params.antibioticActivity);
+        if (params?.seq !== undefined) query.set('seq', String(params.seq));
+        if (params?.gramStain) query.set('gramStain', params.gramStain);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/strains${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strains: ${response.statusText}`);
         }
-        const data = await response.json();
-        return data.data;
+        return response.json();
     },
 
     async getStrain(id: number): Promise<Strain> {
