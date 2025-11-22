@@ -20,6 +20,13 @@
 - Filenames kebab-case for files and directories; classes/interfaces in PascalCase; variables camelCase.
 - React components live under `components/` or `app/` segments; favor functional components and hooks.
 
+## Current Feature Notes
+- Storage: boxes/cells grid with allocate/unallocate/bulk; deep link highlights via `?boxId=&cell=` from strain cards.
+- Media: `/media` CRUD for nutrient media; link/unlink to strains in strain card.
+- Legend: `/legend` text editor for UI legend.
+- Wiki: `/docs` renders Markdown from `docs/wiki`; keep wiki in sync with features (changelog, playbooks, architecture).
+- Filters/pagination: lists for strains/samples support server filters & paging (search, sampleCode/taxonomy/genome/etc. for strains; site/type/date for samples).
+
 ## Testing Guidelines
 - Unit tests colocated with backend sources as `.spec.ts`; e2e specs in `backend/test`.
 - Use `npm run test:cov` before merge when backend changes touch logic.

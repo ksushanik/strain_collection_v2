@@ -14,6 +14,8 @@ A full-stack web application for managing microbiological strain collections, fi
 - **Storage System**: Interactive grid-based storage management with box and cell allocation
 - **Flexible Structure**: Dynamic UI configuration through database-driven field packs and profiles
 - **Real-time Dashboard**: Live statistics and analytics
+- **Media & Legend**: Nutrient media catalog linked to strains; editable legend for UI codes.
+- **In-app Wiki**: `/docs` renders `docs/wiki` (архитектура, API, playbooks, changelog).
 
 ## Wiki
 
