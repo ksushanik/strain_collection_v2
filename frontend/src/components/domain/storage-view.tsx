@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 type BoxSummary = {
   id: number;
@@ -42,10 +42,12 @@ type BoxDetail = {
 export function StorageView() {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
   const [selectedCellCode, setSelectedCellCode] = React.useState<string | null>(null)
+  const [pendingHighlight, setPendingHighlight] = React.useState<{ boxId?: number; cell?: string } | null>(null)
   const [strains, setStrains] = React.useState<Strain[]>([])
   const [allocating, setAllocating] = React.useState(false)
   const [allocForm, setAllocForm] = React.useState<{ strainId?: number; isPrimary?: boolean }>({})
@@ -89,6 +91,38 @@ export function StorageView() {
   }, [selectedBoxId])
 
   const selectedCell = selectedBox?.cells.find(c => c.cellCode === selectedCellCode) || null
+
+  // Apply highlight from query params (?boxId=&cell=) when data is ready
+  React.useEffect(() => {
+    if (boxes.length === 0) return
+    const boxIdParam = searchParams?.get("boxId")
+    const cellParam = searchParams?.get("cell")
+    if (!boxIdParam && !cellParam) return
+
+    const parsedBoxId = boxIdParam ? Number(boxIdParam) : undefined
+    const validBoxId = parsedBoxId && Number.isFinite(parsedBoxId) ? parsedBoxId : undefined
+    if (validBoxId && boxes.some((b) => b.id === validBoxId)) {
+      setSelectedBoxId(validBoxId)
+    }
+
+    setPendingHighlight({ boxId: validBoxId, cell: cellParam || undefined })
+  }, [boxes, searchParams])
+
+  React.useEffect(() => {
+    if (!selectedBox || !pendingHighlight) return
+    if (pendingHighlight.boxId && selectedBox.id !== pendingHighlight.boxId) return
+
+    if (pendingHighlight.cell) {
+      const match = selectedBox.cells.find(
+        (c) => c.cellCode.toLowerCase() === pendingHighlight.cell!.toLowerCase()
+      )
+      if (match) {
+        setSelectedCellCode(match.cellCode)
+      }
+    }
+
+    setPendingHighlight(null)
+  }, [pendingHighlight, selectedBox])
 
   React.useEffect(() => {
     if (selectedCell?.status === 'OCCUPIED' && selectedCell.strain?.strain?.id) {

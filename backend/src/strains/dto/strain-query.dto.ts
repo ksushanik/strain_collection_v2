@@ -7,6 +7,13 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
+const toOptionalBool = ({ value }: { value: any }) => {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (value === 'true' || value === true) return true;
+  if (value === 'false' || value === false) return false;
+  return value;
+};
+
 export class StrainQueryDto {
   @IsOptional()
   @IsInt()
@@ -15,7 +22,7 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(toOptionalBool)
   seq?: boolean;
 
   @IsOptional()
@@ -24,17 +31,17 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(toOptionalBool)
   phosphates?: boolean;
 
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(toOptionalBool)
   siderophores?: boolean;
 
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(toOptionalBool)
   pigmentSecretion?: boolean;
 
   @IsOptional()
@@ -51,7 +58,7 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(toOptionalBool)
   hasGenome?: boolean;
 
   @IsOptional()

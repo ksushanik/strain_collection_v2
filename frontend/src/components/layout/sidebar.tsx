@@ -12,6 +12,7 @@ import {
     FlaskConical,
     Box,
     Settings,
+    BookOpen,
     Menu,
     Loader2,
     LogOut,
@@ -110,6 +111,42 @@ export function Sidebar() {
                             )
                         })
                     )}
+
+                    <Link
+                        href="/media"
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <FlaskConical className="h-4 w-4" />
+                        {!isCollapsed && <span>Media</span>}
+                    </Link>
+
+                    <Link
+                        href="/legend"
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/legend" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <BookOpen className="h-4 w-4" />
+                        {!isCollapsed && <span>Legend</span>}
+                    </Link>
+
+                    <Link
+                        href="/docs"
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/docs" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <BookOpen className="h-4 w-4" />
+                        {!isCollapsed && <span>Wiki</span>}
+                    </Link>
                 </nav>
             </div>
 

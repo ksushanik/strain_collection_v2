@@ -21,6 +21,9 @@ export interface UiBinding {
     icon: string;
     enabledFieldPacks: string[];
     routeSlug: string;
+    order?: number;
+    legendId?: number | null;
+    legend?: { id: number; content: string } | null;
 }
 
 export interface Sample {
@@ -92,6 +95,29 @@ export interface Strain {
             };
         };
     }[];
+    media?: {
+        mediaId: number;
+        notes?: string | null;
+        media: Media;
+    }[];
+}
+
+export interface Media {
+    id: number;
+    name: string;
+    composition?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 }
 
 export const ApiService = {
@@ -99,6 +125,18 @@ export const ApiService = {
         const response = await request(`/api/v1/settings/ui-bindings`);
         if (!response.ok) {
             throw new Error(`Failed to fetch UI bindings: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async updateUiBindings(bindings: UiBinding[]): Promise<{ updated: number }> {
+        const response = await request(`/api/v1/settings/ui-bindings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bindings),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to update UI bindings: ${response.statusText}`);
         }
         return response.json();
     },
@@ -133,6 +171,33 @@ export const ApiService = {
         const response = await request(`/api/v1/strains/${id}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strain: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async getLegend(): Promise<{ id: number; content: string } | null> {
+        const response = await request(`/api/v1/settings/legend`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch legend: ${response.statusText}`);
+        }
+        // Backend может вернуть пустой ответ, обрабатываем 204 / пустое тело
+        const text = await response.text();
+        if (!text) return null;
+        try {
+            return JSON.parse(text);
+        } catch {
+            return null;
+        }
+    },
+
+    async updateLegend(content: string): Promise<{ id: number; content: string }> {
+        const response = await request(`/api/v1/settings/legend`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content }),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to update legend: ${response.statusText}`);
         }
         return response.json();
     },
@@ -229,6 +294,42 @@ export const ApiService = {
         return response.json();
     },
 
+    async getMedia(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<Media>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/media${qs ? `?${qs}` : ''}`);
+        if (!response.ok) throw new Error(`Failed to fetch media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async createMedia(payload: { name: string; composition?: string }): Promise<Media> {
+        const response = await request(`/api/v1/media`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`Failed to create media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async updateMedia(id: number, payload: { name: string; composition?: string }): Promise<Media> {
+        const response = await request(`/api/v1/media/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`Failed to update media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async deleteMedia(id: number): Promise<void> {
+        const response = await request(`/api/v1/media/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error(`Failed to delete media: ${response.statusText}`);
+    },
+
     async createStrain(data: Partial<Strain>): Promise<Strain> {
         const response = await request(`/api/v1/strains`, {
             method: 'POST',
@@ -302,5 +403,27 @@ export const ApiService = {
         if (!response.ok) {
             throw new Error(`Failed to delete photo: ${response.statusText}`);
         }
+    },
+
+    async linkMediaToStrain(strainId: number, payload: { mediaId: number; notes?: string }) {
+        const response = await request(`/api/v1/strains/${strainId}/media`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to link media: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async unlinkMediaFromStrain(strainId: number, mediaId: number) {
+        const response = await request(`/api/v1/strains/${strainId}/media/${mediaId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to unlink media: ${response.statusText}`);
+        }
+        return response.json();
     },
 };

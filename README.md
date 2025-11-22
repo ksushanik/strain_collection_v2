@@ -15,6 +15,16 @@ A full-stack web application for managing microbiological strain collections, fi
 - **Flexible Structure**: Dynamic UI configuration through database-driven field packs and profiles
 - **Real-time Dashboard**: Live statistics and analytics
 
+## Wiki
+
+Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
+
+
+## Wiki
+
+Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
+
+
 ## 🏗️ Architecture
 
 ```
