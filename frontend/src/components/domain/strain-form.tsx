@@ -71,8 +71,8 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
     })
 
     React.useEffect(() => {
-        ApiService.getSamples()
-            .then(setSamples)
+        ApiService.getSamples({ limit: 500 })
+            .then((res) => setSamples(res.data || []))
             .catch(console.error)
     }, [])
 

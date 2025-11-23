@@ -26,7 +26,7 @@ const DOCS: DocMeta[] = [
 ]
 
 function renderInline(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).filter(Boolean)
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g).filter(Boolean)
   return parts.map((part, idx) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
@@ -45,31 +45,24 @@ function renderInline(text: string) {
         </code>
       )
     }
-    return <span key={`t-${idx}`}>{part}</span>
-  })
-}
-
-function renderLinkAware(text: string) {
-  const linkRegex = /(\[[^\]]+\]\([^)]+\))/g
-  const segments = text.split(linkRegex).filter(Boolean)
-
-  return segments.map((seg, idx) => {
-    const match = seg.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
-    if (match) {
-      const [, label, hrefRaw] = match
-      const isMd = hrefRaw.endsWith(".md")
-      const anchor = isMd ? `#${hrefRaw.replace(/\.md$/, "")}` : hrefRaw
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+    if (linkMatch) {
+      const [, label, href] = linkMatch
+      const isExternal = href.startsWith("http")
+      const anchor = href.endsWith(".md") ? `#${href.replace(/\.md$/, "")}` : href
       return (
         <a
           key={`link-${idx}`}
           href={anchor}
           className="text-primary underline underline-offset-4"
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noreferrer" : undefined}
         >
-          {renderInline(label)}
+          {label}
         </a>
       )
     }
-    return <React.Fragment key={`seg-${idx}`}>{renderInline(seg)}</React.Fragment>
+    return <span key={`t-${idx}`}>{part}</span>
   })
 }
 
@@ -77,13 +70,15 @@ function renderMarkdown(md: string) {
   const lines = md.split(/\r?\n/)
   const elements: React.ReactNode[] = []
   let listBuffer: string[] = []
+  let orderedListBuffer: string[] = []
   let paragraph: string[] = []
+  let codeBlock: string[] | null = null
 
   const flushParagraph = () => {
     if (paragraph.length) {
       elements.push(
         <p key={`p-${elements.length}`} className="leading-relaxed">
-          {renderLinkAware(paragraph.join(" "))}
+          {renderInline(paragraph.join(" "))}
         </p>
       )
       paragraph = []
@@ -95,7 +90,7 @@ function renderMarkdown(md: string) {
       elements.push(
         <ul key={`ul-${elements.length}`} className="list-disc pl-6 space-y-1">
           {listBuffer.map((item, idx) => (
-            <li key={`li-${elements.length}-${idx}`}>{renderLinkAware(item)}</li>
+            <li key={`li-${elements.length}-${idx}`}>{renderInline(item)}</li>
           ))}
         </ul>
       )
@@ -103,11 +98,44 @@ function renderMarkdown(md: string) {
     }
   }
 
+  const flushOrderedList = () => {
+    if (orderedListBuffer.length) {
+      elements.push(
+        <ol key={`ol-${elements.length}`} className="list-decimal pl-6 space-y-1">
+          {orderedListBuffer.map((item, idx) => (
+            <li key={`oli-${elements.length}-${idx}`}>{renderInline(item)}</li>
+          ))}
+        </ol>
+      )
+      orderedListBuffer = []
+    }
+  }
+
   lines.forEach((line) => {
+    if (line.startsWith("```")) {
+      if (codeBlock) {
+        elements.push(
+          <pre key={`code-${elements.length}`} className="rounded bg-muted p-3 text-xs overflow-x-auto">
+            <code>{codeBlock.join("\n")}</code>
+          </pre>
+        )
+        codeBlock = null
+      } else {
+        codeBlock = []
+      }
+      return
+    }
+
+    if (codeBlock) {
+      codeBlock.push(line)
+      return
+    }
+
     const trimmed = line.trim()
     if (trimmed === "") {
       flushParagraph()
       flushList()
+      flushOrderedList()
       return
     }
 
@@ -115,12 +143,13 @@ function renderMarkdown(md: string) {
     if (headingMatch) {
       flushParagraph()
       flushList()
+      flushOrderedList()
       const level = headingMatch[1].length
       const text = headingMatch[2]
       const Tag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements
       elements.push(
         <Tag key={`h-${elements.length}`} className="scroll-m-20 text-lg font-semibold first:mt-0">
-          {renderLinkAware(text)}
+          {renderInline(text)}
         </Tag>
       )
       return
@@ -131,11 +160,18 @@ function renderMarkdown(md: string) {
       return
     }
 
+    const orderedMatch = trimmed.match(/^\d+\.\s+(.*)$/)
+    if (orderedMatch) {
+      orderedListBuffer.push(orderedMatch[1])
+      return
+    }
+
     paragraph.push(trimmed)
   })
 
   flushParagraph()
   flushList()
+  flushOrderedList()
 
   return <div className="prose prose-sm max-w-none">{elements}</div>
 }

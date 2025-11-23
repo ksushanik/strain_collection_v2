@@ -13,7 +13,7 @@ export default function StrainsPage() {
                         Browse and manage strains in the collection.
                     </p>
                 </div>
-                <StrainList enabledPacks={[]} />
+                <StrainList enabledPacks={["taxonomy", "growth_characteristics"]} />
             </div>
         </MainLayout>
     )

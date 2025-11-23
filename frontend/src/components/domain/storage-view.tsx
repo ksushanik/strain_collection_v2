@@ -39,7 +39,7 @@ type BoxDetail = {
   }[];
 }
 
-export function StorageView() {
+export function StorageView({ legendText }: { legendText?: string | null }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -300,6 +300,11 @@ export function StorageView() {
             {selectedBox.description && (
               <CardDescription>{selectedBox.description}</CardDescription>
             )}
+            {legendText && (
+              <CardDescription className="mt-2 whitespace-pre-line text-xs text-muted-foreground border-t pt-2">
+                {legendText}
+              </CardDescription>
+            )}
           </CardHeader>
           <CardContent>
             {loadingBox ? (
@@ -309,9 +314,9 @@ export function StorageView() {
             ) : (
               <>
                 <div
-                  className="grid gap-1 mx-auto w-fit"
+                  className="grid gap-1 mx-auto w-fit max-h-[70vh] overflow-auto p-2"
                   style={{
-                    gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(40px, 1fr))`
+                    gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(32px, 1fr))`
                   }}
                 >
                   {selectedBox.cells?.map((cell) => {
@@ -323,10 +328,10 @@ export function StorageView() {
                       <div
                         key={cell.id}
                         className={cn(
-                          "h-10 w-10 flex items-center justify-center rounded border text-xs font-medium cursor-pointer transition-colors hover:ring-2 hover:ring-ring hover:ring-offset-1",
+                          "h-8 w-8 flex items-center justify-center rounded border text-[10px] font-medium cursor-pointer transition-colors hover:ring-2 hover:ring-ring hover:ring-offset-0",
                           isOccupied
                             ? "bg-green-100 border-green-300 text-green-700 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400"
-                            : "bg-background border-muted hover:bg-muted",
+                            : "bg-muted/30 border-muted-foreground/30 text-muted-foreground hover:bg-muted/60",
                           selectedCellCode === cell.cellCode && "ring-2 ring-primary"
                         )}
                         title={isOccupied ? `Strain: ${strainId}` : `Empty ${cell.cellCode}`}
@@ -335,7 +340,7 @@ export function StorageView() {
                         {isOccupied ? (
                           <span className="truncate px-0.5 text-[8px]">{strainId?.split('-').pop()}</span>
                         ) : (
-                          <span className="text-muted-foreground/30">{cell.cellCode}</span>
+                          <span className="text-muted-foreground/30 text-[8px]">{cell.cellCode}</span>
                         )}
                       </div>
                     )

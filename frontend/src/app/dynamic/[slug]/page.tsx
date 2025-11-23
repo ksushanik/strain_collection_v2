@@ -68,7 +68,7 @@ export default function DynamicPage() {
                     <StrainList enabledPacks={binding.enabledFieldPacks} returnPath={`/dynamic/${slug}`} />
                 )}
                 {binding.profileKey === 'SAMPLE' && <SampleList />}
-                {binding.profileKey === 'STORAGE' && <StorageView />}
+                {binding.profileKey === 'STORAGE' && <StorageView legendText={binding.legend?.content} />}
             </div>
         </MainLayout>
     )

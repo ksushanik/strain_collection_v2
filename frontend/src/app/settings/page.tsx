@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, Plus, ArrowUp, ArrowDown, Save } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 
 type EditableBinding = UiBinding & { enabledFieldPacks: string[] }
 
@@ -16,6 +17,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
+  const [legendGlobal, setLegendGlobal] = React.useState<string>("")
 
   React.useEffect(() => {
     ApiService.getUiBindings()
@@ -24,7 +26,9 @@ export default function SettingsPage() {
           (data || []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) as EditableBinding[]
         )
         setMessage(null)
+        return ApiService.getLegend()
       })
+      .then((legend) => setLegendGlobal(legend?.content || ""))
       .catch((err) => {
         console.error("Failed to load ui bindings", err)
         setMessage("Failed to load settings")
@@ -64,6 +68,7 @@ export default function SettingsPage() {
         enabledFieldPacks: [],
         order: prev.length,
         legendId: null,
+        legend: null,
       },
     ])
   }
@@ -155,6 +160,14 @@ export default function SettingsPage() {
                         >
                           <ArrowDown className="h-4 w-4" />
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setBindings((prev) => prev.filter((_, i) => i !== index))}
+                          title="Remove section"
+                        >
+                          ✕
+                        </Button>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -169,6 +182,18 @@ export default function SettingsPage() {
                         value={binding.enabledFieldPacks.join(",")}
                         onChange={(e) => updateBinding(index, { enabledFieldPacks: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
                         placeholder="enabled field packs (comma separated)"
+                      />
+                      <Textarea
+                        className="w-64"
+                        rows={2}
+                        value={binding.legend?.content || ""}
+                        onChange={(e) =>
+                          updateBinding(index, {
+                            legend: { id: binding.legendId ?? undefined as any, content: e.target.value },
+                            legendId: binding.legendId ?? null,
+                          })
+                        }
+                        placeholder="Legend override (optional)"
                       />
                     </div>
                   </div>
