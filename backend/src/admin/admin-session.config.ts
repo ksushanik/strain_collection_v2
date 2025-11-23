@@ -1,6 +1,23 @@
 import session from 'express-session';
+import RedisStore from 'connect-redis';
+import Redis from 'ioredis';
 
-export const adminSessionStore = new session.MemoryStore();
+const redisUrl = process.env.REDIS_URL;
+const redisClient = redisUrl ? new Redis(redisUrl) : null;
+
+if (redisClient) {
+  // Log and continue with MemoryStore fallback if Redis breaks.
+  redisClient.on('error', (err) => {
+    console.error('Redis session error', err);
+  });
+}
+
+export const adminSessionStore: session.Store = redisClient
+  ? new RedisStore({
+      client: redisClient,
+      prefix: 'adminjs:',
+    })
+  : new session.MemoryStore();
 
 export const adminSessionOptions: session.SessionOptions = {
   name: 'adminjs',

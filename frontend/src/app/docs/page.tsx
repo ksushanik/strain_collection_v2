@@ -1,29 +1,116 @@
-import fs from "fs/promises"
-import path from "path"
+"use client"
+
 import React from "react"
+import { Search } from "lucide-react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-type DocMeta = {
+type IndexedDoc = {
   id: string
   title: string
   file: string
+  content: string
+  text: string
+  headings: { level: number; text: string }[]
 }
 
-const DOCS: DocMeta[] = [
-  { id: "index", title: "Index", file: "index.md" },
-  { id: "architecture", title: "Architecture & Overview", file: "architecture.md" },
-  { id: "backend", title: "Backend (NestJS/Prisma)", file: "backend.md" },
-  { id: "frontend", title: "Frontend (Next.js)", file: "frontend.md" },
-  { id: "api", title: "API & Auth", file: "api.md" },
-  { id: "storage", title: "Storage", file: "storage.md" },
-  { id: "media", title: "Media", file: "media.md" },
-  { id: "legend", title: "Legend", file: "legend.md" },
-  { id: "testing", title: "Testing", file: "testing.md" },
-  { id: "playbooks", title: "Playbooks", file: "playbooks.md" },
-  { id: "changelog", title: "Changelog", file: "changelog.md" },
-  { id: "contrib", title: "Wiki Contribution Guide", file: "contrib.md" },
-]
+export default function DocsPage() {
+  const [docs, setDocs] = React.useState<IndexedDoc[]>([])
+  const [query, setQuery] = React.useState("")
+  const [error, setError] = React.useState<string | null>(null)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/wiki-api/docs-index")
+        if (!res.ok) throw new Error(`Failed to load docs index: ${res.statusText}`)
+        const data = (await res.json()) as IndexedDoc[]
+        setDocs(data)
+      } catch (e: any) {
+        setError(e?.message || "Не удалось загрузить wiki")
+      } finally {
+        setLoading(false)
+      }
+    }
+    void load()
+  }, [])
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return docs
+    return docs.filter((d) => d.text.includes(q) || d.title.toLowerCase().includes(q))
+  }, [query, docs])
+
+  return (
+    <MainLayout>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Wiki</h1>
+            <p className="text-muted-foreground">
+              Markdown из docs/wiki (volume), поиск по тексту.
+            </p>
+          </div>
+          <div className="w-full sm:w-80">
+            <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                className="flex-1 bg-transparent text-sm outline-none"
+                placeholder="Поиск по тексту..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {loading && <p className="text-sm text-muted-foreground">Загрузка wiki...</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
+        {!loading && !error && (
+          <div className="grid gap-4">
+            {filtered.map((doc) => (
+              <Card key={doc.id} id={doc.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <CardTitle>{doc.title}</CardTitle>
+                    {doc.headings.length > 0 && (
+                      <div className="text-xs text-muted-foreground space-y-1 max-w-xs">
+                        <div className="font-semibold text-foreground">Содержание</div>
+                        <div className="space-y-1">
+                          {doc.headings.slice(0, 6).map((h, idx) => (
+                            <div
+                              key={`${doc.id}-h-${idx}`}
+                              className="truncate"
+                              style={{ paddingLeft: (h.level - 1) * 8 }}
+                            >
+                              • {h.text}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {doc.content ? (
+                    renderMarkdown(doc.content)
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Файл не найден: {doc.file}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {filtered.length === 0 && (
+              <p className="text-sm text-muted-foreground">Ничего не найдено по запросу “{query}”</p>
+            )}
+          </div>
+        )}
+      </div>
+    </MainLayout>
+  )
+}
 
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g).filter(Boolean)
@@ -146,7 +233,7 @@ function renderMarkdown(md: string) {
       flushOrderedList()
       const level = headingMatch[1].length
       const text = headingMatch[2]
-      const Tag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements
+      const Tag = `h${Math.min(level, 6)}` as keyof React.JSX.IntrinsicElements
       elements.push(
         <Tag key={`h-${elements.length}`} className="scroll-m-20 text-lg font-semibold first:mt-0">
           {renderInline(text)}
@@ -174,51 +261,4 @@ function renderMarkdown(md: string) {
   flushOrderedList()
 
   return <div className="prose prose-sm max-w-none">{elements}</div>
-}
-
-async function loadDoc(file: string) {
-  const filePath = path.resolve(process.cwd(), "..", "docs", "wiki", file)
-  const content = await fs.readFile(filePath, "utf-8").catch(() => "")
-  return content
-}
-
-export default async function DocsPage() {
-  const docsWithContent = await Promise.all(
-    DOCS.map(async (doc) => ({
-      ...doc,
-      content: await loadDoc(doc.file),
-    }))
-  )
-
-  return (
-    <MainLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Wiki</h1>
-            <p className="text-muted-foreground">
-              Актуальная база знаний проекта (Markdown из docs/wiki).
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          {docsWithContent.map((doc) => (
-            <Card key={doc.id} id={doc.id}>
-              <CardHeader>
-                <CardTitle>{doc.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {doc.content ? (
-                  renderMarkdown(doc.content)
-                ) : (
-                  <p className="text-sm text-muted-foreground">Файл не найден или пуст: {doc.file}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </MainLayout>
-  )
 }
