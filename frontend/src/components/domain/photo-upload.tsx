@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash } from "lucide-react"
 import { ApiService, SamplePhoto } from "@/services/api"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,8 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
     const [selectedPhotoIndex, setSelectedPhotoIndex] = React.useState<number | null>(null)
     const [photoToDelete, setPhotoToDelete] = React.useState<number | null>(null)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const [loadedPreview, setLoadedPreview] = React.useState<Record<number, boolean>>({})
+    const [fullLoaded, setFullLoaded] = React.useState(false)
 
     React.useEffect(() => {
         setPhotos(existingPhotos)
@@ -183,8 +186,17 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
         return `${url}?tr=w-1600,h-1600,c-at_max,q-90`
     }
 
+    const getBlurThumbnailUrl = (url: string) => {
+        return `${url}?tr=w-40,h-40,bl-20,q-20,fo-auto`
+    }
+
+    const getBlurFullUrl = (url: string) => {
+        return `${url}?tr=w-800,h-800,bl-30,q-20,c-at_max`
+    }
+
     const openLightbox = (index: number) => {
         setSelectedPhotoIndex(index)
+        setFullLoaded(false)
     }
 
     const closeLightbox = () => {
@@ -289,12 +301,22 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
                                 className="relative group cursor-pointer"
                                 onClick={() => openLightbox(index)}
                             >
-                                <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                                    <img
+                                <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                                    <div
+                                        className={`absolute inset-0 bg-center bg-cover filter blur-sm scale-105 transition-opacity ${loadedPreview[photo.id] ? 'opacity-0' : 'opacity-100'}`}
+                                        style={{ backgroundImage: `url(${getBlurThumbnailUrl(photo.url)})` }}
+                                        aria-hidden
+                                    />
+                                    <Image
                                         src={getThumbnailUrl(photo.url)}
                                         alt={photo.meta?.originalName || 'Sample photo'}
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        loading="lazy"
+                                        fill
+                                        className="object-cover transition-transform group-hover:scale-105 opacity-0"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        onLoadingComplete={(img) => {
+                                            img.classList.remove('opacity-0')
+                                            setLoadedPreview((prev) => ({ ...prev, [photo.id]: true }))
+                                        }}
                                     />
                                 </div>
                                 <Button
@@ -358,11 +380,22 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
                     )}
 
                     {/* Image */}
-                    <div className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
-                        <img
+                    <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
+                        <div
+                            className={`absolute inset-0 bg-center bg-contain bg-no-repeat filter blur-md scale-105 transition-opacity ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
+                            style={{ backgroundImage: `url(${getBlurFullUrl(currentPhoto.url)})` }}
+                            aria-hidden
+                        />
+                        <Image
                             src={getFullSizeUrl(currentPhoto.url)}
                             alt={currentPhoto.meta?.originalName || 'Sample photo'}
-                            className="max-w-full max-h-full object-contain rounded-lg"
+                            fill
+                            className="object-contain rounded-lg opacity-0"
+                            sizes="100vw"
+                            onLoadingComplete={(img) => {
+                                img.classList.remove('opacity-0')
+                                setFullLoaded(true)
+                            }}
                             onClick={(e) => e.stopPropagation()}
                         />
                     </div>

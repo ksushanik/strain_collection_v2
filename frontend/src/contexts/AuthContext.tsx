@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User } from '../types/domain';
 
 interface AuthContextType {
@@ -14,23 +14,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+    const [user, setUser] = useState<User | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
         if (token && storedUser) {
             try {
-                setUser(JSON.parse(storedUser) as User);
+                return JSON.parse(storedUser) as User;
             } catch {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                setUser(null);
+                return null;
             }
         }
-        setIsLoading(false);
-    }, []);
+        return null;
+    });
+    const [isLoading] = useState(false);
 
     const login = (token: string, userData: User) => {
         localStorage.setItem('token', token);

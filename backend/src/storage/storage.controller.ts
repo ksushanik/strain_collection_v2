@@ -12,7 +12,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StorageService } from './storage.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
+import {
+  AllocateStrainDto,
+  BulkAllocateStrainDto,
+} from './dto/allocate-strain.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
@@ -51,7 +54,11 @@ export class StorageController {
     @Param('cellCode') cellCode: string,
     @Body() allocateDto: Omit<AllocateStrainDto, 'boxId' | 'cellCode'>,
   ) {
-    return this.storageService.allocateStrain({ ...allocateDto, boxId, cellCode });
+    return this.storageService.allocateStrain({
+      ...allocateDto,
+      boxId,
+      cellCode,
+    });
   }
 
   @Post('boxes/:boxId/bulk-allocate')

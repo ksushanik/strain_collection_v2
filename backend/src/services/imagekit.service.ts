@@ -61,7 +61,8 @@ export class ImageKitService {
         fileType: response.fileType,
       };
     } catch (error) {
-      throw new Error(`Failed to upload image to ImageKit: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to upload image to ImageKit: ${message}`);
     }
   }
 
@@ -69,7 +70,8 @@ export class ImageKitService {
     try {
       await this.imagekit.deleteFile(fileId);
     } catch (error) {
-      throw new Error(`Failed to delete image from ImageKit: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to delete image from ImageKit: ${message}`);
     }
   }
 

@@ -54,7 +54,13 @@ describe('Storage e2e (limited smoke)', () => {
     const res = await request(app.getHttpServer())
       .post('/api/v1/storage/boxes')
       .set('Authorization', `Bearer ${token}`)
-      .send({ displayName: 'Test Box', storageType: 'FRIDGE_MINUS_20', rows: 9, cols: 9, description: 'e2e box' })
+      .send({
+        displayName: 'Test Box',
+        storageType: 'FRIDGE_MINUS_20',
+        rows: 9,
+        cols: 9,
+        description: 'e2e box',
+      })
       .expect(201);
 
     boxId = res.body.id;

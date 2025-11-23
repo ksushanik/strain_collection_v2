@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './local-auth.guard';
+import { Prisma, User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UsersService } from '../users/users.service';
@@ -32,7 +33,7 @@ export class AuthController {
       required: ['email', 'password'],
     },
   })
-  async login(@Request() req: any) {
+  login(@Request() req: { user: Omit<User, 'password'> }) {
     return this.authService.login(req.user);
   }
 
@@ -48,7 +49,7 @@ export class AuthController {
       required: ['email', 'password'],
     },
   })
-  async register(@Body() createUserDto: any) {
+  async register(@Body() createUserDto: Prisma.UserCreateInput) {
     // Basic registration for initial setup
     // In production, you might want to restrict this or require admin approval
     return this.usersService.create(createUserDto);
@@ -57,7 +58,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth()
-  getProfile(@Request() req: any) {
+  getProfile(@Request() req: { user: Omit<User, 'password'> }) {
     return req.user;
   }
 }

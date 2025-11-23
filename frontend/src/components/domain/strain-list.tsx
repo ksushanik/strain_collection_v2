@@ -173,7 +173,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                         <TableCell>
                                             {strain.taxonomy16s ? (
                                                 <span className="italic">
-                                                    {(strain.taxonomy16s as any)?.genus} {(strain.taxonomy16s as any)?.species}
+                                                    {(strain.taxonomy16s as { genus?: string; species?: string })?.genus} {(strain.taxonomy16s as { genus?: string; species?: string })?.species}
                                                 </span>
                                             ) : (
                                                 <span className="text-muted-foreground">-</span>

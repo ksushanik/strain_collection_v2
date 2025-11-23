@@ -24,7 +24,9 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('Strain Collection API')
-    .setDescription('API documentation for microbiological strain collection system')
+    .setDescription(
+      'API documentation for microbiological strain collection system',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -33,4 +35,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();

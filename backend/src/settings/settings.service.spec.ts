@@ -31,16 +31,24 @@ describe('SettingsService', () => {
 
   it('creates legend when none exists', async () => {
     prisma.legendContent.findFirst = jest.fn().mockResolvedValue(null);
-    prisma.legendContent.create = jest.fn().mockResolvedValue({ id: 1, content: 'text' });
+    prisma.legendContent.create = jest
+      .fn()
+      .mockResolvedValue({ id: 1, content: 'text' });
 
     const res = await service.updateLegend({ content: 'text' });
-    expect(prisma.legendContent.create).toHaveBeenCalledWith({ data: { content: 'text' } });
+    expect(prisma.legendContent.create).toHaveBeenCalledWith({
+      data: { content: 'text' },
+    });
     expect(res).toEqual({ id: 1, content: 'text' });
   });
 
   it('updates legend when exists', async () => {
-    prisma.legendContent.findFirst = jest.fn().mockResolvedValue({ id: 2, content: 'old' });
-    prisma.legendContent.update = jest.fn().mockResolvedValue({ id: 2, content: 'new' });
+    prisma.legendContent.findFirst = jest
+      .fn()
+      .mockResolvedValue({ id: 2, content: 'old' });
+    prisma.legendContent.update = jest
+      .fn()
+      .mockResolvedValue({ id: 2, content: 'new' });
 
     const res = await service.updateLegend({ content: 'new' });
     expect(prisma.legendContent.update).toHaveBeenCalledWith({
@@ -50,4 +58,3 @@ describe('SettingsService', () => {
     expect(res).toEqual({ id: 2, content: 'new' });
   });
 });
-

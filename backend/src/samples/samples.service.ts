@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateSampleDto } from './dto/create-sample.dto';
 import { UpdateSampleDto } from './dto/update-sample.dto';
 import { SampleQueryDto } from './dto/sample-query.dto';
@@ -27,18 +28,19 @@ export class SamplesService {
       limit = 50,
     } = query;
 
-    const where: any = {};
+    const where: Prisma.SampleWhereInput = {};
 
     if (sampleType) where.sampleType = sampleType;
 
     if (dateFrom || dateTo) {
-      where.collectedAt = {};
+      const collectedAtFilter: { gte?: Date; lte?: Date } = {};
       if (dateFrom) {
-        where.collectedAt.gte = new Date(dateFrom);
+        collectedAtFilter.gte = new Date(dateFrom);
       }
       if (dateTo) {
-        where.collectedAt.lte = new Date(dateTo);
+        collectedAtFilter.lte = new Date(dateTo);
       }
+      where.collectedAt = collectedAtFilter as unknown as Prisma.DateTimeFilter;
     }
 
     if (site) {
@@ -46,15 +48,17 @@ export class SamplesService {
     }
 
     if (latMin !== undefined || latMax !== undefined) {
-      where.lat = {};
-      if (latMin !== undefined) where.lat.gte = latMin;
-      if (latMax !== undefined) where.lat.lte = latMax;
+      const latFilter: { gte?: number; lte?: number } = {};
+      if (latMin !== undefined) latFilter.gte = latMin;
+      if (latMax !== undefined) latFilter.lte = latMax;
+      where.lat = latFilter as unknown as Prisma.FloatNullableFilter;
     }
 
     if (lngMin !== undefined || lngMax !== undefined) {
-      where.lng = {};
-      if (lngMin !== undefined) where.lng.gte = lngMin;
-      if (lngMax !== undefined) where.lng.lte = lngMax;
+      const lngFilter: { gte?: number; lte?: number } = {};
+      if (lngMin !== undefined) lngFilter.gte = lngMin;
+      if (lngMax !== undefined) lngFilter.lte = lngMax;
+      where.lng = lngFilter as unknown as Prisma.FloatNullableFilter;
     }
 
     if (search) {
@@ -126,7 +130,7 @@ export class SamplesService {
   async update(id: number, updateSampleDto: UpdateSampleDto) {
     await this.findOne(id); // Check existence
 
-    const data: any = { ...updateSampleDto };
+    const data: Prisma.SampleUpdateInput = { ...updateSampleDto };
     if (updateSampleDto.collectedAt) {
       data.collectedAt = new Date(updateSampleDto.collectedAt);
     }
@@ -187,8 +191,8 @@ export class SamplesService {
     }
 
     // Extract fileId from meta
-    const meta = photo.meta as any;
-    if (meta?.fileId) {
+    const meta = photo.meta as { fileId?: string } | null;
+    if (typeof meta?.fileId === 'string') {
       try {
         await this.imagekitService.deleteImage(meta.fileId);
       } catch (error) {

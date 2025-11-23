@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProfileKey } from '@prisma/client';
 
 @Injectable()
 export class SettingsService {
@@ -7,7 +8,7 @@ export class SettingsService {
 
   async getUiBindings() {
     const bindings = await this.prisma.uiBinding.findMany({
-      orderBy: [{ order: 'asc' } as any],
+      orderBy: [{ order: 'asc' }],
       include: { legend: true },
     });
 
@@ -16,21 +17,35 @@ export class SettingsService {
       menuLabel: b.menuLabel,
       profileKey: b.profileKey,
       icon: b.icon || 'Box',
-      enabledFieldPacks: b.enabledFieldPacks,
+      enabledFieldPacks: Array.isArray(b.enabledFieldPacks)
+        ? (b.enabledFieldPacks as unknown[]).filter(
+            (x): x is string => typeof x === 'string',
+          )
+        : [],
       routeSlug: b.routeSlug,
-      order: (b as any).order ?? 0,
-      legend: (b as any).legend,
+      order: b.order ?? 0,
+      legend: b.legend,
     }));
   }
 
-  async updateUiBindings(bindings: any[]) {
+  async updateUiBindings(
+    bindings: {
+      menuLabel: string;
+      profileKey: string;
+      icon?: string | null;
+      enabledFieldPacks?: string[];
+      routeSlug: string;
+      order?: number;
+      legendId?: number | null;
+    }[],
+  ) {
     // Delete all existing, then recreate
     await this.prisma.uiBinding.deleteMany();
 
     const created = await this.prisma.uiBinding.createMany({
       data: bindings.map((b, index) => ({
         menuLabel: b.menuLabel,
-        profileKey: b.profileKey,
+        profileKey: b.profileKey as ProfileKey,
         icon: b.icon || 'Box',
         enabledFieldPacks: b.enabledFieldPacks || [],
         routeSlug: b.routeSlug,

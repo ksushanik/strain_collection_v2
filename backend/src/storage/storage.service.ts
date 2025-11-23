@@ -1,34 +1,45 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
+import {
+  AllocateStrainDto,
+  BulkAllocateStrainDto,
+} from './dto/allocate-strain.dto';
 
 @Injectable()
 export class StorageService {
   constructor(private prisma: PrismaService) {}
 
   async findAllBoxes() {
-    return this.prisma.storageBox.findMany({
-      include: {
-        _count: {
-          select: { cells: true },
+    return this.prisma.storageBox
+      .findMany({
+        include: {
+          _count: {
+            select: { cells: true },
+          },
+          cells: {
+            select: { status: true },
+          },
         },
-        cells: {
-          select: { status: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    }).then((boxes) =>
-      boxes.map((box) => {
-        const occupied = box.cells.filter((c) => c.status === 'OCCUPIED').length;
-        return {
-          ...box,
-          occupiedCells: occupied,
-          freeCells: box._count.cells - occupied,
-          cells: undefined,
-        };
-      }),
-    );
+        orderBy: { createdAt: 'desc' },
+      })
+      .then((boxes) =>
+        boxes.map((box) => {
+          const occupied = box.cells.filter(
+            (c) => c.status === 'OCCUPIED',
+          ).length;
+          return {
+            ...box,
+            occupiedCells: occupied,
+            freeCells: box._count.cells - occupied,
+            cells: undefined,
+          };
+        }),
+      );
   }
 
   async findBox(id: number) {
@@ -36,10 +47,7 @@ export class StorageService {
       where: { id },
       include: {
         cells: {
-          orderBy: [
-            { row: 'asc' },
-            { col: 'asc' },
-          ],
+          orderBy: [{ row: 'asc' }, { col: 'asc' }],
           include: {
             strain: {
               include: {
@@ -65,7 +73,7 @@ export class StorageService {
   }
 
   async createBox(createBoxDto: CreateStorageBoxDto) {
-    const { rows, cols, storageType, ...boxData } = createBoxDto;
+    const { rows, cols, ...boxData } = createBoxDto;
 
     if (![9, 10].includes(rows) || ![9, 10].includes(cols)) {
       throw new BadRequestException('Rows and cols must be either 9 or 10');
@@ -103,7 +111,9 @@ export class StorageService {
     });
 
     if (!cell) {
-      throw new NotFoundException(`Storage cell ${cellCode} in box ${boxId} not found`);
+      throw new NotFoundException(
+        `Storage cell ${cellCode} in box ${boxId} not found`,
+      );
     }
 
     // Check if strain exists
@@ -130,7 +140,9 @@ export class StorageService {
           where: { id: existing.id },
           include: {
             strain: { select: { id: true, identifier: true } },
-            cell: { include: { box: { select: { id: true, displayName: true } } } },
+            cell: {
+              include: { box: { select: { id: true, displayName: true } } },
+            },
           },
         });
       }

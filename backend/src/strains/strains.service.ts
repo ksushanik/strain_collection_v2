@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
@@ -26,7 +31,7 @@ export class StrainsService {
       limit = 50,
     } = query;
 
-    const where: any = {};
+    const where: Prisma.StrainWhereInput = {};
 
     if (sampleId !== undefined) where.sampleId = sampleId;
     if (seq !== undefined) where.seq = seq;
@@ -36,7 +41,10 @@ export class StrainsService {
     if (pigmentSecretion !== undefined)
       where.pigmentSecretion = pigmentSecretion;
     if (antibioticActivity)
-      where.antibioticActivity = { contains: antibioticActivity, mode: 'insensitive' };
+      where.antibioticActivity = {
+        contains: antibioticActivity,
+        mode: 'insensitive',
+      };
     if (genome) where.genome = { contains: genome, mode: 'insensitive' };
     if (hasGenome !== undefined) {
       where.genome = hasGenome ? { not: null } : null;
@@ -49,7 +57,7 @@ export class StrainsService {
     }
     if (sampleCode) {
       where.sample = {
-        code: { contains: sampleCode, mode: 'insensitive' },
+        is: { code: { contains: sampleCode, mode: 'insensitive' } },
       };
     }
 
@@ -157,7 +165,9 @@ export class StrainsService {
 
   async addMedia(strainId: number, mediaId: number, notes?: string) {
     await this.findOne(strainId);
-    const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
+    const media = await this.prisma.media.findUnique({
+      where: { id: mediaId },
+    });
     if (!media) {
       throw new NotFoundException(`Media with ID ${mediaId} not found`);
     }

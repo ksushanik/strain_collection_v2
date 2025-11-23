@@ -7,11 +7,11 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
-const toOptionalBool = ({ value }: { value: any }) => {
+const toOptionalBool = ({ value }: { value: unknown }) => {
   if (value === undefined || value === null || value === '') return undefined;
   if (value === 'true' || value === true) return true;
   if (value === 'false' || value === false) return false;
-  return value;
+  return undefined;
 };
 
 export class StrainQueryDto {

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuditLogService {
@@ -17,8 +18,8 @@ export class AuditLogService {
       | 'CONFIG';
     entity: string;
     entityId: number;
-    changes?: any;
-    metadata?: any;
+    changes?: Prisma.InputJsonValue;
+    metadata?: Prisma.InputJsonValue;
     batchId?: string;
     comment?: string;
   }) {
@@ -30,8 +31,8 @@ export class AuditLogService {
         entityId: params.entityId,
         batchId: params.batchId,
         comment: params.comment,
-        changes: params.changes || {},
-        metadata: params.metadata || {},
+        changes: params.changes ?? ({} as Prisma.JsonObject),
+        metadata: params.metadata ?? ({} as Prisma.JsonObject),
       },
     });
   }

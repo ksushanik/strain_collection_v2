@@ -1,6 +1,6 @@
 import { Ability, AbilityBuilder, AbilityClass } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { User, Role } from '@prisma/client';
 
 export type Actions = 'manage' | 'create' | 'read' | 'update' | 'delete';
 
@@ -22,7 +22,7 @@ export type AppAbility = Ability<[Actions, Subjects]>;
 
 @Injectable()
 export class CaslAbilityFactory {
-  createForUser(user: User) {
+  createForUser(user: Partial<User> & { role: Role }) {
     const { can, cannot, build } = new AbilityBuilder<AppAbility>(
       Ability as AbilityClass<AppAbility>,
     );

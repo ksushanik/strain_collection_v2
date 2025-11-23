@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { AdminModule as AdminJSModule } from '@adminjs/nestjs';
 import AdminJS from 'adminjs';
 import { Database, Resource } from '@adminjs/prisma';
@@ -16,8 +17,8 @@ AdminJS.registerAdapter({ Database, Resource });
     AdminJSModule.createAdminAsync({
       imports: [PrismaModule, AuthModule, UsersModule],
       inject: [PrismaService, AuthService],
-      useFactory: async (prisma: PrismaService, authService: AuthService) => {
-        const dmmf = (prisma as any)._baseDmmf;
+      useFactory: (prisma: PrismaService, authService: AuthService) => {
+        const dmmf = Prisma.dmmf;
         const adminOptions = createAdminOptions(prisma, dmmf);
 
         return {

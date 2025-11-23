@@ -150,9 +150,9 @@ function StrainDetailContent({ id }: { id: string }) {
                             {strain.taxonomy16s && (
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <span className="font-medium">Genus:</span>
-                                    <span>{(strain.taxonomy16s as any)?.genus}</span>
+                                    <span>{(strain.taxonomy16s as { genus?: string; species?: string })?.genus}</span>
                                     <span className="font-medium">Species:</span>
-                                    <span>{(strain.taxonomy16s as any)?.species}</span>
+                                    <span>{(strain.taxonomy16s as { genus?: string; species?: string })?.species}</span>
                                 </div>
                             )}
                             {strain.otherTaxonomy && (

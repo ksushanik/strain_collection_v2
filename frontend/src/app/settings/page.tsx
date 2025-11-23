@@ -17,7 +17,6 @@ export default function SettingsPage() {
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
-  const [legendGlobal, setLegendGlobal] = React.useState<string>("")
 
   React.useEffect(() => {
     ApiService.getUiBindings()
@@ -26,9 +25,7 @@ export default function SettingsPage() {
           (data || []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) as EditableBinding[]
         )
         setMessage(null)
-        return ApiService.getLegend()
       })
-      .then((legend) => setLegendGlobal(legend?.content || ""))
       .catch((err) => {
         console.error("Failed to load ui bindings", err)
         setMessage("Failed to load settings")
@@ -188,10 +185,12 @@ export default function SettingsPage() {
                         rows={2}
                         value={binding.legend?.content || ""}
                         onChange={(e) =>
-                          updateBinding(index, {
-                            legend: { id: binding.legendId ?? undefined as any, content: e.target.value },
-                            legendId: binding.legendId ?? null,
-                          })
+                          updateBinding(
+                            index,
+                            binding.legendId != null
+                              ? { legend: { id: binding.legendId, content: e.target.value }, legendId: binding.legendId }
+                              : { legend: null, legendId: null }
+                          )
                         }
                         placeholder="Legend override (optional)"
                       />

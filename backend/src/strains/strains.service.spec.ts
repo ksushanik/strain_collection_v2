@@ -23,10 +23,7 @@ describe('StrainsService', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     const module = await Test.createTestingModule({
-      providers: [
-        StrainsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [StrainsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get(StrainsService);
@@ -67,4 +64,3 @@ describe('StrainsService', () => {
     await expect(service.remove(123)).rejects.toBeInstanceOf(NotFoundException);
   });
 });
-

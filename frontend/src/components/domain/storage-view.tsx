@@ -35,7 +35,7 @@ type BoxDetail = {
     col: number;
     cellCode: string;
     status: 'FREE' | 'OCCUPIED';
-    strain?: { strain?: { id: number; identifier: string; seq: boolean } } | null;
+    strain?: { isPrimary?: boolean; strain?: { id: number; identifier: string; seq: boolean } } | null;
   }[];
 }
 
@@ -128,7 +128,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     if (selectedCell?.status === 'OCCUPIED' && selectedCell.strain?.strain?.id) {
       setAllocForm({
         strainId: selectedCell.strain.strain.id,
-        isPrimary: (selectedCell.strain as any)?.isPrimary ?? false,
+        isPrimary: selectedCell.strain.isPrimary ?? false,
       });
     } else if (selectedCell?.status === 'FREE') {
       setAllocForm({ strainId: undefined, isPrimary: false });
@@ -322,7 +322,6 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                   {selectedBox.cells?.map((cell) => {
                     const isOccupied = cell.status === 'OCCUPIED'
                     const strainId = cell.strain?.strain?.identifier
-                    const strainDbId = cell.strain?.strain?.id
 
                     return (
                       <div
