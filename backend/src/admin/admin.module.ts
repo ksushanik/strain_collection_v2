@@ -4,7 +4,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { UsersModule } from '../users/users.module';
+import { SettingsModule } from '../settings/settings.module';
+import { SettingsService } from '../settings/settings.service';
+import { AuditModule } from '../audit/audit.module';
+import { AuditLogService } from '../audit/audit-log.service';
 import { createAdminOptions } from './admin.options';
+import { AdminSsoController } from './admin.sso.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { adminSessionOptions } from './admin-session.config';
 
 @Module({
   imports: [
@@ -21,11 +29,41 @@ import { createAdminOptions } from './admin.options';
         AdminJS.registerAdapter({ Database, Resource });
 
         return AdminModule.createAdminAsync({
-          imports: [PrismaModule, AuthModule, UsersModule],
-          inject: [PrismaService, AuthService],
-          useFactory: (prisma: PrismaService, authService: AuthService) => {
-            const adminOptions = createAdminOptions(prisma, (name: string) =>
-              getModelByName(name),
+          imports: [
+            PrismaModule,
+            AuthModule,
+            UsersModule,
+            SettingsModule,
+            AuditModule,
+            ConfigModule,
+            JwtModule.registerAsync({
+              imports: [ConfigModule],
+              useFactory: (config: ConfigService) => ({
+                secret:
+                  config.get<string>('JWT_SECRET') ||
+                  'dev_secret_key_do_not_use_in_prod',
+                signOptions: { expiresIn: '7d' },
+              }),
+              inject: [ConfigService],
+            }),
+          ],
+          inject: [
+            PrismaService,
+            AuthService,
+            SettingsService,
+            AuditLogService,
+          ],
+          useFactory: (
+            prisma: PrismaService,
+            authService: AuthService,
+            settingsService: SettingsService,
+            auditLogService: AuditLogService,
+          ) => {
+            const adminOptions = createAdminOptions(
+              prisma,
+              (name: string) => getModelByName(name),
+              settingsService,
+              auditLogService,
             );
 
             return {
@@ -33,6 +71,8 @@ import { createAdminOptions } from './admin.options';
                 ...adminOptions,
               },
               auth: {
+                cookieName: adminSessionOptions.name ?? 'adminjs',
+                cookiePassword: (adminSessionOptions.secret as string) ?? '',
                 authenticate: async (email: string, password: string) => {
                   try {
                     const user = await authService.validateUser(
@@ -45,23 +85,27 @@ import { createAdminOptions } from './admin.options';
                     return null;
                   }
                 },
-                cookieName: 'adminjs',
-                cookiePassword:
-                  process.env.ADMIN_COOKIE_SECRET ||
-                  'admin_secret_change_in_production',
               },
               sessionOptions: {
-                resave: false,
-                saveUninitialized: false,
-                secret:
-                  process.env.ADMIN_SESSION_SECRET ||
-                  'session_secret_change_in_production',
+                ...adminSessionOptions,
               },
             };
           },
         });
       },
     ),
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        secret:
+          config.get<string>('JWT_SECRET') ||
+          'dev_secret_key_do_not_use_in_prod',
+        signOptions: { expiresIn: '7d' },
+      }),
+      inject: [ConfigService],
+    }),
   ],
+  controllers: [AdminSsoController],
 })
 export class AdminModule {}

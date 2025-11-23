@@ -1,9 +1,13 @@
 import { ResourceWithOptions } from 'adminjs';
 import { PrismaClient } from '@prisma/client';
+import { SettingsService } from '../settings/settings.service';
+import { AuditLogService } from '../audit/audit-log.service';
 
 export const createAdminOptions = (
   prisma: PrismaClient,
   getModelByName: (modelName: string) => any,
+  settingsService: SettingsService,
+  auditLogService: AuditLogService,
 ) => {
   return {
     rootPath: '/admin',
@@ -146,6 +150,281 @@ export const createAdminOptions = (
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
+            },
+          },
+        },
+      } as ResourceWithOptions,
+
+      // Settings
+      {
+        resource: { model: getModelByName('UiBinding'), client: prisma },
+        options: {
+          navigation: {
+            name: 'Настройки',
+            icon: 'Settings',
+          },
+          properties: {
+            id: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            menuLabel: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            profileKey: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+              availableValues: [
+                { value: 'SAMPLE', label: 'Sample' },
+                { value: 'STRAIN', label: 'Strain' },
+                { value: 'MEDIA', label: 'Media' },
+                { value: 'STORAGE', label: 'Storage' },
+              ],
+            },
+            order: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            legendId: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            routeSlug: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            icon: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            enabledFieldPacks: { type: 'mixed', isArray: true },
+            updatedAt: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false,
+              },
+            },
+          },
+          actions: {
+            new: {
+              handler: async (request: any, response: any, context: any) => {
+                const params = request?.payload ?? {};
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                const created = await settingsService.createUiBinding({
+                  menuLabel: params.menuLabel,
+                  profileKey: params.profileKey,
+                  icon: params.icon,
+                  enabledFieldPacks: params.enabledFieldPacks,
+                  routeSlug: params.routeSlug,
+                  order: params.order,
+                  legendId: params.legendId,
+                } as any);
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'UiBinding',
+                    entityId: created.id,
+                    comment: 'AdminJS: create UiBinding',
+                    changes: params,
+                    metadata: { route: 'admin/ui-binding/new' },
+                  });
+                }
+                return {
+                  record: { params: { ...created } },
+                };
+              },
+            },
+            edit: {
+              handler: async (request: any, response: any, context: any) => {
+                const params = request?.payload ?? {};
+                const id = Number(request?.params?.recordId ?? params.id);
+                const updated = await settingsService.updateUiBinding(
+                  id,
+                  params,
+                );
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'UiBinding',
+                    entityId: id,
+                    comment: 'AdminJS: edit UiBinding',
+                    changes: params,
+                    metadata: { route: 'admin/ui-binding/edit' },
+                  });
+                }
+                return {
+                  record: { params: { ...updated } },
+                };
+              },
+            },
+            delete: {
+              handler: async (request: any, response: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0);
+                await settingsService.deleteUiBinding(id);
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'UiBinding',
+                    entityId: id,
+                    comment: 'AdminJS: delete UiBinding',
+                    changes: {},
+                    metadata: { route: 'admin/ui-binding/delete' },
+                  });
+                }
+                return {
+                  notice: { message: 'Deleted', type: 'success' },
+                };
+              },
+            },
+          },
+        },
+      } as ResourceWithOptions,
+
+      {
+        resource: { model: getModelByName('LegendContent'), client: prisma },
+        options: {
+          navigation: {
+            name: 'Настройки',
+            icon: 'Settings',
+          },
+          properties: {
+            id: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            content: {
+              isVisible: { list: false, filter: false, show: true, edit: true },
+            },
+            updatedAt: {
+              isVisible: { list: true, filter: false, show: true, edit: false },
+            },
+          },
+          actions: {
+            new: {
+              handler: async (request: any, response: any, context: any) => {
+                const params = request?.payload ?? {};
+                const created = await settingsService.updateLegend({
+                  content: params.content,
+                });
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'LegendContent',
+                    entityId: created.id,
+                    comment: 'AdminJS: create LegendContent',
+                    changes: params,
+                    metadata: { route: 'admin/legend/new' },
+                  });
+                }
+                return { record: { params: { ...created } } };
+              },
+            },
+            edit: {
+              handler: async (request: any, response: any, context: any) => {
+                const params = request?.payload ?? {};
+                const updated = await settingsService.updateLegend({
+                  content: params.content,
+                });
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'LegendContent',
+                    entityId: updated.id,
+                    comment: 'AdminJS: edit LegendContent',
+                    changes: params,
+                    metadata: { route: 'admin/legend/edit' },
+                  });
+                }
+                return { record: { params: { ...updated } } };
+              },
+            },
+            delete: {
+              handler: async (request: any, response: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0);
+                await settingsService.deleteLegend(id);
+                const admin = context.currentAdmin;
+                const email = (admin?.email as string) || undefined;
+                const user = email
+                  ? await prisma.user.findUnique({ where: { email } })
+                  : null;
+                if (user?.id) {
+                  await auditLogService.log({
+                    userId: user.id,
+                    action: 'CONFIG',
+                    entity: 'LegendContent',
+                    entityId: id,
+                    comment: 'AdminJS: delete LegendContent',
+                    changes: {},
+                    metadata: { route: 'admin/legend/delete' },
+                  });
+                }
+                return { notice: { message: 'Deleted', type: 'success' } };
+              },
+            },
+          },
+        },
+      } as ResourceWithOptions,
+
+      // Audit (read-only)
+      {
+        resource: { model: getModelByName('AuditLog'), client: prisma },
+        options: {
+          navigation: { name: 'Аудит', icon: 'Activity' },
+          actions: {
+            new: { isAccessible: () => false },
+            edit: { isAccessible: () => false },
+            delete: { isAccessible: () => false },
+          },
+          properties: {
+            id: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            userId: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            action: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            entity: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            entityId: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            batchId: {
+              isVisible: { list: false, filter: true, show: true, edit: false },
+            },
+            comment: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            changes: { type: 'mixed' },
+            metadata: { type: 'mixed' },
+            createdAt: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
             },
           },
         },

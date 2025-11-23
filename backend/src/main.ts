@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import session from 'express-session';
+import { adminSessionOptions } from './admin/admin-session.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,6 +13,8 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   });
+
+  app.use(session(adminSessionOptions));
 
   // Validation/transform
   app.useGlobalPipes(

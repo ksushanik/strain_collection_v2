@@ -81,4 +81,60 @@ export class SettingsService {
       data: { content: payload.content },
     });
   }
+
+  async createUiBinding(binding: {
+    menuLabel: string;
+    profileKey: ProfileKey;
+    icon?: string | null;
+    enabledFieldPacks?: string[];
+    routeSlug: string;
+    order?: number;
+    legendId?: number | null;
+  }) {
+    return this.prisma.uiBinding.create({
+      data: {
+        menuLabel: binding.menuLabel,
+        profileKey: binding.profileKey,
+        icon: binding.icon || 'Box',
+        enabledFieldPacks: binding.enabledFieldPacks || [],
+        routeSlug: binding.routeSlug,
+        order: binding.order ?? 0,
+        legendId: binding.legendId ?? null,
+      },
+    });
+  }
+
+  async updateUiBinding(
+    id: number,
+    binding: {
+      menuLabel?: string;
+      profileKey?: ProfileKey;
+      icon?: string | null;
+      enabledFieldPacks?: string[];
+      routeSlug?: string;
+      order?: number;
+      legendId?: number | null;
+    },
+  ) {
+    return this.prisma.uiBinding.update({
+      where: { id },
+      data: {
+        menuLabel: binding.menuLabel,
+        profileKey: binding.profileKey,
+        icon: binding.icon ?? undefined,
+        enabledFieldPacks: binding.enabledFieldPacks,
+        routeSlug: binding.routeSlug,
+        order: binding.order,
+        legendId: binding.legendId,
+      },
+    });
+  }
+
+  async deleteUiBinding(id: number) {
+    return this.prisma.uiBinding.delete({ where: { id } });
+  }
+
+  async deleteLegend(id: number) {
+    return this.prisma.legendContent.delete({ where: { id } });
+  }
 }

@@ -6,13 +6,15 @@ import { ApiService, UiBinding } from "@/services/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Loader2, Plus, ArrowUp, ArrowDown, Save } from "lucide-react"
+import { Loader2, Plus, ArrowUp, ArrowDown, Save, Shield } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 
 type EditableBinding = UiBinding & { enabledFieldPacks: string[] }
 
 export default function SettingsPage() {
+  const { user } = useAuth()
   const [bindings, setBindings] = React.useState<EditableBinding[]>([])
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
@@ -102,6 +104,38 @@ export default function SettingsPage() {
             Add section
           </Button>
         </div>
+
+        {user?.role === 'ADMIN' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Admin Panel</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Open AdminJS without re-login (single sign-on)
+                </p>
+                <Button
+                  variant="default"
+                  onClick={async () => {
+                    try {
+                      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010'
+                      const data = await ApiService.startAdminSso()
+                      if (data?.nonce) {
+                        window.location.href = `${base}/api/v1/admin-sso/sso/complete?nonce=${encodeURIComponent(data.nonce)}`
+                      }
+                    } catch (e) {
+                      console.error('SSO failed', e)
+                    }
+                  }}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Open AdminJS
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

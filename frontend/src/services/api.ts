@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010';
 
 function authHeaders() {
     if (typeof window === 'undefined') return {};
@@ -121,6 +121,13 @@ export interface PaginatedResponse<T> {
 }
 
 export const ApiService = {
+    async startAdminSso(): Promise<{ nonce: string }> {
+        const response = await request(`/api/v1/admin-sso/sso/start`, { method: 'POST' });
+        if (!response.ok) {
+            throw new Error(`Failed to start SSO: ${response.statusText}`);
+        }
+        return response.json();
+    },
     async getUiBindings(): Promise<UiBinding[]> {
         const response = await request(`/api/v1/settings/ui-bindings`);
         if (!response.ok) {
