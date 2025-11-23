@@ -21,6 +21,9 @@ export interface UiBinding {
     icon: string;
     enabledFieldPacks: string[];
     routeSlug: string;
+    order?: number;
+    legendId?: number | null;
+    legend?: { id: number; content: string } | null;
 }
 
 export interface Sample {
@@ -80,6 +83,41 @@ export interface Strain {
     iuk?: string;
     features?: string;
     comments?: string;
+    storage?: {
+        id: number;
+        isPrimary: boolean;
+        cell: {
+            id: number;
+            cellCode: string;
+            box: {
+                id: number;
+                displayName: string;
+            };
+        };
+    }[];
+    media?: {
+        mediaId: number;
+        notes?: string | null;
+        media: Media;
+    }[];
+}
+
+export interface Media {
+    id: number;
+    name: string;
+    composition?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
 }
 
 export const ApiService = {
@@ -91,13 +129,41 @@ export const ApiService = {
         return response.json();
     },
 
-    async getSamples(): Promise<Sample[]> {
-        const response = await request(`/api/v1/samples`);
+    async updateUiBindings(bindings: UiBinding[]): Promise<{ updated: number }> {
+        const response = await request(`/api/v1/settings/ui-bindings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bindings),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to update UI bindings: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async getSamples(params?: {
+        search?: string;
+        page?: number;
+        limit?: number;
+        sampleType?: string;
+        site?: string;
+        dateFrom?: string;
+        dateTo?: string;
+    }): Promise<PaginatedResponse<Sample>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.sampleType) query.set('sampleType', params.sampleType);
+        if (params?.site) query.set('site', params.site);
+        if (params?.dateFrom) query.set('dateFrom', params.dateFrom);
+        if (params?.dateTo) query.set('dateTo', params.dateTo);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/samples${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch samples: ${response.statusText}`);
         }
-        const data = await response.json();
-        return data.data;
+        return response.json();
     },
 
     async getSample(id: number): Promise<Sample> {
@@ -108,19 +174,68 @@ export const ApiService = {
         return response.json();
     },
 
-    async getStrains(): Promise<Strain[]> {
-        const response = await request(`/api/v1/strains`);
+    async getStrains(params?: {
+        search?: string;
+        sampleCode?: string;
+        taxonomy?: string;
+        genome?: string;
+        hasGenome?: boolean;
+        antibioticActivity?: string;
+        seq?: boolean;
+        gramStain?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<PaginatedResponse<Strain>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.sampleCode) query.set('sampleCode', params.sampleCode);
+        if (params?.taxonomy) query.set('taxonomy', params.taxonomy);
+        if (params?.genome) query.set('genome', params.genome);
+        if (params?.hasGenome !== undefined) query.set('hasGenome', String(params.hasGenome));
+        if (params?.antibioticActivity) query.set('antibioticActivity', params.antibioticActivity);
+        if (params?.seq !== undefined) query.set('seq', String(params.seq));
+        if (params?.gramStain) query.set('gramStain', params.gramStain);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/strains${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strains: ${response.statusText}`);
         }
-        const data = await response.json();
-        return data.data;
+        return response.json();
     },
 
     async getStrain(id: number): Promise<Strain> {
         const response = await request(`/api/v1/strains/${id}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch strain: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async getLegend(): Promise<{ id: number; content: string } | null> {
+        const response = await request(`/api/v1/settings/legend`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch legend: ${response.statusText}`);
+        }
+        // Backend может вернуть пустой ответ, обрабатываем 204 / пустое тело
+        const text = await response.text();
+        if (!text) return null;
+        try {
+            return JSON.parse(text);
+        } catch {
+            return null;
+        }
+    },
+
+    async updateLegend(content: string): Promise<{ id: number; content: string }> {
+        const response = await request(`/api/v1/settings/legend`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content }),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to update legend: ${response.statusText}`);
         }
         return response.json();
     },
@@ -133,10 +248,24 @@ export const ApiService = {
         cols: number;
         description?: string;
         _count?: { cells: number };
+        occupiedCells?: number;
+        freeCells?: number;
     }[]> {
         const response = await request(`/api/v1/storage/boxes`);
         if (!response.ok) {
             throw new Error(`Failed to fetch storage boxes: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async createStorageBox(data: { displayName: string; rows: number; cols: number; description?: string }) {
+        const response = await request(`/api/v1/storage/boxes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to create storage box: ${response.statusText}`);
         }
         return response.json();
     },
@@ -161,6 +290,82 @@ export const ApiService = {
             throw new Error(`Failed to fetch box cells: ${response.statusText}`);
         }
         return response.json();
+    },
+
+    async allocateCell(boxId: number, cellCode: string, data: { strainId: number; isPrimary?: boolean }) {
+        const response = await request(`/api/v1/storage/boxes/${boxId}/cells/${cellCode}/allocate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ strainId: data.strainId, isPrimary: data.isPrimary ?? false }),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to allocate cell: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async unallocateCell(boxId: number, cellCode: string) {
+        const response = await request(`/api/v1/storage/boxes/${boxId}/cells/${cellCode}/unallocate`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to unallocate cell: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async getAnalyticsOverview(): Promise<{
+        totalStrains: number;
+        totalSamples: number;
+        totalBoxes: number;
+        occupiedCells: number;
+        freeCells: number;
+        recentAdditions: {
+            id: number;
+            identifier: string;
+            createdAt: string;
+            sample?: { id: number; code: string | null };
+        }[];
+    }> {
+        const response = await request(`/api/v1/analytics/overview`);
+        if (!response.ok) throw new Error(`Failed to fetch analytics: ${response.statusText}`);
+        return response.json();
+    },
+
+    async getMedia(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<Media>> {
+        const query = new URLSearchParams();
+        if (params?.search) query.set('search', params.search);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
+        const qs = query.toString();
+        const response = await request(`/api/v1/media${qs ? `?${qs}` : ''}`);
+        if (!response.ok) throw new Error(`Failed to fetch media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async createMedia(payload: { name: string; composition?: string }): Promise<Media> {
+        const response = await request(`/api/v1/media`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`Failed to create media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async updateMedia(id: number, payload: { name: string; composition?: string }): Promise<Media> {
+        const response = await request(`/api/v1/media/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`Failed to update media: ${response.statusText}`);
+        return response.json();
+    },
+
+    async deleteMedia(id: number): Promise<void> {
+        const response = await request(`/api/v1/media/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error(`Failed to delete media: ${response.statusText}`);
     },
 
     async createStrain(data: Partial<Strain>): Promise<Strain> {
@@ -236,5 +441,27 @@ export const ApiService = {
         if (!response.ok) {
             throw new Error(`Failed to delete photo: ${response.statusText}`);
         }
+    },
+
+    async linkMediaToStrain(strainId: number, payload: { mediaId: number; notes?: string }) {
+        const response = await request(`/api/v1/strains/${strainId}/media`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to link media: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async unlinkMediaFromStrain(strainId: number, mediaId: number) {
+        const response = await request(`/api/v1/strains/${strainId}/media/${mediaId}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to unlink media: ${response.statusText}`);
+        }
+        return response.json();
     },
 };

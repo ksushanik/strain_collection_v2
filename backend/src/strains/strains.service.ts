@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
@@ -16,6 +16,11 @@ export class StrainsService {
       phosphates,
       siderophores,
       pigmentSecretion,
+      sampleCode,
+      antibioticActivity,
+      genome,
+      hasGenome,
+      taxonomy,
       search,
       page = 1,
       limit = 50,
@@ -30,12 +35,33 @@ export class StrainsService {
     if (siderophores !== undefined) where.siderophores = siderophores;
     if (pigmentSecretion !== undefined)
       where.pigmentSecretion = pigmentSecretion;
+    if (antibioticActivity)
+      where.antibioticActivity = { contains: antibioticActivity, mode: 'insensitive' };
+    if (genome) where.genome = { contains: genome, mode: 'insensitive' };
+    if (hasGenome !== undefined) {
+      where.genome = hasGenome ? { not: null } : null;
+    }
+    if (taxonomy) {
+      where.OR = [
+        ...(where.OR || []),
+        { otherTaxonomy: { contains: taxonomy, mode: 'insensitive' } },
+      ];
+    }
+    if (sampleCode) {
+      where.sample = {
+        code: { contains: sampleCode, mode: 'insensitive' },
+      };
+    }
 
     if (search) {
       where.OR = [
+        ...(where.OR || []),
         { identifier: { contains: search, mode: 'insensitive' } },
         { features: { contains: search, mode: 'insensitive' } },
         { comments: { contains: search, mode: 'insensitive' } },
+        { antibioticActivity: { contains: search, mode: 'insensitive' } },
+        { genome: { contains: search, mode: 'insensitive' } },
+        { otherTaxonomy: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -127,5 +153,44 @@ export class StrainsService {
     });
 
     return { message: `Strain with ID ${id} deleted successfully` };
+  }
+
+  async addMedia(strainId: number, mediaId: number, notes?: string) {
+    await this.findOne(strainId);
+    const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
+    if (!media) {
+      throw new NotFoundException(`Media with ID ${mediaId} not found`);
+    }
+
+    const existing = await this.prisma.strainMedia.findUnique({
+      where: { strainId_mediaId: { strainId, mediaId } },
+    });
+    if (existing) {
+      throw new BadRequestException('Media already linked to strain');
+    }
+
+    return this.prisma.strainMedia.create({
+      data: {
+        strainId,
+        mediaId,
+        notes,
+      },
+    });
+  }
+
+  async removeMedia(strainId: number, mediaId: number) {
+    await this.findOne(strainId);
+    const existing = await this.prisma.strainMedia.findUnique({
+      where: { strainId_mediaId: { strainId, mediaId } },
+    });
+    if (!existing) {
+      throw new NotFoundException('Media link not found');
+    }
+
+    await this.prisma.strainMedia.delete({
+      where: { strainId_mediaId: { strainId, mediaId } },
+    });
+
+    return { message: 'Media link removed' };
   }
 }

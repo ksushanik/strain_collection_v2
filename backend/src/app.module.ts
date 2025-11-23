@@ -9,9 +9,11 @@ import { SamplesModule } from './samples/samples.module';
 import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-// import { AdminModule } from './admin/admin.module'; // Временно отключено из-за несовместимости AdminJS v7 с CommonJS
+// import { AdminModule } from './admin/admin.module'; // отключено из-за совместимости AdminJS v7 и CommonJS
 import { CaslModule } from './casl/casl.module';
 import { AuditModule } from './audit/audit.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -28,7 +30,9 @@ import { AuditModule } from './audit/audit.module';
     AuthModule,
     CaslModule,
     AuditModule,
-    // AdminModule, // Временно отключено
+    AnalyticsModule,
+    MediaModule,
+    // AdminModule, // подключить при необходимости
   ],
   controllers: [AppController],
   providers: [AppService],

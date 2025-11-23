@@ -12,6 +12,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StrainsService } from './strains.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
@@ -22,6 +23,8 @@ import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 
 @Controller('api/v1/strains')
+@ApiTags('Strains')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StrainsController {
@@ -60,5 +63,24 @@ export class StrainsController {
   @CheckPolicies((ability) => ability.can('delete', 'Strain'))
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.strainsService.remove(id);
+  }
+
+  @Post(':id/media')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  addMedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('mediaId', ParseIntPipe) mediaId: number,
+    @Body('notes') notes?: string,
+  ) {
+    return this.strainsService.addMedia(id, mediaId, notes);
+  }
+
+  @Delete(':id/media/:mediaId')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  removeMedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('mediaId', ParseIntPipe) mediaId: number,
+  ) {
+    return this.strainsService.removeMedia(id, mediaId);
   }
 }

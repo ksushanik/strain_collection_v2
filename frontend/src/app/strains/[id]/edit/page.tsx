@@ -1,14 +1,17 @@
 "use client"
 
 import * as React from "react"
+import { Suspense } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { StrainForm } from "@/components/domain/strain-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Strain } from "@/services/api"
 import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
-export default function EditStrainPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = React.use(params)
+function EditStrainContent({ id }: { id: string }) {
+    const searchParams = useSearchParams()
+    const returnTo = searchParams?.get("returnTo") || undefined
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
 
@@ -54,10 +57,19 @@ export default function EditStrainPage({ params }: { params: Promise<{ id: strin
                         <CardTitle>Strain Details</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <StrainForm initialData={strain} isEdit />
+                        <StrainForm initialData={strain} isEdit returnTo={returnTo} />
                     </CardContent>
                 </Card>
             </div>
         </MainLayout>
+    )
+}
+
+export default function EditStrainPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params)
+    return (
+        <Suspense fallback={<div className="p-8">Loading...</div>}>
+            <EditStrainContent id={id} />
+        </Suspense>
     )
 }

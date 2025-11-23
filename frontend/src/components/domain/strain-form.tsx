@@ -46,9 +46,10 @@ type StrainFormValues = z.infer<typeof strainSchema>
 interface StrainFormProps {
     initialData?: Strain
     isEdit?: boolean
+    returnTo?: string
 }
 
-export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
+export function StrainForm({ initialData, isEdit = false, returnTo }: StrainFormProps) {
     const router = useRouter()
     const [samples, setSamples] = React.useState<Sample[]>([])
     const [loading, setLoading] = React.useState(false)
@@ -70,8 +71,8 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
     })
 
     React.useEffect(() => {
-        ApiService.getSamples()
-            .then(setSamples)
+        ApiService.getSamples({ limit: 500 })
+            .then((res) => setSamples(res.data || []))
             .catch(console.error)
     }, [])
 
@@ -92,7 +93,8 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
             } else {
                 await ApiService.createStrain(payload)
             }
-            router.push("/strains")
+            const target = returnTo || "/strains"
+            router.push(target)
             router.refresh()
         } catch (error) {
             console.error("Failed to save strain:", error)
@@ -305,7 +307,17 @@ export function StrainForm({ initialData, isEdit = false }: StrainFormProps) {
                 </div>
 
                 <div className="flex justify-end gap-4">
-                    <Button variant="outline" type="button" onClick={() => router.back()}>
+                    <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => {
+                            if (returnTo) {
+                                router.push(returnTo)
+                            } else {
+                                router.back()
+                            }
+                        }}
+                    >
                         Cancel
                     </Button>
                     <Button type="submit" disabled={loading}>

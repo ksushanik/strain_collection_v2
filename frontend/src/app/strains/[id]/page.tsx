@@ -1,32 +1,84 @@
 "use client"
 
 import * as React from "react"
-import { ApiService, Strain } from "@/services/api"
+import { Suspense } from "react"
+import { ApiService, Strain, Media } from "@/services/api"
 import { MainLayout } from "@/components/layout/main-layout"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker, Trash2, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function StrainDetailPage({ params }: { params: Promise<{ id: string }> }) {
+function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
-    const { id } = React.use(params)
+    const searchParams = useSearchParams()
+    const returnTo = searchParams?.get("returnTo") || undefined
     const [strain, setStrain] = React.useState<Strain | null>(null)
+    const [mediaOptions, setMediaOptions] = React.useState<Media[]>([])
     const [loading, setLoading] = React.useState(true)
+    const [savingMedia, setSavingMedia] = React.useState(false)
+    const [mediaForm, setMediaForm] = React.useState<{ mediaId?: number; notes?: string }>({})
 
     React.useEffect(() => {
         if (!id) return;
-        ApiService.getStrain(parseInt(id))
-            .then(data => {
-                setStrain(data)
-                setLoading(false)
-            })
-            .catch(err => {
+        const load = async () => {
+            try {
+                const [strainData, mediaList] = await Promise.all([
+                    ApiService.getStrain(parseInt(id)),
+                    ApiService.getMedia({ page: 1, limit: 100 }),
+                ])
+                setStrain(strainData)
+                setMediaOptions(mediaList.data)
+            } catch (err) {
                 console.error('Failed to load strain:', err)
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+        load()
     }, [id])
+
+    const refreshStrain = async () => {
+        try {
+            const updated = await ApiService.getStrain(parseInt(id))
+            setStrain(updated)
+        } catch (err) {
+            console.error('Failed to refresh strain:', err)
+        }
+    }
+
+    const handleLinkMedia = async () => {
+        if (!strain || !mediaForm.mediaId) return
+        setSavingMedia(true)
+        try {
+            await ApiService.linkMediaToStrain(strain.id, {
+                mediaId: mediaForm.mediaId,
+                notes: mediaForm.notes,
+            })
+            await refreshStrain()
+            setMediaForm({})
+        } catch (err) {
+            console.error('Failed to link media', err)
+        } finally {
+            setSavingMedia(false)
+        }
+    }
+
+    const handleUnlinkMedia = async (mediaId: number) => {
+        if (!strain) return
+        setSavingMedia(true)
+        try {
+            await ApiService.unlinkMediaFromStrain(strain.id, mediaId)
+            await refreshStrain()
+        } catch (err) {
+            console.error('Failed to unlink media', err)
+        } finally {
+            setSavingMedia(false)
+        }
+    }
 
     if (loading) {
         return (
@@ -52,13 +104,18 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
     return (
         <MainLayout>
             <div className="p-8 space-y-6">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-6">
-                    <Button variant="outline" size="sm" onClick={() => router.back()}>
+                    <Button variant="outline" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
                         <ArrowLeft className="h-4 w-4 mr-1" />
                         Back
                     </Button>
-                    <Button variant="default" size="sm" onClick={() => router.push(`/strains/${strain.id}/edit`)}>
+                    <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() =>
+                            router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
+                        }
+                    >
                         <Edit className="h-4 w-4 mr-1" />
                         Edit Strain
                     </Button>
@@ -68,7 +125,7 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">{strain.identifier}</h1>
                         <p className="text-muted-foreground">
-                            Sample: {strain.sample?.code || 'Unknown'} • ID: {strain.id}
+                            Sample: {strain.sample?.code || 'Unknown'}  ID: {strain.id}
                         </p>
                     </div>
                     <div className="ml-auto flex gap-2">
@@ -82,7 +139,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
-                    {/* Taxonomy */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -94,9 +150,9 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                             {strain.taxonomy16s && (
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <span className="font-medium">Genus:</span>
-                                    <span>{strain.taxonomy16s.genus}</span>
+                                    <span>{(strain.taxonomy16s as any)?.genus}</span>
                                     <span className="font-medium">Species:</span>
-                                    <span>{strain.taxonomy16s.species}</span>
+                                    <span>{(strain.taxonomy16s as any)?.species}</span>
                                 </div>
                             )}
                             {strain.otherTaxonomy && (
@@ -108,7 +164,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Growth Characteristics */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -137,7 +192,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Genetics */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -163,7 +217,6 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                         </CardContent>
                     </Card>
 
-                    {/* Additional Info */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -192,8 +245,120 @@ export default function StrainDetailPage({ params }: { params: Promise<{ id: str
                             </div>
                         </CardContent>
                     </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Beaker className="h-5 w-5" />
+                                Media
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 text-sm">
+                            {strain.media && strain.media.length > 0 ? (
+                                <div className="space-y-2">
+                                    {strain.media.map((m) => (
+                                        <div key={m.mediaId} className="flex items-start justify-between rounded border p-2">
+                                            <div>
+                                                <div className="font-medium">{m.media.name}</div>
+                                                {m.media.composition && (
+                                                    <div className="text-muted-foreground text-xs mt-1 whitespace-pre-line">
+                                                        {m.media.composition}
+                                                    </div>
+                                                )}
+                                                {m.notes && <div className="text-muted-foreground text-xs mt-1">Notes: {m.notes}</div>}
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-destructive"
+                                                onClick={() => handleUnlinkMedia(m.mediaId)}
+                                                disabled={savingMedia}
+                                                title="Remove"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-muted-foreground">No media linked</p>
+                            )}
+
+                            <div className="rounded border p-3 space-y-2">
+                                <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                                    <Select
+                                        value={mediaForm.mediaId?.toString()}
+                                        onValueChange={(val) => setMediaForm((prev) => ({ ...prev, mediaId: parseInt(val) }))}
+                                    >
+                                        <SelectTrigger className="md:w-64">
+                                            <SelectValue placeholder="Select media" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {mediaOptions.map((option) => (
+                                                <SelectItem key={option.id} value={option.id.toString()}>
+                                                    {option.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Input
+                                        placeholder="Notes (optional)"
+                                        value={mediaForm.notes || ""}
+                                        onChange={(e) => setMediaForm((prev) => ({ ...prev, notes: e.target.value }))}
+                                    />
+                                    <Button
+                                        size="sm"
+                                        onClick={handleLinkMedia}
+                                        disabled={!mediaForm.mediaId || savingMedia}
+                                    >
+                                        {savingMedia ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
+                                        Link
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Archive className="h-5 w-5" />
+                                Storage Locations
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            {strain.storage && strain.storage.length > 0 ? (
+                                strain.storage.map((s) => (
+                                    <button
+                                        key={s.id}
+                                        className="w-full text-left flex items-center justify-between rounded border p-2 hover:bg-muted/60"
+                                        onClick={() =>
+                                            window.location.href = `/dynamic/storage?boxId=${s.cell.box.id}&cell=${s.cell.cellCode}`
+                                        }
+                                    >
+                                        <div>
+                                            <div className="font-medium">{s.cell.box.displayName}</div>
+                                            <div className="text-muted-foreground text-xs">Cell: {s.cell.cellCode}</div>
+                                        </div>
+                                        {s.isPrimary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-muted-foreground">Not allocated</p>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </MainLayout>
+    )
+}
+
+export default function StrainDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params)
+    return (
+        <Suspense fallback={<div className="p-8">Loading...</div>}>
+            <StrainDetailContent id={id} />
+        </Suspense>
     )
 }
