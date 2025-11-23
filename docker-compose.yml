@@ -28,6 +28,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
     restart: unless-stopped
     depends_on:
       - postgres
@@ -37,9 +39,6 @@ services:
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/strain_collection_v2?schema=public"
       ADMIN_SESSION_SECRET: "change_me_in_prod"
       REDIS_URL: "redis://redis:6379/0"
-      IMAGEKIT_PUBLIC_KEY: ${IMAGEKIT_PUBLIC_KEY:-dummy_public}
-      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE_KEY:-dummy_private}
-      IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL_ENDPOINT:-https://example.com}
       JWT_SECRET: ${JWT_SECRET:-dev_secret_key_do_not_use_in_prod}
     ports:
       - "3000:3000"

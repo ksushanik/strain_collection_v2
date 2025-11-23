@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import session from 'express-session';
 import { adminSessionOptions } from './admin/admin-session.config';
+import * as express from 'express';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +17,13 @@ async function bootstrap() {
   });
 
   app.use(session(adminSessionOptions));
+  app.use(
+    '/uploads',
+    express.static(path.join(process.cwd(), 'uploads'), {
+      maxAge: '30d',
+      fallthrough: true,
+    }),
+  );
 
   // Validation/transform
   app.useGlobalPipes(

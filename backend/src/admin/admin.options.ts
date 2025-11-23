@@ -1,13 +1,110 @@
 import { ResourceWithOptions } from 'adminjs';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { SettingsService } from '../settings/settings.service';
 import { AuditLogService } from '../audit/audit-log.service';
+
+const accessControlNavigation = { name: 'Access Control', icon: 'Shield' };
+const catalogNavigation = { name: 'Catalog', icon: 'Microscope' };
+const storageNavigation = { name: 'Storage', icon: 'Box' };
+const configurationNavigation = { name: 'Configuration', icon: 'Settings' };
+const mediaNavigation = { name: 'Media', icon: 'Image' };
+const auditNavigation = { name: 'Audit', icon: 'Activity' };
+
+const getCurrentAdminUser = async (
+  context: any,
+  prisma: PrismaClient,
+): Promise<{ id: number } | null> => {
+  const email = (context?.currentAdmin?.email as string) || '';
+  if (!email) return null;
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  return user ?? null;
+};
+
+const logAudit = async (params: {
+  context: any;
+  prisma: PrismaClient;
+  auditLogService: AuditLogService;
+  entity: string;
+  entityId: number;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'CONFIG';
+  comment: string;
+  changes?: Prisma.InputJsonValue;
+  route: string;
+}) => {
+  const currentUser = await getCurrentAdminUser(params.context, params.prisma);
+  if (!currentUser?.id) return;
+
+  const safeChanges: Prisma.InputJsonValue =
+    params.changes ?? ({} as Prisma.JsonObject);
+
+  await params.auditLogService.log({
+    userId: currentUser.id,
+    action: params.action,
+    entity: params.entity,
+    entityId: params.entityId,
+    comment: params.comment,
+    changes: safeChanges,
+    metadata: { route: params.route },
+  });
+};
+
+const hashPasswordBefore = async (request: any) => {
+  if (request?.method !== 'post' || !request?.payload) return request;
+
+  const payload = { ...request.payload };
+  const password = payload.password;
+
+  if (typeof password === 'string') {
+    const trimmed = password.trim();
+    if (trimmed.length === 0) {
+      delete payload.password;
+    } else {
+      payload.password = await bcrypt.hash(trimmed, 10);
+    }
+  }
+
+  return { ...request, payload };
+};
+
+const stripPasswordFromResponse = (response: any) => {
+  if (response?.record?.params?.password !== undefined) {
+    delete response.record.params.password;
+  }
+  return response;
+};
+
+const normalizePermissionsBefore = (request: any) => {
+  if (request?.method !== 'post' || !request?.payload) return request;
+  const payload = { ...request.payload };
+  const rawPermissions = payload.permissions;
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'permissions')) {
+    if (typeof rawPermissions === 'string') {
+      try {
+        payload.permissions = rawPermissions.trim()
+          ? JSON.parse(rawPermissions)
+          : {};
+      } catch {
+        payload.permissions = {};
+      }
+    } else if (rawPermissions === null || typeof rawPermissions !== 'object') {
+      payload.permissions = {};
+    }
+  }
+
+  return { ...request, payload };
+};
 
 export const createAdminOptions = (
   prisma: PrismaClient,
   getModelByName: (modelName: string) => any,
   settingsService: SettingsService,
   auditLogService: AuditLogService,
+  permissionsComponent: any,
 ) => {
   return {
     rootPath: '/admin',
@@ -20,10 +117,19 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('User'), client: prisma },
         options: {
-          navigation: {
-            name: 'Управление пользователями',
-            icon: 'User',
-          },
+          navigation: accessControlNavigation,
+          listProperties: ['id', 'email', 'name', 'roleId', 'groupId', 'createdAt'],
+          filterProperties: ['email', 'roleId', 'groupId', 'createdAt'],
+          editProperties: ['email', 'name', 'roleId', 'groupId', 'password'],
+          showProperties: [
+            'id',
+            'email',
+            'name',
+            'roleId',
+            'groupId',
+            'createdAt',
+            'updatedAt',
+          ],
           properties: {
             password: {
               isVisible: {
@@ -32,6 +138,7 @@ export const createAdminOptions = (
                 show: false,
                 edit: true,
               },
+              type: 'password',
             },
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -42,13 +149,13 @@ export const createAdminOptions = (
             name: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
-            role: {
+            roleId: {
               isVisible: { list: true, filter: true, show: true, edit: true },
-              availableValues: [
-                { value: 'USER', label: 'User' },
-                { value: 'MANAGER', label: 'Manager' },
-                { value: 'ADMIN', label: 'Admin' },
-              ],
+              reference: 'Role',
+            },
+            groupId: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+              reference: 'Group',
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
@@ -62,6 +169,181 @@ export const createAdminOptions = (
               },
             },
           },
+          actions: {
+            new: {
+              before: hashPasswordBefore,
+              after: async (response: any, request: any, context: any) => {
+                stripPasswordFromResponse(response);
+                const id = response?.record?.params?.id;
+                if (id) {
+                  const { password, ...changes } = request?.payload ?? {};
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'User',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create User',
+                    changes: changes as Prisma.InputJsonValue,
+                    route: 'admin/users/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              before: hashPasswordBefore,
+              after: async (response: any, request: any, context: any) => {
+                stripPasswordFromResponse(response);
+                const id =
+                  response?.record?.params?.id ??
+                  Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  const { password, ...changes } = request?.payload ?? {};
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'User',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit User',
+                    changes: changes as Prisma.InputJsonValue,
+                    route: 'admin/users/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  Number(request?.params?.recordId ?? 0) ||
+                  Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'User',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete User',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/users/delete',
+                  });
+                }
+                return response;
+              },
+            },
+          },
+        },
+      } as ResourceWithOptions,
+
+      // Roles Management
+      {
+        resource: { model: getModelByName('Role'), client: prisma },
+        options: {
+          navigation: accessControlNavigation,
+          listProperties: ['id', 'key', 'name', 'description', 'updatedAt'],
+          filterProperties: ['key', 'name', 'updatedAt'],
+          editProperties: ['key', 'name', 'description', 'permissions'],
+          showProperties: ['id', 'key', 'name', 'description', 'permissions', 'createdAt', 'updatedAt'],
+          properties: {
+            id: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            key: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            name: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            description: {
+              isVisible: { list: true, filter: false, show: true, edit: true },
+            },
+            permissions: {
+              type: 'mixed',
+              isVisible: { list: false, filter: false, show: true, edit: true },
+              description:
+                'JSON карта прав роли, напр. {"Strain":["read","update"],"Sample":["read"]}. Пусто = роль без прав (используйте группу).',
+              components: {
+                edit: permissionsComponent,
+              },
+            },
+            createdAt: {
+              isVisible: { list: false, filter: false, show: true, edit: false },
+            },
+            updatedAt: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+          },
+          actions: {
+            new: {
+              before: normalizePermissionsBefore,
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Role',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create Role',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/roles/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              before: normalizePermissionsBefore,
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  response?.record?.params?.id ??
+                  Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Role',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit Role',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/roles/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  Number(request?.params?.recordId ?? 0) ||
+                  Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Role',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete Role',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/roles/delete',
+                  });
+                }
+                return response;
+              },
+            },
+          },
         },
       } as ResourceWithOptions,
 
@@ -69,10 +351,11 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('Group'), client: prisma },
         options: {
-          navigation: {
-            name: 'Управление пользователями',
-            icon: 'Users',
-          },
+          navigation: accessControlNavigation,
+          listProperties: ['id', 'name', 'description', 'updatedAt'],
+          filterProperties: ['name', 'updatedAt'],
+          editProperties: ['name', 'description', 'permissions'],
+          showProperties: ['id', 'name', 'description', 'permissions', 'createdAt', 'updatedAt'],
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -83,6 +366,86 @@ export const createAdminOptions = (
             description: {
               isVisible: { list: true, filter: false, show: true, edit: true },
             },
+            permissions: {
+              type: 'mixed',
+              isVisible: { list: false, filter: false, show: true, edit: true },
+              description:
+                'JSON карта прав, напр. {"Strain":["read","update"],"Sample":["read"]}. Пустое значение = права по роли.',
+              components: {
+                edit: permissionsComponent,
+              },
+            },
+            createdAt: {
+              isVisible: { list: false, filter: false, show: true, edit: false },
+            },
+            updatedAt: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+          },
+          actions: {
+            new: {
+              before: normalizePermissionsBefore,
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Group',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create Group',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/groups/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              before: normalizePermissionsBefore,
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  response?.record?.params?.id ??
+                  Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Group',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit Group',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/groups/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  Number(request?.params?.recordId ?? 0) ||
+                  Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Group',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete Group',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/groups/delete',
+                  });
+                }
+                return response;
+              },
+            },
           },
         },
       } as ResourceWithOptions,
@@ -91,10 +454,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('Strain'), client: prisma },
         options: {
-          navigation: {
-            name: 'Коллекция',
-            icon: 'Microscope',
-          },
+          navigation: catalogNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -119,10 +479,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('Sample'), client: prisma },
         options: {
-          navigation: {
-            name: 'Коллекция',
-            icon: 'FlaskConical',
-          },
+          navigation: catalogNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -159,10 +516,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('UiBinding'), client: prisma },
         options: {
-          navigation: {
-            name: 'Настройки',
-            icon: 'Settings',
-          },
+          navigation: configurationNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -296,10 +650,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('LegendContent'), client: prisma },
         options: {
-          navigation: {
-            name: 'Настройки',
-            icon: 'Settings',
-          },
+          navigation: configurationNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -393,7 +744,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('AuditLog'), client: prisma },
         options: {
-          navigation: { name: 'Аудит', icon: 'Activity' },
+          navigation: auditNavigation,
           actions: {
             new: { isAccessible: () => false },
             edit: { isAccessible: () => false },
@@ -434,10 +785,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('StorageBox'), client: prisma },
         options: {
-          navigation: {
-            name: 'Хранение',
-            icon: 'Box',
-          },
+          navigation: storageNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -472,10 +820,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('StorageCell'), client: prisma },
         options: {
-          navigation: {
-            name: 'Хранение',
-            icon: 'Package',
-          },
+          navigation: storageNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -503,10 +848,7 @@ export const createAdminOptions = (
       {
         resource: { model: getModelByName('SamplePhoto'), client: prisma },
         options: {
-          navigation: {
-            name: 'Медиа',
-            icon: 'Image',
-          },
+          navigation: mediaNavigation,
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },

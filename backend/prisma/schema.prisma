@@ -182,18 +182,14 @@ model LegendContent {
 
 // --- Authentication & RBAC ---
 
-enum Role {
-  ADMIN
-  MANAGER
-  USER
-}
-
 model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   password String // Hashed
   name     String?
-  role     Role    @default(USER)
+
+  roleId Int    @map("role_id")
+  role   Role   @relation(fields: [roleId], references: [id])
 
   groupId Int?   @map("group_id")
   group   Group? @relation(fields: [groupId], references: [id])
@@ -212,11 +208,26 @@ model Group {
   name        String  @unique
   description String?
   users       User[]
+  permissions Json     @default("{}")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("groups")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
+  name        String
+  description String?
+  permissions Json     @default("{}")
+  users       User[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("roles")
 }
 
 // --- Enums ---

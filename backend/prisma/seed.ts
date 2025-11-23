@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,9 @@ async function main() {
 
   // 1. Clear existing data in FK-safe order
   await prisma.auditLog.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.group.deleteMany();
+  await prisma.role.deleteMany();
   await prisma.strainStorage.deleteMany();
   await prisma.storageCell.deleteMany();
   await prisma.storageBox.deleteMany();
@@ -57,7 +61,136 @@ async function main() {
     ] as any[]),
   });
 
-  // 3. Create Samples
+  // 3. Roles
+  console.log('Creating roles...');
+  const [adminRole, managerRole, viewerRole] = await Promise.all([
+    prisma.role.create({
+      data: {
+        key: 'ADMIN',
+        name: 'Администратор',
+        description: 'Полный доступ',
+        permissions: { all: ['manage'] },
+      },
+    }),
+    prisma.role.create({
+      data: {
+        key: 'MANAGER',
+        name: 'Менеджер',
+        description: 'CRUD доменов + чтение настроек/легенды',
+        permissions: {
+          Strain: ['read', 'create', 'update', 'delete'],
+          Sample: ['read', 'create', 'update', 'delete'],
+          Storage: ['read', 'create', 'update', 'delete'],
+          Photo: ['read', 'create', 'update', 'delete'],
+          Media: ['read', 'create', 'update', 'delete'],
+          Settings: ['read'],
+          Legend: ['read'],
+          Analytics: ['read'],
+          User: ['read'],
+          Group: ['read'],
+        },
+      },
+    }),
+    prisma.role.create({
+      data: {
+        key: 'USER',
+        name: 'Пользователь',
+        description: 'Чтение основных разделов + ограниченный CRUD штаммов/проб/фото',
+        permissions: {
+          Strain: ['read', 'create', 'update'],
+          Sample: ['read', 'create', 'update'],
+          Photo: ['read', 'create', 'update'],
+          Storage: ['read'],
+          Media: ['read'],
+          Analytics: ['read'],
+          Legend: ['read'],
+          Settings: ['read'],
+        },
+      },
+    }),
+  ]);
+
+  // 4. Groups & Users with permissions
+  console.log('Creating groups and users...');
+  const adminGroup = await prisma.group.create({
+    data: {
+      name: 'Admins',
+      description: 'Полный доступ к системе',
+      permissions: { all: ['manage'] },
+    },
+  });
+
+  const managerGroup = await prisma.group.create({
+    data: {
+      name: 'Managers',
+      description: 'CRUD по штаммам/пробам/хранению/медиа, чтение настроек',
+      permissions: {
+        Strain: ['read', 'create', 'update', 'delete'],
+        Sample: ['read', 'create', 'update', 'delete'],
+        Storage: ['read', 'create', 'update', 'delete'],
+        Photo: ['read', 'create', 'update', 'delete'],
+        Media: ['read', 'create', 'update', 'delete'],
+        Settings: ['read'],
+        Legend: ['read'],
+        Analytics: ['read'],
+        User: ['read'],
+        Group: ['read'],
+      },
+    },
+  });
+
+  const viewerGroup = await prisma.group.create({
+    data: {
+      name: 'Viewers',
+      description: 'Только чтение основных разделов',
+      permissions: {
+        Strain: ['read'],
+        Sample: ['read'],
+        Storage: ['read'],
+        Photo: ['read'],
+        Media: ['read'],
+        Analytics: ['read'],
+        Legend: ['read'],
+        Settings: ['read'],
+      },
+    },
+  });
+
+  const passwordAdmin = await bcrypt.hash('admin123', 10);
+  const passwordManager = await bcrypt.hash('manager123', 10);
+  const passwordViewer = await bcrypt.hash('viewer123', 10);
+
+  await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
+      name: 'Super Admin',
+      password: passwordAdmin,
+      roleId: adminRole.id,
+      groupId: adminGroup.id,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      email: 'manager@example.com',
+      name: 'Lab Manager',
+      password: passwordManager,
+      roleId: managerRole.id,
+      groupId: managerGroup.id,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      email: 'viewer@example.com',
+      name: 'Read Only',
+      password: passwordViewer,
+      roleId: viewerRole.id,
+      groupId: viewerGroup.id,
+    },
+  });
+
+  // 5. Create Samples
   console.log('Creating samples...');
   const sample1 = await prisma.sample.create({
     data: {

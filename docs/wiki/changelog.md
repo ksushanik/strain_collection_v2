@@ -1,5 +1,11 @@
 # Changelog (кратко)
 
+## 2025-11-23
+- AdminJS: пользователи/группы теперь работают с JSON permissions, действия логируются в аудит.
+- Seed: добавлены группы Admins/Managers/Viewers и пользователи с паролями `admin123` / `manager123` / `viewer123`.
+- RBAC: Casl сначала смотрит на `group.permissions`, при пустой карте использует права роли.
+- Роли вынесены в таблицу `roles` (редактируемые в AdminJS), fallback по роли сохранён.
+
 ## 2025-11-22
 - Подсветка ячеек в Storage по query `boxId`/`cell`.
 - Страницы: Media (CRUD), Legend (редактирование текста), Settings (ui-bindings).

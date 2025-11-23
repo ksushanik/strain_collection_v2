@@ -10,14 +10,14 @@ export class UsersService {
   async findOne(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
-      include: { group: true },
+      include: { group: true, role: true },
     });
   }
 
   async findById(id: number): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
-      include: { group: true },
+      include: { group: true, role: true },
     });
   }
 

@@ -21,11 +21,7 @@ import { adminSessionOptions } from './admin-session.config';
       import('@adminjs/prisma'),
       import('adminjs'),
     ]).then(
-      ([
-        { AdminModule },
-        { Database, Resource, getModelByName },
-        { default: AdminJS },
-      ]) => {
+      ([{ AdminModule }, { Database, Resource, getModelByName }, { default: AdminJS }]) => {
         AdminJS.registerAdapter({ Database, Resource });
 
         return AdminModule.createAdminAsync({
@@ -64,6 +60,7 @@ import { adminSessionOptions } from './admin-session.config';
               (name: string) => getModelByName(name),
               settingsService,
               auditLogService,
+              null,
             );
 
             return {
@@ -79,8 +76,13 @@ import { adminSessionOptions } from './admin-session.config';
                       email,
                       password,
                     );
-                    if (!user || user.role !== 'ADMIN') return null;
-                    return { email: user.email, role: user.role };
+                    const roleKey =
+                      (user as any)?.role?.key ??
+                      (typeof (user as any)?.role === 'string'
+                        ? (user as any).role
+                        : 'USER');
+                    if (!user || roleKey !== 'ADMIN') return null;
+                    return { email: user.email, role: roleKey };
                   } catch {
                     return null;
                   }

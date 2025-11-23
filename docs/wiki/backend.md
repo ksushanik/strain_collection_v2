@@ -10,11 +10,19 @@
   - `analytics`: `/api/v1/analytics/overview` (totals, occupied/free, recent additions).
   - `audit`: перехват действий (CREATE/UPDATE/DELETE/ALLOCATE/UNALLOCATE/BULK_ALLOCATE/CONFIG).
   - `auth`: register/login → JWT; `@UseGuards(JwtAuthGuard, PoliciesGuard)`.
-  - `casl`: роли ADMIN/MANAGER/USER.
+  - `casl`: роли из таблицы `roles` (редактируются в AdminJS) + права групп (permissions JSON).
 - **Prisma**: schema в `prisma/schema.prisma`; миграции/seed в `prisma/migrations`, `prisma/seed.ts`.
 - **Глобальные пайпы**: ValidationPipe с transform + enableImplicitConversion (query → числа/булевые).
 - **Важные эндпоинты**:
   - `/api/v1/strains/:id/media` POST/DELETE — линковка media к штамму.
   - `/api/v1/storage/boxes/:boxId/cells/:cellCode/allocate|unallocate` — управление ячейками.
   - `/api/v1/settings/legend` — текст легенды.
+- **Права, роли и группы**:
+  - Роли хранятся в таблице `roles` (key/name/description/permissions JSON). Их можно CRUD-ить в AdminJS, редактировать карту прав.
+  - Группы тоже имеют `permissions` JSON. Если у пользователя непустая карта в группе — используется она. Если пустая — берутся права роли. Если и там пусто — fallback на дефолты (ADMIN/MANAGER/USER).
+  - Примеры JSON: `{"Strain":["read","update"],"Sample":["read"],"Settings":["read"]}`. `{"all":["manage"]}` даёт полный доступ.
+- **Учётные записи seed**:
+  - Admin: `admin@example.com` / `admin123` (роль Admin, группа Admins).
+  - Manager: `manager@example.com` / `manager123` (роль Manager, группа Managers).
+  - Viewer: `viewer@example.com` / `viewer123` (роль User, группа Viewers).
 - **Тесты**: unit в `src/**/*.spec.ts`, e2e в `test/`; команды `npm run test`, `npm run test:e2e`, `npm run test:cov`.

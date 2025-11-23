@@ -35,12 +35,16 @@ export class AdminSsoController {
     if (payload?.role !== 'ADMIN') throw new UnauthorizedException('Not admin');
     const user = await this.prisma.user.findUnique({
       where: { email: payload?.email },
+      include: { role: true },
     });
     if (!user) throw new UnauthorizedException('User not found');
     const anyReq = req as any;
     if (!anyReq.session)
       throw new UnauthorizedException('Session not available');
-    anyReq.session.adminUser = { email: user.email, role: user.role };
+    anyReq.session.adminUser = {
+      email: user.email,
+      role: user.role?.key ?? 'USER',
+    };
     res.status(200).json({ ok: true });
   }
 
@@ -74,13 +78,17 @@ export class AdminSsoController {
     AdminSsoController.nonces.delete(nonce);
     const user = await this.prisma.user.findUnique({
       where: { email: record.email },
+      include: { role: true },
     });
-    if (!user || user.role !== 'ADMIN')
+    if (!user || (user.role?.key ?? 'USER') !== 'ADMIN')
       throw new UnauthorizedException('User invalid');
     const anyReq = req as any;
     if (!anyReq.session)
       throw new UnauthorizedException('Session not available');
-    anyReq.session.adminUser = { email: user.email, role: user.role };
+    anyReq.session.adminUser = {
+      email: user.email,
+      role: user.role?.key ?? 'USER',
+    };
     res.redirect('/admin');
   }
 }

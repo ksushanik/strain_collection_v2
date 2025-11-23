@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User, Role } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -14,7 +14,7 @@ export class AuthService {
   async validateUser(
     email: string,
     pass: string,
-  ): Promise<Omit<User, 'password'> | null> {
+  ): Promise<(Omit<User, 'password'> & { role?: { key?: string } }) | null> {
     console.log('Validating user:', email);
     const user = await this.usersService.findOne(email);
     console.log('User found:', !!user);
@@ -22,17 +22,17 @@ export class AuthService {
       console.log('Password match');
       const { password: _password, ...result } = user;
       void _password;
-      return result as Omit<User, 'password'>;
+      return result as Omit<User, 'password'> & { role?: { key?: string } };
     }
     console.log('Invalid credentials');
     return null;
   }
 
-  login(user: Omit<User, 'password'>) {
-    const payload: { email: string; sub: number; role: Role } = {
+  login(user: Omit<User, 'password'> & { role?: { key?: string } }) {
+    const payload: { email: string; sub: number; role: string } = {
       email: user.email,
       sub: user.id,
-      role: user.role,
+      role: (user as any)?.role?.key ?? 'USER',
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -40,7 +40,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: (user as any)?.role?.key ?? 'USER',
       },
     };
   }

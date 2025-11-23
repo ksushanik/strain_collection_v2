@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Role, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { Reflector } from '@nestjs/core';
 import { CaslAbilityFactory, AppAbility } from './casl-ability.factory';
 import { CHECK_POLICIES_KEY, PolicyHandler } from './check-policies.decorator';
@@ -25,7 +25,7 @@ export class PoliciesGuard implements CanActivate {
 
     const request = context
       .switchToHttp()
-      .getRequest<{ user?: Partial<User> & { role: Role } }>();
+      .getRequest<{ user?: Partial<User> & { role?: { key?: string } } }>();
     const user = request.user;
 
     if (!user) {

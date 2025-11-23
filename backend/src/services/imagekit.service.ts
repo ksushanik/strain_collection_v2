@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import ImageKit from 'imagekit';
 import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
+import { randomBytes } from 'crypto';
 
 export interface ImageKitUploadResponse {
   fileId: string;
@@ -17,6 +20,9 @@ export interface ImageKitUploadResponse {
 @Injectable()
 export class ImageKitService {
   private imagekit: ImageKit;
+  private localMode = false;
+  private localDir = path.join(process.cwd(), 'uploads');
+  private publicUrlBase = '/uploads';
 
   constructor(private configService: ConfigService) {
     const publicKey = this.configService.get<string>('IMAGEKIT_PUBLIC_KEY');
@@ -24,9 +30,10 @@ export class ImageKitService {
     const urlEndpoint = this.configService.get<string>('IMAGEKIT_URL_ENDPOINT');
 
     if (!publicKey || !privateKey || !urlEndpoint) {
-      throw new Error(
-        'ImageKit credentials are not configured. Please check your .env file.',
-      );
+      // Fallback to local storage mode
+      this.localMode = true;
+      fs.mkdirSync(this.localDir, { recursive: true });
+      return;
     }
 
     this.imagekit = new ImageKit({
@@ -41,37 +48,64 @@ export class ImageKitService {
     fileName: string,
     folder: string = 'sample-photos',
   ): Promise<ImageKitUploadResponse> {
-    try {
-      const response = await this.imagekit.upload({
-        file: file.toString('base64'),
-        fileName: fileName,
-        folder: folder,
-        useUniqueFileName: true,
-      });
+    if (this.localMode) {
+      const ext = path.extname(fileName) || '.bin';
+      const safeName = `${Date.now()}-${randomBytes(6).toString('hex')}${ext}`;
+      const destDir = path.join(this.localDir, folder);
+      fs.mkdirSync(destDir, { recursive: true });
+      const fullPath = path.join(destDir, safeName);
+      await fs.promises.writeFile(fullPath, file);
 
+      const url = `${this.publicUrlBase}/${folder}/${safeName}`;
       return {
-        fileId: response.fileId,
-        name: response.name,
-        url: response.url,
-        thumbnailUrl: response.thumbnailUrl,
-        height: response.height,
-        width: response.width,
-        size: response.size,
-        filePath: response.filePath,
-        fileType: response.fileType,
+        fileId: safeName,
+        name: safeName,
+        url,
+        thumbnailUrl: url,
+        height: 0,
+        width: 0,
+        size: file.length,
+        filePath: fullPath,
+        fileType: ext.replace('.', '') || 'bin',
       };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to upload image to ImageKit: ${message}`);
+    } else {
+      try {
+        const response = await this.imagekit.upload({
+          file: file.toString('base64'),
+          fileName: fileName,
+          folder: folder,
+          useUniqueFileName: true,
+        });
+
+        return {
+          fileId: response.fileId,
+          name: response.name,
+          url: response.url,
+          thumbnailUrl: response.thumbnailUrl,
+          height: response.height,
+          width: response.width,
+          size: response.size,
+          filePath: response.filePath,
+          fileType: response.fileType,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to upload image to ImageKit: ${message}`);
+      }
     }
   }
 
   async deleteImage(fileId: string): Promise<void> {
-    try {
-      await this.imagekit.deleteFile(fileId);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to delete image from ImageKit: ${message}`);
+    if (this.localMode) {
+      // In local mode просто игнорируем удаление: файлы не критичны
+      return;
+    } else {
+      try {
+        await this.imagekit.deleteFile(fileId);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to delete image from ImageKit: ${message}`);
+      }
     }
   }
 
@@ -80,6 +114,9 @@ export class ImageKitService {
     expire: number;
     token: string;
   } {
+    if (this.localMode) {
+      return { signature: '', expire: 0, token: '' };
+    }
     return this.imagekit.getAuthenticationParameters();
   }
 }
