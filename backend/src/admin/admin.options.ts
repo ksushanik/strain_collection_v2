@@ -1,7 +1,10 @@
 import { ResourceWithOptions } from 'adminjs';
 import { PrismaClient } from '@prisma/client';
 
-export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
+export const createAdminOptions = (
+  prisma: PrismaClient,
+  getModelByName: (modelName: string) => any,
+) => {
   return {
     rootPath: '/admin',
     branding: {
@@ -11,7 +14,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
     resources: [
       // Users Management
       {
-        resource: { model: dmmf.modelMap.User, client: prisma },
+        resource: { model: getModelByName('User'), client: prisma },
         options: {
           navigation: {
             name: 'Управление пользователями',
@@ -60,7 +63,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
 
       // Groups Management
       {
-        resource: { model: dmmf.modelMap.Group, client: prisma },
+        resource: { model: getModelByName('Group'), client: prisma },
         options: {
           navigation: {
             name: 'Управление пользователями',
@@ -82,7 +85,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
 
       // Strains Management
       {
-        resource: { model: dmmf.modelMap.Strain, client: prisma },
+        resource: { model: getModelByName('Strain'), client: prisma },
         options: {
           navigation: {
             name: 'Коллекция',
@@ -92,16 +95,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
             },
-            catalogNumber: {
-              isVisible: { list: true, filter: true, show: true, edit: true },
-            },
-            genus: {
-              isVisible: { list: true, filter: true, show: true, edit: true },
-            },
-            species: {
-              isVisible: { list: true, filter: true, show: true, edit: true },
-            },
-            strain: {
+            identifier: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
             cultivationConditions: {
@@ -119,7 +113,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
 
       // Samples Management
       {
-        resource: { model: dmmf.modelMap.Sample, client: prisma },
+        resource: { model: getModelByName('Sample'), client: prisma },
         options: {
           navigation: {
             name: 'Коллекция',
@@ -129,20 +123,26 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
             },
-            catalogNumber: {
+            code: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
             sampleType: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
-            collectionDate: {
-              isVisible: { list: true, filter: false, show: true, edit: true },
-            },
-            status: {
+            siteName: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
-            notes: {
-              isVisible: { list: false, filter: false, show: true, edit: true },
+            lat: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            lng: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            description: {
+              isVisible: { list: true, filter: false, show: true, edit: true },
+            },
+            collectedAt: {
+              isVisible: { list: true, filter: false, show: true, edit: true },
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
@@ -153,7 +153,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
 
       // Storage Management
       {
-        resource: { model: dmmf.modelMap.Storage, client: prisma },
+        resource: { model: getModelByName('StorageBox'), client: prisma },
         options: {
           navigation: {
             name: 'Хранение',
@@ -163,17 +163,58 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },
             },
-            location: {
+            displayName: {
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
-            temperature: {
+            rows: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            cols: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            description: {
               isVisible: { list: true, filter: false, show: true, edit: true },
-            },
-            storageType: {
-              isVisible: { list: true, filter: true, show: true, edit: true },
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
+            },
+            updatedAt: {
+              isVisible: {
+                list: false,
+                filter: false,
+                show: true,
+                edit: false,
+              },
+            },
+          },
+        },
+      } as ResourceWithOptions,
+
+      {
+        resource: { model: getModelByName('StorageCell'), client: prisma },
+        options: {
+          navigation: {
+            name: 'Хранение',
+            icon: 'Package',
+          },
+          properties: {
+            id: {
+              isVisible: { list: true, filter: true, show: true, edit: false },
+            },
+            boxId: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            row: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            col: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            cellCode: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
+            },
+            status: {
+              isVisible: { list: true, filter: true, show: true, edit: true },
             },
           },
         },
@@ -181,7 +222,7 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
 
       // Photo Management
       {
-        resource: { model: dmmf.modelMap.Photo, client: prisma },
+        resource: { model: getModelByName('SamplePhoto'), client: prisma },
         options: {
           navigation: {
             name: 'Медиа',
@@ -194,18 +235,10 @@ export const createAdminOptions = (prisma: PrismaClient, dmmf: any) => {
             url: {
               isVisible: { list: true, filter: false, show: true, edit: false },
             },
-            fileId: {
-              isVisible: {
-                list: false,
-                filter: false,
-                show: true,
-                edit: false,
-              },
+            meta: {
+              isVisible: { list: false, filter: false, show: true, edit: true },
             },
-            description: {
-              isVisible: { list: true, filter: false, show: true, edit: true },
-            },
-            uploadedAt: {
+            createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
             },
           },

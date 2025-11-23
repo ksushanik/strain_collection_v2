@@ -14,22 +14,26 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(() => {
-        if (typeof window === 'undefined') return null;
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        if (token && storedUser) {
-            try {
-                return JSON.parse(storedUser) as User;
-            } catch {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                return null;
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    React.useEffect(() => {
+        try {
+            const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            if (token && storedUser) {
+                setUser(JSON.parse(storedUser) as User);
+            } else {
+                setUser(null);
             }
+        } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+        } finally {
+            setIsLoading(false);
         }
-        return null;
-    });
-    const [isLoading] = useState(false);
+    }, []);
 
     const login = (token: string, userData: User) => {
         localStorage.setItem('token', token);
