@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { MainLayout } from "@/components/layout/main-layout"
 import { ApiService } from "@/services/api"
 import { Loader2, Microscope, Beaker, Archive, Boxes } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,108 +19,106 @@ export default function Home() {
   React.useEffect(() => {
     ApiService.getAnalyticsOverview()
       .then((res) => {
-      setStats({
-        totalStrains: res.totalStrains,
-        totalSamples: res.totalSamples,
-        totalBoxes: res.totalBoxes,
-        occupiedCells: res.occupiedCells,
-        freeCells: res.freeCells,
-        recent: res.recentAdditions,
-        loading: false,
+        setStats({
+          totalStrains: res.totalStrains,
+          totalSamples: res.totalSamples,
+          totalBoxes: res.totalBoxes,
+          occupiedCells: res.occupiedCells,
+          freeCells: res.freeCells,
+          recent: res.recentAdditions,
+          loading: false,
+        })
+      }).catch(err => {
+        console.error('Failed to load stats:', err)
+        setStats(prev => ({ ...prev, loading: false }))
       })
-    }).catch(err => {
-      console.error('Failed to load stats:', err)
-      setStats(prev => ({ ...prev, loading: false }))
-    })
   }, [])
 
   return (
-    <MainLayout>
-      <div className="p-8">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome to BioCollection</h1>
-        <p className="mt-2 text-muted-foreground">
-          Microbiological Data Management System
-        </p>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold tracking-tight">Welcome to BioCollection</h1>
+      <p className="mt-2 text-muted-foreground">
+        Microbiological Data Management System
+      </p>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Strains</CardTitle>
-              <Microscope className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              ) : (
-                <div className="text-3xl font-bold">{stats.totalStrains}</div>
-              )}
-            </CardContent>
-          </Card>
+      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Strains</CardTitle>
+            <Microscope className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {stats.loading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <div className="text-3xl font-bold">{stats.totalStrains}</div>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Active Samples</CardTitle>
-              <Beaker className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              ) : (
-                <div className="text-3xl font-bold">{stats.totalSamples}</div>
-              )}
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Samples</CardTitle>
+            <Beaker className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {stats.loading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <div className="text-3xl font-bold">{stats.totalSamples}</div>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Storage Occupancy</CardTitle>
-              <Archive className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              ) : (
-                <>
-                  <div className="text-3xl font-bold">{stats.occupiedCells}/{stats.occupiedCells + stats.freeCells}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Occupied / Total cells</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Storage Occupancy</CardTitle>
+            <Archive className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {stats.loading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold">{stats.occupiedCells}/{stats.occupiedCells + stats.freeCells}</div>
+                <p className="text-xs text-muted-foreground mt-1">Occupied / Total cells</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Storage Boxes</CardTitle>
-              <Boxes className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              ) : (
-                <div className="text-3xl font-bold">{stats.totalBoxes}</div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {!stats.loading && stats.recent.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold mb-3">Recent Strains</h2>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {stats.recent.map((r) => (
-                <Card key={r.id}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">{r.identifier}</CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Sample: {r.sample?.code || 'Unknown'}
-                    </p>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Storage Boxes</CardTitle>
+            <Boxes className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {stats.loading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            ) : (
+              <div className="text-3xl font-bold">{stats.totalBoxes}</div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-    </MainLayout>
+
+      {!stats.loading && stats.recent.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-3">Recent Strains</h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {stats.recent.map((r) => (
+              <Card key={r.id}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">{r.identifier}</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Sample: {r.sample?.code || 'Unknown'}
+                  </p>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

@@ -20,10 +20,11 @@ const DOCS: DocMeta[] = [
   { id: "testing", title: "Testing", file: "testing.md" },
   { id: "playbooks", title: "Playbooks", file: "playbooks.md" },
   { id: "changelog", title: "Changelog", file: "changelog.md" },
+  { id: "audit", title: "Audit Log", file: "audit.md" },
   { id: "contrib", title: "Wiki Contribution Guide", file: "contrib.md" },
 ]
 
-const wikiBasePath = process.env.WIKI_PATH || "/docs/wiki"
+const wikiBasePath = process.env.WIKI_PATH || path.join(process.cwd(), "../docs/wiki")
 
 function renderInlineText(text: string) {
   return text.replace(/(\*\*|`|\[[^\]]+\]\([^)]+\))/g, " ")

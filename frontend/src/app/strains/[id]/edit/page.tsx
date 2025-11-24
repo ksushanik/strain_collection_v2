@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Suspense } from "react"
-import { MainLayout } from "@/components/layout/main-layout"
+
 import { StrainForm } from "@/components/domain/strain-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Strain } from "@/services/api"
@@ -24,44 +24,38 @@ function EditStrainContent({ id }: { id: string }) {
 
     if (loading) {
         return (
-            <MainLayout>
-                <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-            </MainLayout>
+            <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
         )
     }
 
     if (!strain) {
         return (
-            <MainLayout>
-                <div className="p-8 text-center text-muted-foreground">
-                    Strain not found
-                </div>
-            </MainLayout>
+            <div className="p-8 text-center text-muted-foreground">
+                Strain not found
+            </div>
         )
     }
 
     return (
-        <MainLayout>
-            <div className="p-8 max-w-3xl mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold tracking-tight">Edit Strain</h1>
-                    <p className="text-muted-foreground">
-                        Update strain details.
-                    </p>
-                </div>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Strain Details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <StrainForm initialData={strain} isEdit returnTo={returnTo} />
-                    </CardContent>
-                </Card>
+        <div className="p-8 max-w-3xl mx-auto">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">Edit Strain</h1>
+                <p className="text-muted-foreground">
+                    Update strain details.
+                </p>
             </div>
-        </MainLayout>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Strain Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <StrainForm initialData={strain} isEdit returnTo={returnTo} />
+                </CardContent>
+            </Card>
+        </div>
     )
 }
 

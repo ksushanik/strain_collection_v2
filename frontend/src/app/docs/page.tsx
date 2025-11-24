@@ -2,7 +2,6 @@
 
 import React from "react"
 import { Search } from "lucide-react"
-import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 type IndexedDoc = {
@@ -43,7 +42,7 @@ export default function DocsPage() {
   }, [query, docs])
 
   return (
-    <MainLayout>
+    <div className="p-8">
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -108,7 +107,7 @@ export default function DocsPage() {
           </div>
         )}
       </div>
-    </MainLayout>
+    </div>
   )
 }
 

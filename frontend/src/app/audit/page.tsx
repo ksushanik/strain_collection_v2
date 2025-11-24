@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AuditService, AuditLog } from '@/services/audit.service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -14,7 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AuditPage() {
@@ -63,112 +63,103 @@ export default function AuditPage() {
     };
 
     return (
-        <div className="container mx-auto py-6 space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
+        <div className="p-8">
+            <div className="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
+                    <p className="text-muted-foreground">
+                        View and filter system audit logs.
+                    </p>
+                </div>
             </div>
 
-            <Card>
+            <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>Filters</CardTitle>
+                    <CardDescription>Filter logs by user or entity type.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSearch} className="flex gap-4 items-end">
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <label htmlFor="userId" className="text-sm font-medium">
-                                User ID
-                            </label>
+                <CardContent className="flex gap-4">
+                    <div className="flex-1">
+                        <label className="text-sm font-medium mb-2 block">User ID</label>
+                        <div className="relative">
+                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                id="userId"
-                                placeholder="Filter by User ID"
+                                placeholder="Search by User ID..."
                                 value={filters.userId}
-                                onChange={(e) =>
-                                    setFilters({ ...filters, userId: e.target.value })
-                                }
+                                onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
+                                className="pl-8"
                             />
                         </div>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <label htmlFor="entity" className="text-sm font-medium">
-                                Entity
-                            </label>
-                            <Input
-                                id="entity"
-                                placeholder="Filter by Entity (e.g. Strain)"
-                                value={filters.entity}
-                                onChange={(e) =>
-                                    setFilters({ ...filters, entity: e.target.value })
-                                }
-                            />
-                        </div>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    </div>
+                    <div className="flex-1">
+                        <label className="text-sm font-medium mb-2 block">Entity</label>
+                        <Input
+                            placeholder="e.g. Strain, Sample..."
+                            value={filters.entity}
+                            onChange={(e) => setFilters({ ...filters, entity: e.target.value })}
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <Button variant="outline" onClick={() => { setFilters({ userId: '', entity: '' }); fetchLogs(); }}>
+                            Clear
+                        </Button>
+                        <Button onClick={fetchLogs} className="ml-2">
                             Search
                         </Button>
-                    </form>
+                    </div>
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
+            <div className="rounded-md border bg-white">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>User</TableHead>
+                            <TableHead>Action</TableHead>
+                            <TableHead>Entity</TableHead>
+                            <TableHead>Entity ID</TableHead>
+                            <TableHead>Details</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
                             <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>User</TableHead>
-                                <TableHead>Action</TableHead>
-                                <TableHead>Entity</TableHead>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Details</TableHead>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                                </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8">
-                                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                        ) : logs.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    No logs found.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            logs.map((log) => (
+                                <TableRow key={log.id}>
+                                    <TableCell className="whitespace-nowrap">
+                                        {format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+                                    </TableCell>
+                                    <TableCell>{log.userId}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getActionColor(log.action) as any}>
+                                            {log.action}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{log.entity}</TableCell>
+                                    <TableCell className="font-mono text-xs">{log.entityId}</TableCell>
+                                    <TableCell>
+                                        <div className="max-w-[300px] truncate text-xs text-muted-foreground" title={JSON.stringify(log.changes, null, 2)}>
+                                            {log.changes ? JSON.stringify(log.changes) : '-'}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : logs.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                        No logs found
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                logs.map((log) => (
-                                    <TableRow key={log.id}>
-                                        <TableCell className="whitespace-nowrap">
-                                            {format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <span className="font-medium">{log.user?.email || 'Unknown'}</span>
-                                                <span className="text-xs text-muted-foreground">ID: {log.userId}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={getActionColor(log.action) as any}>
-                                                {log.action}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{log.entity}</TableCell>
-                                        <TableCell>{log.entityId}</TableCell>
-                                        <TableCell className="max-w-md truncate" title={JSON.stringify(log.changes)}>
-                                            {log.comment ? (
-                                                <span className="italic text-muted-foreground">{log.comment}</span>
-                                            ) : (
-                                                <span className="text-xs font-mono text-muted-foreground">
-                                                    {JSON.stringify(log.changes || {})}
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     );
 }

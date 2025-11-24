@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { MainLayout } from "@/components/layout/main-layout"
 import { ApiService, UiBinding } from "@/services/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -92,7 +91,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <MainLayout>
+    <div className="p-8">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -244,6 +243,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
+    </div>
   )
 }

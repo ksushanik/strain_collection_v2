@@ -29,3 +29,18 @@ deploy-prod:
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 deploy-prod-win:
 	powershell -Command "ssh 4feb \"cd /home/user/bio_collection && docker compose pull && docker compose up -d\""
+
+# --- Development ---
+
+# Запускает только инфраструктуру (Postgres, Redis) в Docker
+dev-env:
+	docker compose up -d postgres redis
+
+# Запускает бэкенд в режиме разработки (требует локального Node.js)
+dev-backend:
+	cd backend && npm run start:dev
+
+# Запускает фронтенд в режиме разработки (требует локального Node.js)
+dev-frontend:
+	cd frontend && npm run dev
+
