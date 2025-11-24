@@ -27,10 +27,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const strainSchema = z.object({
     identifier: z.string().min(1, "Identifier is required"),
     sampleId: z.string().min(1, "Sample is required"),
+    genus: z.string().optional(),
+    species: z.string().optional(),
+    otherTaxonomy: z.string().optional(),
     gramStain: z.string().optional(),
     seq: z.boolean(),
     phosphates: z.boolean(),
@@ -59,6 +63,9 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
         defaultValues: {
             identifier: initialData?.identifier || "",
             sampleId: initialData?.sampleId?.toString() || undefined,
+            genus: (initialData?.taxonomy16s as { genus?: string })?.genus || "",
+            species: (initialData?.taxonomy16s as { species?: string })?.species || "",
+            otherTaxonomy: initialData?.otherTaxonomy || "",
             gramStain: initialData?.gramStain || undefined,
             seq: initialData?.seq || false,
             phosphates: initialData?.phosphates || false,
@@ -86,18 +93,27 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                 amylase: data.amylase || undefined,
                 features: data.features || undefined,
                 comments: data.comments || undefined,
+                taxonomy16s: (data.genus || data.species) ? { genus: data.genus, species: data.species } : undefined,
+                otherTaxonomy: data.otherTaxonomy || undefined,
             }
+
+            // Remove temp fields from payload if they exist (though spread operator handles it, explicit cleanup is cleaner)
+            delete (payload as any).genus;
+            delete (payload as any).species;
 
             if (isEdit && initialData) {
                 await ApiService.updateStrain(initialData.id, payload)
+                toast.success("Strain updated successfully")
             } else {
                 await ApiService.createStrain(payload)
+                toast.success("Strain created successfully")
             }
             const target = returnTo || "/strains"
             router.push(target)
             router.refresh()
         } catch (error) {
             console.error("Failed to save strain:", error)
+            toast.error("Failed to save strain. Please try again.")
         } finally {
             setLoading(false)
         }
@@ -145,6 +161,51 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             </FormItem>
                         )}
                     />
+
+                    <div className="col-span-2 grid grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="genus"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Genus</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. Bacillus" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="species"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Species</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. subtilis" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="col-span-2">
+                        <FormField
+                            control={form.control}
+                            name="otherTaxonomy"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Other Taxonomy</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Alternative classification..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <FormField
                         control={form.control}

@@ -383,7 +383,6 @@ This project is private and proprietary.
 
 ## 🐛 Known Issues
 
-- File upload for sample photos pending
 - Detail pages in development
 
 ## 🗺️ Roadmap
@@ -392,7 +391,7 @@ This project is private and proprietary.
 - [x] Audit log
 - [ ] Detail pages for strains and samples
 - [ ] Create/Edit forms with validation
-- [ ] File upload for sample photos
+- [x] File upload for sample photos
 - [ ] Advanced search and filtering
 - [ ] Export functionality (CSV, Excel)
 - [ ] Production deployment guide

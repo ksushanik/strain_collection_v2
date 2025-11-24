@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const sampleSchema = z.object({
     code: z.string().min(1, "Code is required"),
@@ -73,13 +74,16 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
 
             if (isEdit && initialData) {
                 await ApiService.updateSample(initialData.id, payload)
+                toast.success("Sample updated successfully")
             } else {
                 await ApiService.createSample(payload)
+                toast.success("Sample created successfully")
             }
             router.push("/samples")
             router.refresh()
         } catch (error) {
             console.error("Failed to save sample:", error)
+            toast.error("Failed to save sample. Please try again.")
         } finally {
             setLoading(false)
         }
