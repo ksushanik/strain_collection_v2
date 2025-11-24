@@ -16,7 +16,8 @@ import {
     Menu,
     Loader2,
     LogOut,
-    User
+    User,
+    ShieldCheck
 } from "lucide-react"
 import { ApiService, UiBinding } from "@/services/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -147,6 +148,20 @@ export function Sidebar() {
                         <BookOpen className="h-4 w-4" />
                         {!isCollapsed && <span>Wiki</span>}
                     </Link>
+
+                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                        <Link
+                            href="/audit"
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/audit" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <ShieldCheck className="h-4 w-4" />
+                            {!isCollapsed && <span>Audit Logs</span>}
+                        </Link>
+                    )}
                 </nav>
             </div>
 

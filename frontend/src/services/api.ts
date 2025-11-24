@@ -6,7 +6,7 @@ function authHeaders() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request(path: string, options: RequestInit = {}) {
+export async function request(path: string, options: RequestInit = {}) {
     const headers = {
         ...(options.headers || {}),
         ...authHeaders(),

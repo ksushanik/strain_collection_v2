@@ -5,12 +5,12 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 
-@Controller('audit-logs')
+@Controller('api/v1/audit-logs')
 @ApiTags('Audit')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 export class AuditLogController {
-  constructor(private auditLogService: AuditLogService) {}
+  constructor(private auditLogService: AuditLogService) { }
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'AuditLog'))
