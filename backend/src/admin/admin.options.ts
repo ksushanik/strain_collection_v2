@@ -99,6 +99,62 @@ const normalizePermissionsBefore = (request: any) => {
   return { ...request, payload };
 };
 
+const syncStorageBoxCells = async (
+  prisma: PrismaClient,
+  boxId: number,
+  rows: number,
+  cols: number,
+) => {
+  const normalizedRows = Number(rows);
+  const normalizedCols = Number(cols);
+  if (![9, 10].includes(normalizedRows) || ![9, 10].includes(normalizedCols)) {
+    throw new Error('Rows and cols must be 9 or 10');
+  }
+
+  const existingCells = await prisma.storageCell.findMany({
+    where: { boxId },
+    select: { id: true, cellCode: true },
+  });
+
+  const existingByCode = new Map(
+    existingCells.map((c) => [c.cellCode, c]),
+  );
+
+  const desired = Array.from(
+    { length: normalizedRows * normalizedCols },
+    (_, i) => {
+      const row = Math.floor(i / normalizedCols) + 1;
+      const col = (i % normalizedCols) + 1;
+      return {
+        row,
+        col,
+        cellCode: `${String.fromCharCode(65 + Math.floor(i / normalizedCols))}${(i % normalizedCols) + 1}`,
+      };
+    },
+  );
+  const desiredCodes = new Set(desired.map((d) => d.cellCode));
+
+  const toDeleteIds = existingCells
+    .filter((c) => !desiredCodes.has(c.cellCode))
+    .map((c) => c.id);
+
+  if (toDeleteIds.length) {
+    await prisma.strainStorage.deleteMany({
+      where: { cellId: { in: toDeleteIds } },
+    });
+    await prisma.storageCell.deleteMany({
+      where: { id: { in: toDeleteIds } },
+    });
+  }
+
+  const toCreate = desired.filter((d) => !existingByCode.has(d.cellCode));
+  if (toCreate.length) {
+    await prisma.storageCell.createMany({
+      data: toCreate.map((d) => ({ ...d, boxId })),
+    });
+  }
+};
+
 export const createAdminOptions = (
   prisma: PrismaClient,
   getModelByName: (modelName: string) => any,
@@ -786,6 +842,46 @@ export const createAdminOptions = (
         resource: { model: getModelByName('StorageBox'), client: prisma },
         options: {
           navigation: storageNavigation,
+          actions: {
+            new: {
+              before: async (request: any) => {
+                if (request?.method !== 'post' || !request?.payload) return request;
+                const payload = { ...request.payload };
+                if (payload.rows) payload.rows = Number(payload.rows);
+                if (payload.cols) payload.cols = Number(payload.cols);
+                return { ...request, payload };
+              },
+              after: async (response: any) => {
+                const id = Number(response?.record?.params?.id ?? 0);
+                const rows = Number(response?.record?.params?.rows ?? 0);
+                const cols = Number(response?.record?.params?.cols ?? 0);
+                if (id && rows && cols) {
+                  await syncStorageBoxCells(prisma, id, rows, cols);
+                }
+                return response;
+              },
+            },
+            edit: {
+              before: async (request: any) => {
+                if (request?.method !== 'post' || !request?.payload) return request;
+                const payload = { ...request.payload };
+                if (payload.rows) payload.rows = Number(payload.rows);
+                if (payload.cols) payload.cols = Number(payload.cols);
+                return { ...request, payload };
+              },
+              after: async (response: any, request: any) => {
+                const id =
+                  Number(request?.params?.recordId ?? 0) ||
+                  Number(response?.record?.params?.id ?? 0);
+                const rows = Number(response?.record?.params?.rows ?? request?.payload?.rows ?? 0);
+                const cols = Number(response?.record?.params?.cols ?? request?.payload?.cols ?? 0);
+                if (id && rows && cols) {
+                  await syncStorageBoxCells(prisma, id, rows, cols);
+                }
+                return response;
+              },
+            },
+          },
           properties: {
             id: {
               isVisible: { list: true, filter: true, show: true, edit: false },

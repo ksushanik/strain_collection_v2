@@ -192,6 +192,22 @@ PORT=3000
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
+## 🚀 Production Deploy (Docker + Make)
+
+Простой поток деплоя через Makefile (образы публикуются в Docker Hub):
+
+```bash
+# 1) Собрать и запушить образы (использует REGISTRY=gimmyhat, TAG=latest, API_URL=https://culturedb.elcity.ru; wiki из docs/wiki теперь копируется в образ фронта)
+make push-all
+
+# 2) Подтянуть образы на проде и перезапустить docker compose (ssh alias 4feb)
+make deploy-prod
+# Windows/PowerShell: если ssh не находится из make, используйте
+# make deploy-prod-win
+```
+
+Параметры можно переопределить: `make TAG=v1.2.3 REGISTRY=myrepo push-all`.
+
 ## 📝 License
 
 This project is private and proprietary.
