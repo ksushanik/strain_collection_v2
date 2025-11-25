@@ -203,7 +203,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
         setSelectedPhotoIndex(null)
     }
 
-    
+
 
     const currentPhoto = selectedPhotoIndex !== null ? photos[selectedPhotoIndex] : null
 
@@ -350,7 +350,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
             {/* Lightbox Modal */}
             {currentPhoto && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
                     onClick={closeLightbox}
                 >
                     {/* Close button */}
