@@ -119,19 +119,20 @@ export default function AuditPage() {
                             <TableHead>Action</TableHead>
                             <TableHead>Entity</TableHead>
                             <TableHead>Entity ID</TableHead>
+                            <TableHead>Comment</TableHead>
                             <TableHead>Details</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={7} className="h-24 text-center">
                                     <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                                 </TableCell>
                             </TableRow>
                         ) : logs.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                     No logs found.
                                 </TableCell>
                             </TableRow>
@@ -141,7 +142,16 @@ export default function AuditPage() {
                                     <TableCell className="whitespace-nowrap">
                                         {format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                                     </TableCell>
-                                    <TableCell>{log.userId}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">
+                                                {log.user?.name || log.user?.email || `User #${log.userId}`}
+                                            </span>
+                                            {log.user?.email && log.user?.name && (
+                                                <span className="text-xs text-muted-foreground">{log.user.email}</span>
+                                            )}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         <Badge variant={getActionColor(log.action) as any}>
                                             {log.action}
@@ -149,6 +159,9 @@ export default function AuditPage() {
                                     </TableCell>
                                     <TableCell>{log.entity}</TableCell>
                                     <TableCell className="font-mono text-xs">{log.entityId}</TableCell>
+                                    <TableCell className="max-w-[200px] truncate text-xs">
+                                        {log.comment || '-'}
+                                    </TableCell>
                                     <TableCell>
                                         <div className="max-w-[300px] truncate text-xs text-muted-foreground" title={JSON.stringify(log.changes, null, 2)}>
                                             {log.changes ? JSON.stringify(log.changes) : '-'}

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import session from 'express-session';
 import { adminSessionOptions } from './admin/admin-session.config';
 import * as express from 'express';
@@ -31,6 +31,10 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       transformOptions: { enableImplicitConversion: true },
+      exceptionFactory: (errors) => {
+        console.error('Validation errors:', JSON.stringify(errors, null, 2));
+        return new BadRequestException(errors);
+      },
     }),
   );
 

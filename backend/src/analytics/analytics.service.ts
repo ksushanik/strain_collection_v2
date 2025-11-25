@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async overview() {
     const [
@@ -21,7 +21,7 @@ export class AnalyticsService {
       this.prisma.storageBox.count(),
       this.prisma.strain.findMany({
         orderBy: { createdAt: 'desc' },
-        take: 5,
+        take: 9,
         select: {
           id: true,
           identifier: true,

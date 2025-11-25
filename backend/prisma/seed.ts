@@ -19,6 +19,7 @@ async function main() {
   await prisma.strainMedia.deleteMany();
   await prisma.media.deleteMany();
   await prisma.strain.deleteMany();
+  await prisma.samplePhoto.deleteMany();
   await prisma.sample.deleteMany();
 
   // 2. Create legend and UI bindings
@@ -190,163 +191,94 @@ async function main() {
     },
   });
 
-  // 5. Create Samples
-  console.log('Creating samples...');
-  const sample1 = await prisma.sample.create({
-    data: {
-      code: '24-PL-Rose-01',
-      sampleType: 'PLANT',
-      siteName: 'Botanical Garden, Sector A',
-      lat: 55.75,
-      lng: 37.61,
-      description: 'Rose rhizosphere sample',
-      collectedAt: new Date('2024-05-15T10:00:00Z'),
-    },
-  });
-
-  const sample2 = await prisma.sample.create({
-    data: {
-      code: '24-SO-Forest-05',
-      sampleType: 'SOIL',
-      siteName: 'Pine Forest, Region 2',
-      lat: 56.1,
-      lng: 38.2,
-      description: 'Forest soil sample',
-      collectedAt: new Date('2024-06-01T14:30:00Z'),
-    },
-  });
-
-  // 4. Create Strains
-  console.log('Creating strains...');
-  await prisma.strain.createMany({
-    data: [
-      {
-        identifier: 'STR-2024-001',
-        sampleId: sample1.id,
-        taxonomy16s: { genus: 'Pseudomonas', species: 'fluorescens' },
-        indexerInitials: 'AK',
-        seq: true,
-        gramStain: 'NEGATIVE',
-        phosphates: true,
-        siderophores: true,
-        pigmentSecretion: true,
-        features: 'Strong fluorescence under UV',
+  // 5. Create Samples (40 items)
+  console.log('Creating 40 samples...');
+  const samples = [];
+  for (let i = 1; i <= 40; i++) {
+    const sample = await prisma.sample.create({
+      data: {
+        code: `24-SMP-${String(i).padStart(3, '0')}`,
+        sampleType: i % 2 === 0 ? 'SOIL' : 'PLANT',
+        siteName: `Site ${Math.floor((i - 1) / 5) + 1}`,
+        lat: 55.0 + Math.random(),
+        lng: 37.0 + Math.random(),
+        description: `Generated sample ${i}`,
+        collectedAt: new Date(),
       },
-      {
-        identifier: 'STR-2024-002',
-        sampleId: sample1.id,
-        taxonomy16s: { genus: 'Bacillus', species: 'subtilis' },
-        indexerInitials: 'AK',
-        seq: false,
-        gramStain: 'POSITIVE',
-        phosphates: false,
-        siderophores: false,
-        pigmentSecretion: false,
-        features: 'Spore forming',
-      },
-      {
-        identifier: 'STR-2024-003',
-        sampleId: sample2.id,
-        taxonomy16s: { genus: 'Streptomyces', species: 'sp.' },
-        indexerInitials: 'VB',
-        seq: true,
-        gramStain: 'POSITIVE',
-        phosphates: true,
-        siderophores: true,
-        pigmentSecretion: true,
-        antibioticActivity: 'High against E. coli',
-      },
-    ],
-  });
+    });
+    samples.push(sample);
+  }
 
-  // 5. Seed media and link to strains
+  // 6. Create Strains (20 items)
+  console.log('Creating 20 strains...');
+  const strains = [];
+  for (let i = 1; i <= 20; i++) {
+    const strain = await prisma.strain.create({
+      data: {
+        identifier: `STR-2024-${String(i).padStart(3, '0')}`,
+        sampleId: samples[i % samples.length].id,
+        taxonomy16s: { genus: 'Bacterium', species: `species_${i}` },
+        indexerInitials: 'TEST',
+        seq: Math.random() > 0.5,
+        gramStain: Math.random() > 0.5 ? 'POSITIVE' : 'NEGATIVE',
+        phosphates: Math.random() > 0.5,
+        siderophores: Math.random() > 0.5,
+        pigmentSecretion: Math.random() > 0.5,
+        features: `Feature description for strain ${i}`,
+      },
+    });
+    strains.push(strain);
+  }
+
+  // 7. Create Media
   console.log('Creating media...');
-  const media = await prisma.media.createMany({
+  await prisma.media.createMany({
     data: [
       { name: 'LB Agar', composition: 'Lysogeny broth agar' },
       { name: 'ISP2', composition: 'International Streptomyces Project medium 2' },
     ],
   });
 
-  const strainList = await prisma.strain.findMany({ select: { id: true } });
-  if (strainList.length && media.count) {
-    await prisma.strainMedia.create({
+  // 8. Create Storage Boxes (16 items)
+  console.log('Creating 16 storage boxes...');
+  const boxes = [];
+  for (let i = 1; i <= 16; i++) {
+    const is9x9 = i % 2 !== 0;
+    const rows = is9x9 ? 9 : 10;
+    const cols = is9x9 ? 9 : 10;
+    const box = await prisma.storageBox.create({
       data: {
-        strainId: strainList[0].id,
-        mediaId: 1,
-        notes: 'Routine isolation',
+        displayName: `Box ${i} (${rows}x${cols})`,
+        rows,
+        cols,
+        description: `Generated storage box ${i}`,
+        cells: {
+          create: Array.from({ length: rows * cols }, (_, k) => ({
+            row: Math.floor(k / cols) + 1,
+            col: (k % cols) + 1,
+            cellCode: `${String.fromCharCode(65 + Math.floor(k / cols))}${(k % cols) + 1}`,
+          })),
+        },
       },
+      include: { cells: true },
     });
+    boxes.push(box);
   }
 
-  // 6. Create Storage Boxes with Cells
-  console.log('Creating storage boxes...');
-  const box1 = await prisma.storageBox.create({
-    data: {
-      displayName: 'Freezer Box -80C #1',
-      rows: 9,
-      cols: 9,
-      description: 'Main freezer storage for long-term preservation',
-      cells: {
-        create: Array.from({ length: 81 }, (_, i) => ({
-          row: Math.floor(i / 9) + 1,
-          col: (i % 9) + 1,
-          cellCode: `${String.fromCharCode(65 + Math.floor(i / 9))}${(i % 9) + 1}`,
-        })),
-      },
-    },
-  });
-
-  const box2 = await prisma.storageBox.create({
-    data: {
-      displayName: 'Fridge Box +4C #1',
-      rows: 10,
-      cols: 10,
-      description: 'Working collection for active research',
-      cells: {
-        create: Array.from({ length: 100 }, (_, i) => ({
-          row: Math.floor(i / 10) + 1,
-          col: (i % 10) + 1,
-          cellCode: `${String.fromCharCode(65 + Math.floor(i / 10))}${(i % 10) + 1}`,
-        })),
-      },
-    },
-  });
-
-  // 7. Allocate strains to storage cells
+  // 9. Allocate strains to storage
   console.log('Allocating strains to storage...');
-  const strains = await prisma.strain.findMany();
-  const box1Cells = await prisma.storageCell.findMany({
-    where: { boxId: box1.id },
-    take: 2,
-  });
-
-  if (strains.length >= 2 && box1Cells.length >= 2) {
-    // Allocate first strain to A1
+  // Allocate first 15 strains to the first box
+  const box1Cells = boxes[0].cells;
+  for (let i = 0; i < 15 && i < strains.length && i < box1Cells.length; i++) {
     await prisma.strainStorage.create({
       data: {
-        strainId: strains[0].id,
-        cellId: box1Cells[0].id,
+        strainId: strains[i].id,
+        cellId: box1Cells[i].id,
         isPrimary: true,
       },
     });
-
     await prisma.storageCell.update({
-      where: { id: box1Cells[0].id },
-      data: { status: 'OCCUPIED' },
-    });
-
-    // Allocate second strain to A2
-    await prisma.strainStorage.create({
-      data: {
-        strainId: strains[1].id,
-        cellId: box1Cells[1].id,
-        isPrimary: true,
-      },
-    });
-
-    await prisma.storageCell.update({
-      where: { id: box1Cells[1].id },
+      where: { id: box1Cells[i].id },
       data: { status: 'OCCUPIED' },
     });
   }

@@ -9,10 +9,11 @@ import {
   AllocateStrainDto,
   BulkAllocateStrainDto,
 } from './dto/allocate-strain.dto';
+import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
 
 @Injectable()
 export class StorageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAllBoxes() {
     return this.prisma.storageBox
@@ -237,5 +238,54 @@ export class StorageService {
     });
 
     return { message: `Strain deallocated successfully` };
+  }
+
+  async updateBox(id: number, data: UpdateStorageBoxDto) {
+    return this.prisma.storageBox.update({
+      where: { id },
+      data,
+      include: {
+        cells: {
+          include: {
+            strain: {
+              include: {
+                strain: true,
+              },
+            },
+          },
+          orderBy: [{ row: 'asc' }, { col: 'asc' }],
+        },
+      },
+    });
+  }
+
+  async deleteBox(id: number) {
+    const box = await this.prisma.storageBox.findUnique({
+      where: { id },
+      include: {
+        cells: {
+          where: { status: 'OCCUPIED' },
+        },
+      },
+    });
+
+    if (!box) {
+      throw new NotFoundException(`Box with ID ${id} not found`);
+    }
+
+    if (box.cells.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete box with occupied cells. Please empty it first.',
+      );
+    }
+
+    return this.prisma.$transaction([
+      this.prisma.storageCell.deleteMany({
+        where: { boxId: id },
+      }),
+      this.prisma.storageBox.delete({
+        where: { id },
+      }),
+    ]);
   }
 }

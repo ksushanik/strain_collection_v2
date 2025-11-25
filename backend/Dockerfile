@@ -19,6 +19,8 @@ FROM deps AS build
 COPY tsconfig*.json nest-cli.json ./
 COPY src ./src
 RUN npm run build
+# Compile seed script for production use
+RUN npx tsc prisma/seed.ts --outDir dist/prisma --module commonjs --esModuleInterop --skipLibCheck
 
 FROM base AS prod-deps
 COPY package*.json ./
@@ -35,3 +37,4 @@ COPY --from=prod-deps /app/prisma ./prisma
 ENV PORT=3000
 EXPOSE 3000
 CMD ["node", "dist/src/main.js"]
+

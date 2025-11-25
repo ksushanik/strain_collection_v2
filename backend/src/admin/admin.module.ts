@@ -21,8 +21,12 @@ import { adminSessionOptions } from './admin-session.config';
       import('@adminjs/prisma'),
       import('adminjs'),
     ]).then(
-      ([{ AdminModule }, { Database, Resource, getModelByName }, { default: AdminJS }]) => {
+      ([{ AdminModule }, { Database, Resource, getModelByName }, { default: AdminJS, ComponentLoader }]) => {
         AdminJS.registerAdapter({ Database, Resource });
+
+        const componentLoader = new ComponentLoader();
+        const dashboard = componentLoader.add('Dashboard', './components/dashboard');
+        const jsonShow = componentLoader.add('JsonShow', './components/json-show');
 
         return AdminModule.createAdminAsync({
           imports: [
@@ -61,11 +65,16 @@ import { adminSessionOptions } from './admin-session.config';
               settingsService,
               auditLogService,
               null,
+              jsonShow,
             );
 
             return {
               adminJsOptions: {
                 ...adminOptions,
+                componentLoader,
+                dashboard: {
+                  component: dashboard,
+                },
               },
               auth: {
                 cookieName: adminSessionOptions.name ?? 'adminjs',
@@ -110,4 +119,4 @@ import { adminSessionOptions } from './admin-session.config';
   ],
   controllers: [AdminSsoController],
 })
-export class AdminModule {}
+export class AdminModule { }

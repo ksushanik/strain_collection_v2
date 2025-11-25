@@ -30,6 +30,22 @@ deploy-prod:
 deploy-prod-win:
 	powershell -Command "ssh 4feb \"cd /home/user/bio_collection && docker compose pull && docker compose up -d\""
 
+# Очистка неиспользуемых Docker ресурсов на production
+clean-prod:
+	ssh 4feb "docker system prune -af --volumes"
+
+# Для Windows
+clean-prod-win:
+	powershell -Command "ssh 4feb \"docker system prune -af --volumes\""
+
+# Проверка использования диска на production
+disk-usage-prod:
+	ssh 4feb "df -h && echo '' && docker system df"
+
+# Для Windows
+disk-usage-prod-win:
+	powershell -Command "ssh 4feb \"df -h; echo ''; docker system df\""
+
 # --- Development ---
 
 # Запускает только инфраструктуру (Postgres, Redis) в Docker
@@ -43,4 +59,13 @@ dev-backend:
 # Запускает фронтенд в режиме разработки (требует локального Node.js)
 dev-frontend:
 	cd frontend && npm run dev
+
+# Загрузить seed данные в production
+# Использует скомпилированный seed.js (см. backend/Dockerfile)
+seed-prod:
+	ssh 4feb "cd /home/user/bio_collection && docker compose exec -T backend node dist/prisma/seed.js"
+
+# Для Windows
+seed-prod-win:
+	powershell -Command "ssh 4feb \"cd /home/user/bio_collection \&\& docker compose exec -T backend node dist/prisma/seed.js\""
 

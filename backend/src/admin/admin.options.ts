@@ -161,6 +161,7 @@ export const createAdminOptions = (
   settingsService: SettingsService,
   auditLogService: AuditLogService,
   permissionsComponent: any,
+  jsonShowComponent: string,
 ) => {
   return {
     rootPath: '/admin',
@@ -528,6 +529,65 @@ export const createAdminOptions = (
               isVisible: { list: true, filter: false, show: true, edit: false },
             },
           },
+          actions: {
+            new: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Strain',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create Strain',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/strains/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id ?? Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Strain',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit Strain',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/strains/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0) || Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Strain',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete Strain',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/strains/delete',
+                  });
+                }
+                return response;
+              },
+            },
+          },
         },
       } as ResourceWithOptions,
 
@@ -563,6 +623,65 @@ export const createAdminOptions = (
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
+            },
+          },
+          actions: {
+            new: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Sample',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create Sample',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/samples/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id ?? Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Sample',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit Sample',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/samples/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0) || Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'Sample',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete Sample',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/samples/delete',
+                  });
+                }
+                return response;
+              },
             },
           },
         },
@@ -812,6 +931,7 @@ export const createAdminOptions = (
             },
             userId: {
               isVisible: { list: true, filter: true, show: true, edit: false },
+              reference: 'User',
             },
             action: {
               isVisible: { list: true, filter: true, show: true, edit: false },
@@ -828,8 +948,20 @@ export const createAdminOptions = (
             comment: {
               isVisible: { list: true, filter: true, show: true, edit: false },
             },
-            changes: { type: 'mixed' },
-            metadata: { type: 'mixed' },
+            changes: {
+              type: 'mixed',
+              isVisible: { list: false, filter: false, show: true, edit: false },
+              components: {
+                show: jsonShowComponent,
+              },
+            },
+            metadata: {
+              type: 'mixed',
+              isVisible: { list: false, filter: false, show: true, edit: false },
+              components: {
+                show: jsonShowComponent,
+              },
+            },
             createdAt: {
               isVisible: { list: true, filter: true, show: true, edit: false },
             },
@@ -851,12 +983,26 @@ export const createAdminOptions = (
                 if (payload.cols) payload.cols = Number(payload.cols);
                 return { ...request, payload };
               },
-              after: async (response: any) => {
+              after: async (response: any, request: any, context: any) => {
                 const id = Number(response?.record?.params?.id ?? 0);
                 const rows = Number(response?.record?.params?.rows ?? 0);
                 const cols = Number(response?.record?.params?.cols ?? 0);
                 if (id && rows && cols) {
                   await syncStorageBoxCells(prisma, id, rows, cols);
+                }
+                // Audit logging
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageBox',
+                    entityId: id,
+                    action: 'CREATE',
+                    comment: 'AdminJS: create StorageBox',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/storage-box/new',
+                  });
                 }
                 return response;
               },
@@ -869,7 +1015,7 @@ export const createAdminOptions = (
                 if (payload.cols) payload.cols = Number(payload.cols);
                 return { ...request, payload };
               },
-              after: async (response: any, request: any) => {
+              after: async (response: any, request: any, context: any) => {
                 const id =
                   Number(request?.params?.recordId ?? 0) ||
                   Number(response?.record?.params?.id ?? 0);
@@ -877,6 +1023,41 @@ export const createAdminOptions = (
                 const cols = Number(response?.record?.params?.cols ?? request?.payload?.cols ?? 0);
                 if (id && rows && cols) {
                   await syncStorageBoxCells(prisma, id, rows, cols);
+                }
+                // Audit logging
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageBox',
+                    entityId: id,
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit StorageBox',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/storage-box/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id =
+                  Number(request?.params?.recordId ?? 0) ||
+                  Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageBox',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete StorageBox',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/storage-box/delete',
+                  });
                 }
                 return response;
               },
@@ -937,6 +1118,65 @@ export const createAdminOptions = (
               isVisible: { list: true, filter: true, show: true, edit: true },
             },
           },
+          actions: {
+            new: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageCell',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create StorageCell',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/storage-cell/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id ?? Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageCell',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit StorageCell',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/storage-cell/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0) || Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'StorageCell',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete StorageCell',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/storage-cell/delete',
+                  });
+                }
+                return response;
+              },
+            },
+          },
         },
       } as ResourceWithOptions,
 
@@ -957,6 +1197,65 @@ export const createAdminOptions = (
             },
             createdAt: {
               isVisible: { list: true, filter: false, show: true, edit: false },
+            },
+          },
+          actions: {
+            new: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id;
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'SamplePhoto',
+                    entityId: Number(id),
+                    action: 'CREATE',
+                    comment: 'AdminJS: create SamplePhoto',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/sample-photo/new',
+                  });
+                }
+                return response;
+              },
+            },
+            edit: {
+              after: async (response: any, request: any, context: any) => {
+                const id = response?.record?.params?.id ?? Number(request?.params?.recordId ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'SamplePhoto',
+                    entityId: Number(id),
+                    action: 'UPDATE',
+                    comment: 'AdminJS: edit SamplePhoto',
+                    changes: (request?.payload ?? {}) as Prisma.InputJsonValue,
+                    route: 'admin/sample-photo/edit',
+                  });
+                }
+                return response;
+              },
+            },
+            delete: {
+              after: async (response: any, request: any, context: any) => {
+                const id = Number(request?.params?.recordId ?? 0) || Number(response?.record?.params?.id ?? 0);
+                if (id) {
+                  await logAudit({
+                    context,
+                    prisma,
+                    auditLogService,
+                    entity: 'SamplePhoto',
+                    entityId: id,
+                    action: 'DELETE',
+                    comment: 'AdminJS: delete SamplePhoto',
+                    changes: {} as Prisma.InputJsonValue,
+                    route: 'admin/sample-photo/delete',
+                  });
+                }
+                return response;
+              },
             },
           },
         },

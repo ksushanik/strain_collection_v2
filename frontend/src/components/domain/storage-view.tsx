@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, Box as BoxIcon, Plus, X, Check } from "lucide-react"
+import { Loader2, Box as BoxIcon, Plus, X, Check, Edit2, Trash2, Save } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 type BoxSummary = {
   id: number;
@@ -60,12 +61,54 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     cols: 9,
     description: "",
   })
+  const [editingBox, setEditingBox] = React.useState(false)
+  const [editForm, setEditForm] = React.useState<{ displayName: string; description: string }>({ displayName: '', description: '' })
+  const [updatingBox, setUpdatingBox] = React.useState(false)
+
+  React.useEffect(() => {
+    if (selectedBox) {
+      setEditForm({ displayName: selectedBox.displayName, description: selectedBox.description || '' })
+    }
+  }, [selectedBox])
+
+  async function handleUpdateBox() {
+    if (!selectedBoxId || !editForm.displayName.trim()) return
+    setUpdatingBox(true)
+    try {
+      await ApiService.updateStorageBox(selectedBoxId, {
+        displayName: editForm.displayName,
+        description: editForm.description
+      })
+      const updated = await ApiService.getBoxCells(selectedBoxId)
+      setSelectedBox(updated)
+      setEditingBox(false)
+      setBoxes(prev => prev.map(b => b.id === selectedBoxId ? { ...b, displayName: updated.displayName, description: updated.description } : b))
+    } catch (err) {
+      console.error('Update failed', err)
+      alert('Failed to update box')
+    } finally {
+      setUpdatingBox(false)
+    }
+  }
+
+  async function handleDeleteBox() {
+    if (!selectedBoxId || !confirm('Are you sure you want to delete this box? All cells must be empty.')) return
+    try {
+      await ApiService.deleteStorageBox(selectedBoxId)
+      setBoxes(prev => prev.filter(b => b.id !== selectedBoxId))
+      setSelectedBoxId(null)
+    } catch (err: any) {
+      console.error('Delete failed', err)
+      alert(err.message)
+    }
+  }
 
   // Fetch Boxes on mount
   React.useEffect(() => {
     ApiService.getStorageBoxes().then(data => {
       setBoxes(data)
-      if (data.length > 0) setSelectedBoxId(data[0].id)
+      setBoxes(data)
+      // if (data.length > 0) setSelectedBoxId(data[0].id) // Removed auto-selection
       setLoading(false)
     }).catch(err => {
       console.error('Failed to load boxes:', err)
@@ -146,6 +189,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       const box = await ApiService.getBoxCells(selectedBoxId)
       setSelectedBox(box)
       setSelectedCellCode(selectedCellCode)
+      updateBoxListState(box)
     } catch (err) {
       console.error('Allocate failed', err)
     } finally {
@@ -182,11 +226,27 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       const box = await ApiService.getBoxCells(selectedBoxId)
       setSelectedBox(box)
       setSelectedCellCode(null)
+      updateBoxListState(box)
     } catch (err) {
       console.error('Unallocate failed', err)
     } finally {
       setAllocating(false)
     }
+  }
+
+  function updateBoxListState(updatedBox: BoxDetail) {
+    const occupiedCount = updatedBox.cells.filter(c => c.status === 'OCCUPIED').length
+    setBoxes(prev => prev.map(b => {
+      if (b.id === updatedBox.id) {
+        return {
+          ...b,
+          occupiedCells: occupiedCount,
+          // Update _count if needed, though usually total cells don't change
+          _count: b._count ? { ...b._count, cells: updatedBox.rows * updatedBox.cols } : undefined
+        }
+      }
+      return b
+    }))
   }
 
   if (loading) {
@@ -266,18 +326,20 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       </Card>
 
       {/* Box Selection */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
         {boxes.map(box => (
           <Button
             key={box.id}
             variant={selectedBoxId === box.id ? "default" : "outline"}
             onClick={() => setSelectedBoxId(box.id)}
-            className="whitespace-nowrap"
+            className="h-24 w-full flex flex-col items-start justify-between p-4"
           >
-            <BoxIcon className="mr-2 h-4 w-4" />
-            {box.displayName}
+            <div className="flex items-center w-full">
+              <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
+              <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
+            </div>
             {box._count && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="w-full justify-center mt-2">
                 {box.occupiedCells !== undefined
                   ? `${box.occupiedCells}/${box._count.cells}`
                   : `${box._count.cells}`} cells
@@ -287,34 +349,76 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
         ))}
       </div>
 
-      {/* Grid View */}
-      {selectedBox && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>{selectedBox.displayName}</span>
-              <span className="text-sm font-normal text-muted-foreground">
-                Grid: {selectedBox.rows} × {selectedBox.cols}
-              </span>
-            </CardTitle>
-            {selectedBox.description && (
-              <CardDescription>{selectedBox.description}</CardDescription>
+      {/* Box Details Modal */}
+      <Dialog open={!!selectedBoxId} onOpenChange={(open) => !open && setSelectedBoxId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between mr-8 h-9">
+              {editingBox ? (
+                <div className="flex items-center gap-2 w-full">
+                  <Input
+                    value={editForm.displayName}
+                    onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
+                    className="h-8"
+                    placeholder="Display Name"
+                  />
+                  <Button size="sm" onClick={handleUpdateBox} disabled={updatingBox}>
+                    {updatingBox ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingBox(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span>{selectedBox?.displayName || 'Loading...'}</span>
+                    {selectedBox && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingBox(true)}>
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={handleDeleteBox}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  {selectedBox && (
+                    <span className="text-sm font-normal text-muted-foreground">
+                      Grid: {selectedBox.rows} × {selectedBox.cols}
+                    </span>
+                  )}
+                </>
+              )}
+            </DialogTitle>
+            {!editingBox && selectedBox?.description && (
+              <DialogDescription>{selectedBox.description}</DialogDescription>
+            )}
+            {editingBox && (
+              <Input
+                value={editForm.description}
+                onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder="Description"
+                className="mt-2 h-8"
+              />
             )}
             {legendText && (
-              <CardDescription className="mt-2 whitespace-pre-line text-xs text-muted-foreground border-t pt-2">
+              <DialogDescription className="mt-2 whitespace-pre-line text-xs text-muted-foreground border-t pt-2">
                 {legendText}
-              </CardDescription>
+              </DialogDescription>
             )}
-          </CardHeader>
-          <CardContent>
+          </DialogHeader>
+
+          <div className="mt-4">
             {loadingBox ? (
               <div className="flex h-64 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
-            ) : (
+            ) : selectedBox ? (
               <>
                 <div
-                  className="grid gap-1 mx-auto w-fit max-h-[70vh] overflow-auto p-2"
+                  className="grid gap-1 mx-auto w-fit p-2"
                   style={{
                     gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(32px, 1fr))`
                   }}
@@ -358,7 +462,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                 </div>
 
                 {selectedCell && (
-                  <div className="mt-6 rounded border p-4">
+                  <div className="mt-6 rounded border p-4 bg-muted/10">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <p className="text-sm text-muted-foreground">Cell</p>
@@ -460,10 +564,10 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                   </div>
                 )}
               </>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

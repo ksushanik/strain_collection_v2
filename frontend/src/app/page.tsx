@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { ApiService } from "@/services/api"
 import { Loader2, Microscope, Beaker, Archive, Boxes } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -107,14 +108,16 @@ export default function Home() {
           <h2 className="text-lg font-semibold mb-3">Recent Strains</h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {stats.recent.map((r) => (
-              <Card key={r.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">{r.identifier}</CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    Sample: {r.sample?.code || 'Unknown'}
-                  </p>
-                </CardHeader>
-              </Card>
+              <Link key={r.id} href={`/strains/${r.id}`} className="block">
+                <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{r.identifier}</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      Sample: {r.sample?.code || 'Unknown'}
+                    </p>
+                  </CardHeader>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

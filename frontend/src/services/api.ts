@@ -11,7 +11,16 @@ export async function request(path: string, options: RequestInit = {}) {
         ...(options.headers || {}),
         ...authHeaders(),
     } as Record<string, string>;
-    return fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+    const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+
+    if (response.status === 401) {
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    }
+
+    return response;
 }
 
 export interface UiBinding {
@@ -273,6 +282,35 @@ export const ApiService = {
         });
         if (!response.ok) {
             throw new Error(`Failed to create storage box: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async updateStorageBox(id: number, data: { displayName?: string; description?: string; storageType?: string }) {
+        const response = await request(`/api/v1/storage/boxes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            throw new Error(`Failed to update storage box: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
+    async deleteStorageBox(id: number) {
+        const response = await request(`/api/v1/storage/boxes/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            // Пытаемся распарсить JSON ошибку если есть
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.message || `Failed to delete storage box`);
+            } catch {
+                throw new Error(`Failed to delete storage box: ${errorText || response.statusText}`);
+            }
         }
         return response.json();
     },

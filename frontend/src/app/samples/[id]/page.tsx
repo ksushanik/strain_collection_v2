@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import dynamic from 'next/dynamic'
 import { ApiService, Sample } from "@/services/api"
 
 import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit } from "lucide-react"
@@ -10,6 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { PhotoUpload } from "@/components/domain/photo-upload"
+
+// Dynamic import for map to avoid SSR issues
+const SampleMap = dynamic(
+    () => import('@/components/domain/sample-map').then(mod => mod.SampleMap),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+)
 
 interface SampleWithStrains extends Sample {
     strains: Array<{
@@ -116,14 +130,23 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                 </div>
                             )}
 
-                            {/* Map Placeholder */}
-                            <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
-                                <div className="text-center text-muted-foreground">
-                                    <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>Map View</p>
-                                    <p className="text-xs">(Integration pending)</p>
+                            {/* Map */}
+                            {sample.lat && sample.lng ? (
+                                <SampleMap
+                                    lat={sample.lat}
+                                    lng={sample.lng}
+                                    siteName={sample.siteName}
+                                    className="h-64"
+                                />
+                            ) : (
+                                <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
+                                    <div className="text-center text-muted-foreground">
+                                        <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                        <p>No coordinates available</p>
+                                        <p className="text-xs">Add coordinates to see map</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </CardContent>
                     </Card>
 

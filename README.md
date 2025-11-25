@@ -11,21 +11,24 @@ A full-stack web application for managing microbiological strain collections, fi
 
 - **Strain Management**: Complete CRUD operations for microbial strains with taxonomy, sequencing data, and biochemical properties
 - **Sample Tracking**: Field sample collection with geolocation, metadata, and photo support
+- **Interactive Maps**: Leaflet-powered geolocation display with markers and popups for sample collection sites
 - **Storage System**: Interactive grid-based storage management with box and cell allocation
 - **Flexible Structure**: Dynamic UI configuration through database-driven field packs and profiles
 - **Real-time Dashboard**: Live statistics and analytics
-- **Media & Legend**: Nutrient media catalog linked to strains; editable legend for UI codes.
-- **In-app Wiki**: `/docs` renders `docs/wiki` (архитектура, API, playbooks, changelog).
+- **Media & Legend**: Nutrient media catalog linked to strains; editable legend for UI codes
+- **In-app Wiki**: `/docs` renders `docs/wiki` (architecture, API, playbooks, changelog)
+- **RBAC & Audit**: Role-based access control with comprehensive audit logging
 
-## Wiki
+## 📚 Wiki
 
-Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
-
-
-## Wiki
-
-Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
-
+Up-to-date documentation lives in [docs/wiki/index.md](docs/wiki/index.md) covering:
+- Architecture & Tech Stack
+- Backend & Frontend Development
+- API Documentation
+- Storage System
+- Media Management
+- Testing & Playbooks
+- Changelog
 
 ## 🏗️ Architecture
 
@@ -38,7 +41,7 @@ Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/fron
 ```
 
 **Tech Stack:**
-- **Frontend**: Next.js 16, React, TypeScript, Tailwind CSS, Shadcn UI
+- **Frontend**: Next.js 16, React, TypeScript, Tailwind CSS, Shadcn UI, Leaflet Maps
 - **Backend**: NestJS, Prisma ORM, TypeScript
 - **Database**: PostgreSQL 16 (Docker)
 - **Dev Tools**: Docker Compose, ESLint, Prettier
@@ -86,10 +89,12 @@ Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/fron
 ## 📊 Database Schema
 
 Key models:
-- **Sample**: Field samples with geolocation and metadata
+- **Sample**: Field samples with geolocation (lat/lng) and metadata
 - **Strain**: Microbial strains with taxonomy and properties
 - **StorageBox/StorageCell**: Physical storage management
 - **UiBinding**: Dynamic UI configuration
+- **User/Role/Group**: Authentication and RBAC
+- **AuditLog**: Comprehensive action tracking
 
 See [schema.prisma](backend/prisma/schema.prisma) for complete schema.
 
@@ -137,150 +142,7 @@ strain_collection_v2/
 │   └── src/
 │       ├── app/           # App router pages
 │       ├── components/    # React components
-│       │   ├── domain/   # Domain components (StrainList, etc)
-│       │   ├── layout/   # Layout components
-│       │   └── ui/       # Shadcn UI components
-│       ├── services/     # API client
-# Microbiological Data Management System
-
-A full-stack web application for managing microbiological strain collections, field samples, and storage systems.
-
-![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![NestJS](https://img.shields.io/badge/NestJS-10-red)
-
-## 🎯 Features
-
-- **Strain Management**: Complete CRUD operations for microbial strains with taxonomy, sequencing data, and biochemical properties
-- **Sample Tracking**: Field sample collection with geolocation, metadata, and photo support
-- **Storage System**: Interactive grid-based storage management with box and cell allocation
-- **Flexible Structure**: Dynamic UI configuration through database-driven field packs and profiles
-- **Real-time Dashboard**: Live statistics and analytics
-- **Media & Legend**: Nutrient media catalog linked to strains; editable legend for UI codes.
-- **In-app Wiki**: `/docs` renders `docs/wiki` (архитектура, API, playbooks, changelog).
-
-## Wiki
-
-Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
-
-
-## Wiki
-
-Up-to-date documentation lives in docs/wiki/index.md (architecture, backend/frontend, API, storage, media, legend, testing, playbooks, changelog).
-
-
-## 🏗️ Architecture
-
-```
-┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│  Next.js        │◄────►│  NestJS         │◄────►│  PostgreSQL     │
-│  Frontend       │      │  Backend        │      │  Database       │
-│  (Port 3001)    │      │  (Port 3000)    │      │  (Docker)       │
-└─────────────────┘      └─────────────────┘      └─────────────────┘
-```
-
-**Tech Stack:**
-- **Frontend**: Next.js 16, React, TypeScript, Tailwind CSS, Shadcn UI
-- **Backend**: NestJS, Prisma ORM, TypeScript
-- **Database**: PostgreSQL 16 (Docker)
-- **Dev Tools**: Docker Compose, ESLint, Prettier
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- Docker and Docker Compose
-- Git
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ksushanik/strain_collection_v2.git
-   cd strain_collection_v2
-   ```
-
-2. **Start PostgreSQL database**
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Setup Backend**
-   ```bash
-   cd backend
-   npm install
-   npx prisma generate
-   npx prisma migrate dev
-   npx prisma db seed
-   npm run start:dev
-   ```
-   Backend will be available at http://localhost:3000
-
-4. **Setup Frontend**
-   ```bash
-   cd ../frontend
-   npm install
-   npm run dev -- -p 3001
-   ```
-   Frontend will be available at http://localhost:3001
-
-## 📊 Database Schema
-
-Key models:
-- **Sample**: Field samples with geolocation and metadata
-- **Strain**: Microbial strains with taxonomy and properties
-- **StorageBox/StorageCell**: Physical storage management
-- **UiBinding**: Dynamic UI configuration
-
-See [schema.prisma](backend/prisma/schema.prisma) for complete schema.
-
-## 🔌 API Endpoints
-
-### Settings
-- `GET /api/v1/settings/ui-bindings` - Get UI configuration
-
-### Strains
-- `GET /api/v1/strains` - List strains (with filters)
-- `POST /api/v1/strains` - Create strain
-- `GET /api/v1/strains/:id` - Get strain details
-- `PUT /api/v1/strains/:id` - Update strain
-- `DELETE /api/v1/strains/:id` - Delete strain
-
-### Samples
-- `GET /api/v1/samples` - List samples
-- `POST /api/v1/samples` - Create sample
-- `GET /api/v1/samples/:id` - Get sample details
-- `PUT /api/v1/samples/:id` - Update sample
-- `DELETE /api/v1/samples/:id` - Delete sample
-
-### Storage
-- `GET /api/v1/storage/boxes` - List storage boxes
-- `GET /api/v1/storage/boxes/:id` - Get box with cells
-- `POST /api/v1/storage/boxes` - Create storage box
-- `POST /api/v1/storage/allocate` - Allocate strain to cell
-- `DELETE /api/v1/storage/allocate/:id` - Deallocate strain
-
-## 📁 Project Structure
-
-```
-strain_collection_v2/
-├── backend/                 # NestJS backend
-│   ├── prisma/             # Database schema and migrations
-│   │   ├── schema.prisma
-│   │   ├── seed.ts
-│   │   └── migrations/
-│   └── src/
-│       ├── strains/        # Strains module
-│       ├── samples/        # Samples module
-│       ├── storage/        # Storage module
-│       └── settings/       # Settings module
-├── frontend/               # Next.js frontend
-│   └── src/
-│       ├── app/           # App router pages
-│       ├── components/    # React components
-│       │   ├── domain/   # Domain components (StrainList, etc)
+│       │   ├── domain/   # Domain components (SampleMap, StrainList, etc)
 │       │   ├── layout/   # Layout components
 │       │   └── ui/       # Shadcn UI components
 │       ├── services/     # API client
@@ -336,6 +198,16 @@ npx prisma migrate reset
 npx prisma db seed
 ```
 
+## 🗺️ Maps Integration
+
+Sample detail pages include interactive Leaflet maps:
+- **Technology**: Leaflet.js with React-Leaflet
+- **Tiles**: OpenStreetMap (free, no API key required)
+- **Features**: Marker display, popup with coordinates, SSR-compatible
+- **Performance**: ~40KB library, fast loading
+
+Location data stored in Sample model (`lat`, `lng` fields).
+
 ## 🎨 UI Components
 
 The frontend uses a flexible field pack system that allows dynamic UI configuration:
@@ -359,19 +231,19 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 
 ## 🚀 Production Deploy (Docker + Make)
 
-Простой поток деплоя через Makefile (образы публикуются в Docker Hub):
+Simple deployment workflow via Makefile (images published to Docker Hub):
 
 ```bash
-# 1) Собрать и запушить образы (использует REGISTRY=gimmyhat, TAG=latest, API_URL=https://culturedb.elcity.ru; wiki из docs/wiki теперь копируется в образ фронта)
+# 1) Build and push images (uses REGISTRY=gimmyhat, TAG=latest, API_URL=https://culturedb.elcity.ru)
 make push-all
 
-# 2) Подтянуть образы на проде и перезапустить docker compose (ssh alias 4feb)
+# 2) Pull images on production and restart docker compose (ssh alias 4feb)
 make deploy-prod
-# Windows/PowerShell: если ssh не находится из make, используйте
+# Windows/PowerShell: if ssh not found from make, use
 # make deploy-prod-win
 ```
 
-Параметры можно переопределить: `make TAG=v1.2.3 REGISTRY=myrepo push-all`.
+Parameters can be overridden: `make TAG=v1.2.3 REGISTRY=myrepo push-all`.
 
 ## 📝 License
 
@@ -381,17 +253,14 @@ This project is private and proprietary.
 
 - Development Team
 
-## 🐛 Known Issues
-
-- Detail pages in development
-
 ## 🗺️ Roadmap
 
 - [x] User authentication and authorization (RBAC)
 - [x] Audit log
-- [ ] Detail pages for strains and samples
-- [ ] Create/Edit forms with validation
+- [x] Detail pages for strains and samples
+- [x] Create/Edit forms with validation
 - [x] File upload for sample photos
+- [x] Interactive maps for sample locations
 - [ ] Advanced search and filtering
 - [ ] Export functionality (CSV, Excel)
-- [ ] Production deployment guide
+- [ ] Map-based sample clustering view

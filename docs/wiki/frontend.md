@@ -18,7 +18,12 @@ Located at `/audit`, this page allows Admins and Managers to view system logs. I
   - `/media` — CRUD справочника питательных сред (поиск/пагинация, add/edit/delete).
   - `/legend` — просмотр/редактирование текстовой легенды.
   - `/settings` — управление ui-bindings (порядок, метки, иконки, routeSlug, field packs).
-- **Ключевые компоненты**: `components/domain/strain-list`, `sample-list`, `storage-view` (подсветка ячейки из query), `photo-upload`.
+- **Ключевые компоненты**: 
+  - `components/domain/strain-list`, `sample-list` — списки штаммов и образцов
+  - `components/domain/sample-map` — интерактивная карта Leaflet для отображения местоположения образцов (SSR-safe через dynamic import)
+  - `storage-view` — подсветка ячейки из query
+  - `photo-upload` — загрузка фотографий образцов
+- **Карты**: Leaflet + react-leaflet для Sample detail pages, маркеры с попапами, OpenStreetMap tiles (без API ключа)
 - **API клиент**: `src/services/api.ts` — включает auth headers из localStorage, методы для strains/samples/storage/media/legend/ui-bindings/analytics.
 - **ReturnTo**: ссылки на штаммы/формы передают `?returnTo=...` для возврата.
 - **UI**: shadcn/ui, Tailwind; Badge/Select/Table/Card/Button.

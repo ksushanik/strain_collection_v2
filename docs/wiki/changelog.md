@@ -1,5 +1,10 @@
 # Changelog (кратко)
 
+## 2025-11-24
+- **Карты образцов**: интегрирована интерактивная карта Leaflet на Sample detail pages с маркерами и попапами (координаты из lat/lng).
+- Зависимости: `leaflet`, `react-leaflet`, `@types/leaflet`.
+- SSR-совместимость через dynamic import, использование OpenStreetMap без API ключа.
+
 ## 2025-11-23
 - AdminJS: пользователи/группы теперь работают с JSON permissions, действия логируются в аудит.
 - Seed: добавлены группы Admins/Managers/Viewers и пользователи с паролями `admin123` / `manager123` / `viewer123`.
