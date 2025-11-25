@@ -63,7 +63,7 @@ export class StrainsService {
     if (taxonomy) {
       where.OR = [
         ...(where.OR || []),
-        { otherTaxonomy: { contains: taxonomy, mode: 'insensitive' } },
+        { taxonomy16s: { contains: taxonomy, mode: 'insensitive' } },
       ];
     }
     if (sampleCode) {
@@ -80,8 +80,7 @@ export class StrainsService {
         { comments: { contains: search, mode: 'insensitive' } },
         { antibioticActivity: { contains: search, mode: 'insensitive' } },
         { genome: { contains: search, mode: 'insensitive' } },
-        { genome: { contains: search, mode: 'insensitive' } },
-        { otherTaxonomy: { contains: search, mode: 'insensitive' } },
+        { taxonomy16s: { contains: search, mode: 'insensitive' } },
         { biochemistry: { contains: search, mode: 'insensitive' } },
         { iuk: { contains: search, mode: 'insensitive' } },
       ];

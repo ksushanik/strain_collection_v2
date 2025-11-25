@@ -141,19 +141,12 @@ function StrainDetailContent({ id }: { id: string }) {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {strain.taxonomy16s && (
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                <span className="font-medium">Genus:</span>
-                                <span>{(strain.taxonomy16s as { genus?: string; species?: string })?.genus}</span>
-                                <span className="font-medium">Species:</span>
-                                <span>{(strain.taxonomy16s as { genus?: string; species?: string })?.species}</span>
+                        {strain.taxonomy16s ? (
+                            <div className="text-sm">
+                                <span className="font-medium italic">{strain.taxonomy16s}</span>
                             </div>
-                        )}
-                        {strain.otherTaxonomy && (
-                            <div className="pt-2 border-t">
-                                <span className="text-sm font-medium block mb-1">Other Taxonomy:</span>
-                                <p className="text-sm text-muted-foreground">{strain.otherTaxonomy}</p>
-                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">No taxonomy information</p>
                         )}
                     </CardContent>
                 </Card>

@@ -235,7 +235,7 @@ async function main() {
       data: {
         identifier: `STR-2024-${String(i).padStart(3, '0')}`,
         sampleId: samples[i % samples.length].id,
-        taxonomy16s: { genus: 'Bacterium', species: `species_${i}` },
+        taxonomy16s: `Bacterium species_${i}`,
         indexerInitials: 'TEST',
         seq: Math.random() > 0.5,
         gramStain: Math.random() > 0.5 ? 'POSITIVE' : 'NEGATIVE',

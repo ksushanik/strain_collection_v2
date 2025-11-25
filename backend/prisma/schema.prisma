@@ -60,8 +60,8 @@ model Strain {
   sampleId   Int    @map("sample_id")
 
   // Taxonomy
-  taxonomy16s   Json?   @map("taxonomy_16s")
-  otherTaxonomy String? @map("other_taxonomy")
+  taxonomy16s String? @map("taxonomy_16s") // e.g. "Bacillus subtilis"
+
 
   // Indexing
   indexerInitials String? @map("indexer_initials")

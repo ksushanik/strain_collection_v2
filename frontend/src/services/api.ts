@@ -77,8 +77,7 @@ export interface Strain {
         code: string;
         siteName?: string;
     };
-    taxonomy16s?: Record<string, unknown>;
-    otherTaxonomy?: string;
+    taxonomy16s?: string;
     indexerInitials?: string;
     collectionRcam?: string;
     seq: boolean;
