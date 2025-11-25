@@ -45,6 +45,22 @@ export class StrainQueryDto {
   pigmentSecretion?: boolean;
 
   @IsOptional()
+  @IsEnum(['POSITIVE', 'NEGATIVE'])
+  amylase?: 'POSITIVE' | 'NEGATIVE';
+
+  @IsOptional()
+  @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
+  isolationRegion?: 'RHIZOSPHERE' | 'ENDOSPHERE' | 'PHYLLOSPHERE' | 'SOIL' | 'OTHER';
+
+  @IsOptional()
+  @IsString()
+  biochemistry?: string;
+
+  @IsOptional()
+  @IsString()
+  iuk?: string;
+
+  @IsOptional()
   @IsString()
   sampleCode?: string;
 
@@ -68,6 +84,14 @@ export class StrainQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsEnum(['createdAt', 'identifier'])
+  sortBy?: 'createdAt' | 'identifier';
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  sortOrder?: 'asc' | 'desc';
 
   @IsOptional()
   @IsInt()

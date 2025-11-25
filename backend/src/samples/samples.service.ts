@@ -11,11 +11,13 @@ export class SamplesService {
   constructor(
     private prisma: PrismaService,
     private imagekitService: ImageKitService,
-  ) {}
+  ) { }
 
   async findAll(query: SampleQueryDto) {
     const {
       sampleType,
+      sampleTypeId,
+      subject,
       search,
       dateFrom,
       dateTo,
@@ -24,6 +26,8 @@ export class SamplesService {
       latMax,
       lngMin,
       lngMax,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
       page = 1,
       limit = 50,
     } = query;
@@ -61,13 +65,27 @@ export class SamplesService {
       where.lng = lngFilter as unknown as Prisma.FloatNullableFilter;
     }
 
+    if (sampleTypeId !== undefined) {
+      where.sampleTypeId = sampleTypeId;
+    }
+
+    if (subject) {
+      where.subject = { contains: subject, mode: 'insensitive' };
+    }
+
     if (search) {
       where.OR = [
         { code: { contains: search, mode: 'insensitive' } },
         { siteName: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
+        { subject: { contains: search, mode: 'insensitive' } },
       ];
     }
+
+    // Dynamic sorting
+    const orderBy: Prisma.SampleOrderByWithRelationInput = {
+      [sortBy]: sortOrder,
+    };
 
     const [samples, total] = await Promise.all([
       this.prisma.sample.findMany({
@@ -79,7 +97,7 @@ export class SamplesService {
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.sample.count({ where }),
     ]);
@@ -119,11 +137,48 @@ export class SamplesService {
   }
 
   async create(createSampleDto: CreateSampleDto) {
-    return this.prisma.sample.create({
-      data: {
-        ...createSampleDto,
-        collectedAt: new Date(createSampleDto.collectedAt),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Fetch Sample Type to get the slug
+      const sampleType = await tx.sampleTypeDictionary.findUnique({
+        where: { id: createSampleDto.sampleTypeId },
+      });
+
+      if (!sampleType) {
+        throw new NotFoundException(
+          `Sample Type with ID ${createSampleDto.sampleTypeId} not found`,
+        );
+      }
+
+      // 2. Create Sample with a temporary code
+      // We use a random string to satisfy the unique constraint temporarily
+      const tempCode = `TEMP_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+      const sample = await tx.sample.create({
+        data: {
+          ...createSampleDto,
+          code: tempCode,
+          sampleType: 'OTHER', // Default/Fallback for the enum field
+          collectedAt: new Date(createSampleDto.collectedAt),
+        },
+      });
+
+      // 3. Generate the final code based on ID
+      // Format: ID_SLUG_SUBJECT
+      const subjectSlug = createSampleDto.subject
+        ? createSampleDto.subject.replace(/\s+/g, '-')
+        : 'NoSubject';
+      const finalCode = `${sample.id}_${sampleType.slug}_${subjectSlug}`;
+
+      // 4. Update the sample with the final code
+      return tx.sample.update({
+        where: { id: sample.id },
+        data: { code: finalCode },
+        include: {
+          photos: {
+            select: { id: true },
+          },
+        },
+      });
     });
   }
 
@@ -203,5 +258,11 @@ export class SamplesService {
 
     // Delete from database
     return this.prisma.samplePhoto.delete({ where: { id: photoId } });
+  }
+
+  async getSampleTypes() {
+    return this.prisma.sampleTypeDictionary.findMany({
+      orderBy: { name: 'asc' },
+    });
   }
 }

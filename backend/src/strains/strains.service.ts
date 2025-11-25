@@ -11,7 +11,7 @@ import { StrainQueryDto } from './dto/strain-query.dto';
 
 @Injectable()
 export class StrainsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: StrainQueryDto) {
     const {
@@ -27,6 +27,12 @@ export class StrainsService {
       hasGenome,
       taxonomy,
       search,
+      amylase,
+      isolationRegion,
+      biochemistry,
+      iuk,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
       page = 1,
       limit = 50,
     } = query;
@@ -40,6 +46,11 @@ export class StrainsService {
     if (siderophores !== undefined) where.siderophores = siderophores;
     if (pigmentSecretion !== undefined)
       where.pigmentSecretion = pigmentSecretion;
+    if (amylase) where.amylase = amylase;
+    if (isolationRegion) where.isolationRegion = isolationRegion;
+    if (biochemistry)
+      where.biochemistry = { contains: biochemistry, mode: 'insensitive' };
+    if (iuk) where.iuk = { contains: iuk, mode: 'insensitive' };
     if (antibioticActivity)
       where.antibioticActivity = {
         contains: antibioticActivity,
@@ -69,9 +80,17 @@ export class StrainsService {
         { comments: { contains: search, mode: 'insensitive' } },
         { antibioticActivity: { contains: search, mode: 'insensitive' } },
         { genome: { contains: search, mode: 'insensitive' } },
+        { genome: { contains: search, mode: 'insensitive' } },
         { otherTaxonomy: { contains: search, mode: 'insensitive' } },
+        { biochemistry: { contains: search, mode: 'insensitive' } },
+        { iuk: { contains: search, mode: 'insensitive' } },
       ];
     }
+
+    // Dynamic sorting
+    const orderBy: Prisma.StrainOrderByWithRelationInput = {
+      [sortBy]: sortOrder,
+    };
 
     const [strains, total] = await Promise.all([
       this.prisma.strain.findMany({
@@ -83,7 +102,7 @@ export class StrainsService {
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.strain.count({ where }),
     ]);

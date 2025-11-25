@@ -46,7 +46,7 @@ export function SampleList() {
         })
     }, [search, filters, page])
 
-    if (loading) {
+    if (loading && !meta) {
         return (
             <div className="flex h-64 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -64,7 +64,11 @@ export function SampleList() {
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     />
-                    <MapPin className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    {loading ? (
+                        <Loader2 className="absolute right-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                        <MapPin className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    )}
                 </div>
                 <div className="flex gap-2">
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
@@ -88,16 +92,22 @@ export function SampleList() {
                             value={filters.sampleType}
                             onChange={(e) => { setFilters({ ...filters, sampleType: e.target.value }); setPage(1); }}
                         />
-                        <Input
-                            type="date"
-                            value={filters.dateFrom}
-                            onChange={(e) => { setFilters({ ...filters, dateFrom: e.target.value }); setPage(1); }}
-                        />
-                        <Input
-                            type="date"
-                            value={filters.dateTo}
-                            onChange={(e) => { setFilters({ ...filters, dateTo: e.target.value }); setPage(1); }}
-                        />
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">Collected After</span>
+                            <Input
+                                type="date"
+                                value={filters.dateFrom}
+                                onChange={(e) => { setFilters({ ...filters, dateFrom: e.target.value }); setPage(1); }}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">Collected Before</span>
+                            <Input
+                                type="date"
+                                value={filters.dateTo}
+                                onChange={(e) => { setFilters({ ...filters, dateTo: e.target.value }); setPage(1); }}
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-2">
                         <Button

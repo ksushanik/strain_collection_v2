@@ -8,11 +8,21 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateSampleDto {
+  @IsOptional()
   @IsString()
-  code: string;
+  code?: string;
 
+  @IsOptional()
   @IsEnum(['PLANT', 'ANIMAL', 'WATER', 'SOIL', 'OTHER'])
-  sampleType: 'PLANT' | 'ANIMAL' | 'WATER' | 'SOIL' | 'OTHER';
+  sampleType?: 'PLANT' | 'ANIMAL' | 'WATER' | 'SOIL' | 'OTHER';
+
+  @IsNumber()
+  @Type(() => Number)
+  sampleTypeId: number;
+
+  @IsOptional()
+  @IsString()
+  subject?: string;
 
   @IsString()
   siteName: string;

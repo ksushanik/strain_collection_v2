@@ -21,6 +21,7 @@ async function main() {
   await prisma.strain.deleteMany();
   await prisma.samplePhoto.deleteMany();
   await prisma.sample.deleteMany();
+  await prisma.sampleTypeDictionary.deleteMany();
 
   // 2. Create legend and UI bindings
   console.log('Creating UI bindings and legend...');
@@ -191,14 +192,31 @@ async function main() {
     },
   });
 
-  // 5. Create Samples (40 items)
+
+
+  // 5. Create Sample Types
+  console.log('Creating sample types...');
+  const sampleTypes = await Promise.all([
+    prisma.sampleTypeDictionary.create({ data: { name: 'Plant', slug: 'plant' } }),
+    prisma.sampleTypeDictionary.create({ data: { name: 'Animal', slug: 'animal' } }),
+    prisma.sampleTypeDictionary.create({ data: { name: 'Water', slug: 'water' } }),
+    prisma.sampleTypeDictionary.create({ data: { name: 'Soil', slug: 'soil' } }),
+    prisma.sampleTypeDictionary.create({ data: { name: 'Other', slug: 'other' } }),
+  ]);
+
+  // 6. Create Samples (40 items)
   console.log('Creating 40 samples...');
   const samples = [];
   for (let i = 1; i <= 40; i++) {
+    const typeIndex = i % 5;
+    const type = sampleTypes[typeIndex];
+    const subject = `Subject ${i}`;
     const sample = await prisma.sample.create({
       data: {
-        code: `24-SMP-${String(i).padStart(3, '0')}`,
-        sampleType: i % 2 === 0 ? 'SOIL' : 'PLANT',
+        code: `${i}_${type.slug}_${subject.replace(/\s+/g, '-')}`,
+        sampleType: 'OTHER', // Deprecated, keeping for now to avoid validation errors if any
+        sampleTypeId: type.id,
+        subject: subject,
         siteName: `Site ${Math.floor((i - 1) / 5) + 1}`,
         lat: 55.0 + Math.random(),
         lng: 37.0 + Math.random(),
@@ -209,7 +227,7 @@ async function main() {
     samples.push(sample);
   }
 
-  // 6. Create Strains (20 items)
+  // 7. Create Strains (20 items)
   console.log('Creating 20 strains...');
   const strains = [];
   for (let i = 1; i <= 20; i++) {
@@ -230,7 +248,7 @@ async function main() {
     strains.push(strain);
   }
 
-  // 7. Create Media
+  // 8. Create Media
   console.log('Creating media...');
   await prisma.media.createMany({
     data: [
@@ -239,7 +257,7 @@ async function main() {
     ],
   });
 
-  // 8. Create Storage Boxes (16 items)
+  // 9. Create Storage Boxes (16 items)
   console.log('Creating 16 storage boxes...');
   const boxes = [];
   for (let i = 1; i <= 16; i++) {
@@ -265,7 +283,7 @@ async function main() {
     boxes.push(box);
   }
 
-  // 9. Allocate strains to storage
+  // 10. Allocate strains to storage
   console.log('Allocating strains to storage...');
   // Allocate first 15 strains to the first box
   const box1Cells = boxes[0].cells;

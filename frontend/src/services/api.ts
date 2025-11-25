@@ -39,6 +39,8 @@ export interface Sample {
     id: number;
     code: string;
     sampleType: string;
+    sampleTypeId?: number;
+    subject?: string;
     siteName: string;
     lat?: number;
     lng?: number;
@@ -190,6 +192,14 @@ export const ApiService = {
         return response.json();
     },
 
+    async getSampleTypes(): Promise<Array<{ id: number; name: string; slug: string }>> {
+        const response = await request('/api/v1/samples/types');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch sample types: ${response.statusText}`);
+        }
+        return response.json();
+    },
+
     async getStrains(params?: {
         search?: string;
         sampleCode?: string;
@@ -199,6 +209,13 @@ export const ApiService = {
         antibioticActivity?: string;
         seq?: boolean;
         gramStain?: string;
+        phosphates?: boolean;
+        siderophores?: boolean;
+        pigmentSecretion?: boolean;
+        amylase?: string;
+        isolationRegion?: string;
+        biochemistry?: string;
+        iuk?: string;
         page?: number;
         limit?: number;
     }): Promise<PaginatedResponse<Strain>> {
@@ -211,6 +228,13 @@ export const ApiService = {
         if (params?.antibioticActivity) query.set('antibioticActivity', params.antibioticActivity);
         if (params?.seq !== undefined) query.set('seq', String(params.seq));
         if (params?.gramStain) query.set('gramStain', params.gramStain);
+        if (params?.phosphates !== undefined) query.set('phosphates', String(params.phosphates));
+        if (params?.siderophores !== undefined) query.set('siderophores', String(params.siderophores));
+        if (params?.pigmentSecretion !== undefined) query.set('pigmentSecretion', String(params.pigmentSecretion));
+        if (params?.amylase) query.set('amylase', params.amylase);
+        if (params?.isolationRegion) query.set('isolationRegion', params.isolationRegion);
+        if (params?.biochemistry) query.set('biochemistry', params.biochemistry);
+        if (params?.iuk) query.set('iuk', params.iuk);
         if (params?.page) query.set('page', params.page.toString());
         if (params?.limit) query.set('limit', params.limit.toString());
         const qs = query.toString();

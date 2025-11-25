@@ -17,6 +17,13 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -37,6 +44,15 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         genome: "",
         hasGenome: false,
         antibioticActivity: "",
+        seq: false,
+        gramStain: "",
+        phosphates: false,
+        siderophores: false,
+        pigmentSecretion: false,
+        amylase: "",
+        isolationRegion: "",
+        biochemistry: "",
+        iuk: "",
     })
 
     React.useEffect(() => {
@@ -48,6 +64,15 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             genome: filters.genome || undefined,
             hasGenome: filters.hasGenome ? true : undefined,
             antibioticActivity: filters.antibioticActivity || undefined,
+            seq: filters.seq ? true : undefined,
+            gramStain: filters.gramStain || undefined,
+            phosphates: filters.phosphates ? true : undefined,
+            siderophores: filters.siderophores ? true : undefined,
+            pigmentSecretion: filters.pigmentSecretion ? true : undefined,
+            amylase: filters.amylase || undefined,
+            isolationRegion: filters.isolationRegion || undefined,
+            biochemistry: filters.biochemistry || undefined,
+            iuk: filters.iuk || undefined,
             page,
             limit: 10,
         }).then(res => {
@@ -64,7 +89,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
 
-    if (loading) {
+    if (loading && !meta) {
         return (
             <div className="flex h-64 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -76,7 +101,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         <div className="space-y-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="relative flex-1 min-w-[220px] max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    {loading ? (
+                        <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    )}
                     <Input
                         placeholder="Search strains..."
                         className="pl-8"
@@ -126,12 +155,114 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             />
                             <label htmlFor="hasGenome" className="text-sm">Has genome</label>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="seq"
+                                checked={filters.seq}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, seq: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="seq" className="text-sm">Sequenced</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="phosphates"
+                                checked={filters.phosphates}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, phosphates: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="phosphates" className="text-sm">Phosphates</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="siderophores"
+                                checked={filters.siderophores}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, siderophores: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="siderophores" className="text-sm">Siderophores</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="pigmentSecretion"
+                                checked={filters.pigmentSecretion}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, pigmentSecretion: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="pigmentSecretion" className="text-sm">Pigment</label>
+                        </div>
+                        <Select
+                            value={filters.gramStain}
+                            onValueChange={(value) => { setFilters({ ...filters, gramStain: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Any Gram Stain" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Gram Stain</SelectItem>
+                                <SelectItem value="POSITIVE">Gram Positive</SelectItem>
+                                <SelectItem value="NEGATIVE">Gram Negative</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.amylase}
+                            onValueChange={(value) => { setFilters({ ...filters, amylase: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Amylase" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Amylase</SelectItem>
+                                <SelectItem value="POSITIVE">Positive</SelectItem>
+                                <SelectItem value="NEGATIVE">Negative</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.isolationRegion}
+                            onValueChange={(value) => { setFilters({ ...filters, isolationRegion: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Isolation Region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Region</SelectItem>
+                                <SelectItem value="RHIZOSPHERE">Rhizosphere</SelectItem>
+                                <SelectItem value="ENDOSPHERE">Endosphere</SelectItem>
+                                <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
+                                <SelectItem value="SOIL">Soil</SelectItem>
+                                <SelectItem value="OTHER">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input
+                            placeholder="Biochemistry contains"
+                            value={filters.biochemistry}
+                            onChange={(e) => { setFilters({ ...filters, biochemistry: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="IUK contains"
+                            value={filters.iuk}
+                            onChange={(e) => { setFilters({ ...filters, iuk: e.target.value }); setPage(1); }}
+                        />
                     </div>
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => { setFilters({ sampleCode: "", taxonomy: "", genome: "", hasGenome: false, antibioticActivity: "" }); setPage(1); }}
+                            onClick={() => {
+                                setFilters({
+                                    sampleCode: "",
+                                    taxonomy: "",
+                                    genome: "",
+                                    hasGenome: false,
+                                    antibioticActivity: "",
+                                    seq: false,
+                                    gramStain: "",
+                                    phosphates: false,
+                                    siderophores: false,
+                                    pigmentSecretion: false,
+                                    amylase: "",
+                                    isolationRegion: "",
+                                    biochemistry: "",
+                                    iuk: "",
+                                });
+                                setPage(1);
+                            }}
                         >
                             Reset
                         </Button>

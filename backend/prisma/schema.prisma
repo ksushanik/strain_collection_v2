@@ -13,6 +13,8 @@ model Sample {
   id           Int        @id @default(autoincrement())
   code         String     @unique // Constructed code, e.g. "24-PL-Rose"
   sampleType   SampleType @map("sample_type")
+  sampleTypeId Int?       @map("sample_type_id")
+  subject      String?
   siteName     String     @map("site_name")
   lat          Float?
   lng          Float?
@@ -23,10 +25,21 @@ model Sample {
   customFields Json?      @map("custom_fields")
 
   // Relations
-  photos  SamplePhoto[]
-  strains Strain[]
+  photos         SamplePhoto[]
+  strains        Strain[]
+  sampleTypeDict SampleTypeDictionary? @relation(fields: [sampleTypeId], references: [id])
 
   @@map("samples")
+}
+
+model SampleTypeDictionary {
+  id    Int    @id @default(autoincrement())
+  name  String
+  slug  String @unique
+
+  samples Sample[]
+
+  @@map("sample_types")
 }
 
 model SamplePhoto {

@@ -24,13 +24,20 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 const sampleSchema = z.object({
-    code: z.string().min(1, "Code is required"),
-    sampleType: z.string().min(1, "Type is required"),
+    sampleTypeId: z.number().min(1, "Type is required"),
+    subject: z.string().optional(),
     siteName: z.string().min(1, "Site name is required"),
     collectedAt: z.date(),
     lat: z.string().optional(),
@@ -48,12 +55,26 @@ interface SampleFormProps {
 export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
     const router = useRouter()
     const [loading, setLoading] = React.useState(false)
+    const [sampleTypes, setSampleTypes] = React.useState<Array<{ id: number; name: string; slug: string }>>([])
+
+    React.useEffect(() => {
+        async function fetchSampleTypes() {
+            try {
+                const types = await ApiService.getSampleTypes()
+                setSampleTypes(types)
+            } catch (error) {
+                console.error('Failed to fetch sample types:', error)
+                toast.error('Failed to load sample types')
+            }
+        }
+        fetchSampleTypes()
+    }, [])
 
     const form = useForm<SampleFormValues>({
         resolver: zodResolver(sampleSchema),
         defaultValues: {
-            code: initialData?.code || "",
-            sampleType: initialData?.sampleType || "",
+            sampleTypeId: (initialData as any)?.sampleTypeId || undefined,
+            subject: (initialData as any)?.subject || "",
             siteName: initialData?.siteName || "",
             collectedAt: initialData?.collectedAt ? new Date(initialData.collectedAt) : undefined,
             lat: initialData?.lat?.toString() || "",
@@ -95,13 +116,27 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                 <div className="grid gap-6 md:grid-cols-2">
                     <FormField
                         control={form.control}
-                        name="code"
+                        name="sampleTypeId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Sample Code</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g. SMP-2024-001" {...field} />
-                                </FormControl>
+                                <FormLabel>Sample Type</FormLabel>
+                                <Select
+                                    onValueChange={(value) => field.onChange(parseInt(value))}
+                                    value={field.value?.toString()}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select sample type" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {sampleTypes.map((type) => (
+                                            <SelectItem key={type.id} value={type.id.toString()}>
+                                                {type.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -109,12 +144,14 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
 
                     <FormField
                         control={form.control}
-                        name="sampleType"
+                        name="subject"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Sample Type</FormLabel>
+                                <FormLabel>Subject (Species/Object)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g. Soil, Water, Plant" {...field} />
+                                    <Input placeholder="e.g. Hedysarum zunduk
+
+ii" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -52,6 +52,23 @@ export class SampleQueryDto {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
+  sampleTypeId?: number;
+
+  @IsOptional()
+  @IsString()
+  subject?: string;
+
+  @IsOptional()
+  @IsEnum(['createdAt', 'collectedAt', 'code'])
+  sortBy?: 'createdAt' | 'collectedAt' | 'code';
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  sortOrder?: 'asc' | 'desc';
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
   page?: number;
 
   @IsOptional()
