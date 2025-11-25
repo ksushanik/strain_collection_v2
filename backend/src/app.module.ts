@@ -14,6 +14,7 @@ import { CaslModule } from './casl/casl.module';
 import { AuditModule } from './audit/audit.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MediaModule } from './media/media.module';
+import { TaxonomyModule } from './taxonomy/taxonomy.module';
 
 @Module({
   imports: [
@@ -32,9 +33,10 @@ import { MediaModule } from './media/media.module';
     AuditModule,
     AnalyticsModule,
     MediaModule,
+    TaxonomyModule,
     AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

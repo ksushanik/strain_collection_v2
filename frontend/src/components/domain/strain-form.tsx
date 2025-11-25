@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { TaxonomyAutocomplete } from "./taxonomy-autocomplete"
 
 const strainSchema = z.object({
     identifier: z.string().min(1, "Identifier is required"),
@@ -160,7 +161,11 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             <FormItem className="col-span-2">
                                 <FormLabel>Taxonomy (16S)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g. Bacillus subtilis" {...field} />
+                                    <TaxonomyAutocomplete
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Search NCBI Taxonomy (e.g. Bacillus subtilis)..."
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
