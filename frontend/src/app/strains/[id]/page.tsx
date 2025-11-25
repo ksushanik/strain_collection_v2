@@ -148,6 +148,14 @@ function StrainDetailContent({ id }: { id: string }) {
                         ) : (
                             <p className="text-sm text-muted-foreground">No taxonomy information</p>
                         )}
+                        {strain.otherTaxonomy && (
+                            <div className="pt-4 border-t">
+                                <span className="text-xs font-medium text-muted-foreground block mb-1">
+                                    Other Identification Methods:
+                                </span>
+                                <p className="text-sm">{strain.otherTaxonomy}</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 

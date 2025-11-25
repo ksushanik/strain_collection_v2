@@ -34,6 +34,7 @@ const strainSchema = z.object({
     identifier: z.string().min(1, "Identifier is required"),
     sampleId: z.string().min(1, "Sample is required"),
     taxonomy16s: z.string().optional(),
+    otherTaxonomy: z.string().optional(),
     gramStain: z.string().optional(),
     seq: z.boolean(),
     phosphates: z.boolean(),
@@ -63,6 +64,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
             identifier: initialData?.identifier || "",
             sampleId: initialData?.sampleId?.toString() || undefined,
             taxonomy16s: initialData?.taxonomy16s || "",
+            otherTaxonomy: initialData?.otherTaxonomy || "",
             gramStain: initialData?.gramStain || undefined,
             seq: initialData?.seq || false,
             phosphates: initialData?.phosphates || false,
@@ -91,18 +93,22 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                 features: data.features || undefined,
                 comments: data.comments || undefined,
                 taxonomy16s: data.taxonomy16s || undefined,
+                otherTaxonomy: data.otherTaxonomy || undefined,
             }
 
             if (isEdit && initialData) {
                 await ApiService.updateStrain(initialData.id, payload)
                 toast.success("Strain updated successfully")
+                // Go back to previous page (strain detail) and refresh
+                router.back()
+                router.refresh()
             } else {
                 await ApiService.createStrain(payload)
                 toast.success("Strain created successfully")
+                const target = returnTo || "/strains"
+                router.push(target)
+                router.refresh()
             }
-            const target = returnTo || "/strains"
-            router.push(target)
-            router.refresh()
         } catch (error) {
             console.error("Failed to save strain:", error)
             toast.error("Failed to save strain. Please try again.")
@@ -167,6 +173,26 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         placeholder="Search NCBI Taxonomy (e.g. Bacillus subtilis)..."
                                     />
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="otherTaxonomy"
+                        render={({ field }) => (
+                            <FormItem className="col-span-2">
+                                <FormLabel>Other Identification Methods</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="e.g. Biochemical tests, morphological characteristics..."
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    Non-DNA/RNA based identification methods
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}

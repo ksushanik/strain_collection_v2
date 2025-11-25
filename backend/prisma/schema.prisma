@@ -60,7 +60,8 @@ model Strain {
   sampleId   Int    @map("sample_id")
 
   // Taxonomy
-  taxonomy16s String? @map("taxonomy_16s") // e.g. "Bacillus subtilis"
+  taxonomy16s    String? @map("taxonomy_16s") // e.g. "Bacillus subtilis"
+  otherTaxonomy  String? @map("other_taxonomy") // Biochemical, morphological, etc.
 
 
   // Indexing

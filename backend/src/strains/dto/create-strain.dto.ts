@@ -21,6 +21,10 @@ export class CreateStrainDto {
 
   @IsOptional()
   @IsString()
+  otherTaxonomy?: string; // Biochemical, morphological, etc.
+
+  @IsOptional()
+  @IsString()
   indexerInitials?: string;
 
   @IsOptional()

@@ -78,6 +78,7 @@ export interface Strain {
         siteName?: string;
     };
     taxonomy16s?: string;
+    otherTaxonomy?: string;
     indexerInitials?: string;
     collectionRcam?: string;
     seq: boolean;
