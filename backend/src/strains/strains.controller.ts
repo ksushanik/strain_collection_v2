@@ -11,7 +11,10 @@ import {
   ValidationPipe,
   UseGuards,
   UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StrainsService } from './strains.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
@@ -28,7 +31,7 @@ import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StrainsController {
-  constructor(private readonly strainsService: StrainsService) {}
+  constructor(private readonly strainsService: StrainsService) { }
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))
@@ -82,5 +85,24 @@ export class StrainsController {
     @Param('mediaId', ParseIntPipe) mediaId: number,
   ) {
     return this.strainsService.removeMedia(id, mediaId);
+  }
+
+  @Post(':id/photos')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  @UseInterceptors(FileInterceptor('file'))
+  uploadPhoto(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    return this.strainsService.uploadPhoto(id, file);
+  }
+
+  @Delete('photos/:photoId')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  deletePhoto(@Param('photoId', ParseIntPipe) photoId: number) {
+    return this.strainsService.deletePhoto(photoId);
   }
 }

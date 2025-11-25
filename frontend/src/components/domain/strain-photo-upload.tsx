@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash } from "lucide-react"
-import { ApiService, SamplePhoto } from "@/services/api"
+import { ApiService, StrainPhoto } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -18,15 +18,15 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface PhotoUploadProps {
-    sampleId: number
-    existingPhotos?: SamplePhoto[]
+interface StrainPhotoUploadProps {
+    strainId: number
+    existingPhotos?: StrainPhoto[]
     onPhotosChange?: () => void
     readOnly?: boolean
 }
 
-export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, readOnly = false }: PhotoUploadProps) {
-    const [photos, setPhotos] = React.useState<SamplePhoto[]>(existingPhotos)
+export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChange, readOnly = false }: StrainPhotoUploadProps) {
+    const [photos, setPhotos] = React.useState<StrainPhoto[]>(existingPhotos)
     const [uploading, setUploading] = React.useState(false)
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
     const [dragActive, setDragActive] = React.useState(false)
@@ -124,7 +124,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
         setUploading(true)
         try {
             const uploadPromises = selectedFiles.map(file =>
-                ApiService.uploadSamplePhoto(sampleId, file)
+                ApiService.uploadStrainPhoto(strainId, file)
             )
 
             const newPhotos = await Promise.all(uploadPromises)
@@ -152,7 +152,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             const photoId = photoToDelete
             const photoIndex = photos.findIndex(p => p.id === photoId)
 
-            await ApiService.deleteSamplePhoto(photoId)
+            await ApiService.deleteStrainPhoto(photoId)
             setPhotos(prev => prev.filter(p => p.id !== photoId))
 
             // If we're in lightbox and deleting the current photo
@@ -313,7 +313,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                     />
                                     <Image
                                         src={getThumbnailUrl(photo.url)}
-                                        alt={photo.meta?.originalName || 'Sample photo'}
+                                        alt={photo.meta?.originalName || 'Strain photo'}
                                         fill
                                         className="object-cover transition-transform group-hover:scale-105 opacity-0"
                                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -394,7 +394,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                         />
                         <Image
                             src={getFullSizeUrl(currentPhoto.url)}
-                            alt={currentPhoto.meta?.originalName || 'Sample photo'}
+                            alt={currentPhoto.meta?.originalName || 'Strain photo'}
                             fill
                             className="object-contain rounded-lg opacity-0"
                             sizes="100vw"

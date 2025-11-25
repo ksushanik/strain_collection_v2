@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Strain } from "@/services/api"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 
 function EditStrainContent({ id }: { id: string }) {
     const searchParams = useSearchParams()
@@ -39,7 +40,7 @@ function EditStrainContent({ id }: { id: string }) {
     }
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
+        <div className="p-8 max-w-5xl mx-auto">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Edit Strain</h1>
                 <p className="text-muted-foreground">
@@ -47,12 +48,25 @@ function EditStrainContent({ id }: { id: string }) {
                 </p>
             </div>
 
-            <Card>
+            <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>Strain Details</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <StrainForm initialData={strain} isEdit returnTo={returnTo} />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Strain Photos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <StrainPhotoUpload
+                        strainId={strain.id}
+                        existingPhotos={strain.photos || []}
+                        onPhotosChange={() => ApiService.getStrain(strain.id).then(setStrain).catch(console.error)}
+                    />
                 </CardContent>
             </Card>
         </div>

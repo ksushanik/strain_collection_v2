@@ -111,6 +111,22 @@ export interface Strain {
         notes?: string | null;
         media: Media;
     }[];
+    photos?: StrainPhoto[];
+}
+
+export interface StrainPhoto {
+    id: number;
+    strainId: number;
+    url: string;
+    meta?: {
+        originalName?: string;
+        size?: number;
+        width?: number;
+        height?: number;
+        fileType?: string;
+        fileId?: string;
+    };
+    createdAt: string;
 }
 
 export interface Media {
@@ -538,5 +554,31 @@ export const ApiService = {
         const response = await request(`/api/v1/taxonomy/search?q=${encodeURIComponent(query)}`);
         if (!response.ok) return [];
         return response.json();
+    },
+
+    async uploadStrainPhoto(strainId: number, file: File): Promise<StrainPhoto> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await request(`/api/v1/strains/${strainId}/photos`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to upload strain photo: ${errorText}`);
+        }
+        return response.json();
+    },
+
+    async deleteStrainPhoto(photoId: number): Promise<void> {
+        const response = await request(`/api/v1/strains/photos/${photoId}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to delete strain photo: ${response.statusText}`);
+        }
     },
 };

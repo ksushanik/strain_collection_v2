@@ -6,6 +6,7 @@ import { SampleForm } from "@/components/domain/sample-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Sample } from "@/services/api"
 import { Loader2 } from "lucide-react"
+import { PhotoUpload } from "@/components/domain/photo-upload"
 
 export default function EditSamplePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
@@ -36,7 +37,7 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
     }
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
+        <div className="p-8 max-w-5xl mx-auto space-y-6">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Edit Sample</h1>
                 <p className="text-muted-foreground">
@@ -50,6 +51,19 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
                 </CardHeader>
                 <CardContent>
                     <SampleForm initialData={sample} isEdit />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Sample Photos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <PhotoUpload
+                        sampleId={sample.id}
+                        existingPhotos={(sample as any).photos || []}
+                        onPhotosChange={() => ApiService.getSample(sample.id).then(setSample).catch(console.error)}
+                    />
                 </CardContent>
             </Card>
         </div>

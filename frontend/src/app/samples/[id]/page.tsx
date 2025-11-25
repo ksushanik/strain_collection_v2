@@ -159,7 +159,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                             <PhotoUpload
                                 sampleId={sample.id}
                                 existingPhotos={sample.photos || []}
-                                onPhotosChange={loadSample}
+                                readOnly
                             />
                         </CardContent>
                     </Card>

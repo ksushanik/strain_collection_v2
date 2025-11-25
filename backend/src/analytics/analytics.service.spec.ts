@@ -45,7 +45,7 @@ describe('AnalyticsService', () => {
       freeCells: 60,
     });
     expect(prisma.strain.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 5, orderBy: { createdAt: 'desc' } }),
+      expect.objectContaining({ take: 9, orderBy: { createdAt: 'desc' } }),
     );
     expect(res.recentAdditions).toHaveLength(1);
   });

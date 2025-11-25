@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { StrainsService } from './strains.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
+import { ImageKitService } from '../services/imagekit.service';
 
 describe('StrainsService', () => {
   let service: StrainsService;
@@ -23,7 +24,17 @@ describe('StrainsService', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     const module = await Test.createTestingModule({
-      providers: [StrainsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        StrainsService,
+        { provide: PrismaService, useValue: prisma },
+        {
+          provide: ImageKitService,
+          useValue: {
+            uploadImage: jest.fn(),
+            deleteImage: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get(StrainsService);

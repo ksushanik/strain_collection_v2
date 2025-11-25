@@ -35,12 +35,19 @@ const strainSchema = z.object({
     sampleId: z.string().min(1, "Sample is required"),
     taxonomy16s: z.string().optional(),
     otherTaxonomy: z.string().optional(),
+    indexerInitials: z.string().optional(),
+    collectionRcam: z.string().optional(),
     gramStain: z.string().optional(),
     seq: z.boolean(),
+    genome: z.string().optional(),
+    biochemistry: z.string().optional(),
+    antibioticActivity: z.string().optional(),
+    iuk: z.string().optional(),
     phosphates: z.boolean(),
     siderophores: z.boolean(),
     pigmentSecretion: z.boolean(),
     amylase: z.string().optional(),
+    isolationRegion: z.string().optional(),
     features: z.string().optional(),
     comments: z.string().optional(),
 })
@@ -65,12 +72,19 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
             sampleId: initialData?.sampleId?.toString() || undefined,
             taxonomy16s: initialData?.taxonomy16s || "",
             otherTaxonomy: initialData?.otherTaxonomy || "",
+            indexerInitials: initialData?.indexerInitials || "",
+            collectionRcam: initialData?.collectionRcam || "",
             gramStain: initialData?.gramStain || undefined,
             seq: initialData?.seq || false,
+            genome: initialData?.genome || "",
+            biochemistry: initialData?.biochemistry || "",
+            antibioticActivity: initialData?.antibioticActivity || "",
+            iuk: initialData?.iuk || "",
             phosphates: initialData?.phosphates || false,
             siderophores: initialData?.siderophores || false,
             pigmentSecretion: initialData?.pigmentSecretion || false,
             amylase: initialData?.amylase || "",
+            isolationRegion: initialData?.isolationRegion || "",
             features: initialData?.features || "",
             comments: initialData?.comments || "",
         },
@@ -90,16 +104,22 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                 sampleId: data.sampleId ? parseInt(data.sampleId) : undefined,
                 gramStain: data.gramStain || undefined,
                 amylase: data.amylase || undefined,
+                isolationRegion: data.isolationRegion || undefined,
                 features: data.features || undefined,
                 comments: data.comments || undefined,
                 taxonomy16s: data.taxonomy16s || undefined,
                 otherTaxonomy: data.otherTaxonomy || undefined,
+                indexerInitials: data.indexerInitials || undefined,
+                collectionRcam: data.collectionRcam || undefined,
+                genome: data.genome || undefined,
+                biochemistry: data.biochemistry || undefined,
+                antibioticActivity: data.antibioticActivity || undefined,
+                iuk: data.iuk || undefined,
             }
 
             if (isEdit && initialData) {
                 await ApiService.updateStrain(initialData.id, payload)
                 toast.success("Strain updated successfully")
-                // Go back to previous page (strain detail) and refresh
                 router.back()
                 router.refresh()
             } else {
@@ -119,52 +139,102 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid gap-6 md:grid-cols-2">
-                    <FormField
-                        control={form.control}
-                        name="identifier"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Identifier</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="e.g. STR-2024-001" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="sampleId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Source Sample</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold">Basics</h3>
+                        <p className="text-xs text-muted-foreground">Core identifiers & origin</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="identifier"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Identifier</FormLabel>
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a sample" />
-                                        </SelectTrigger>
+                                        <Input placeholder="e.g. STR-2024-001" {...field} />
                                     </FormControl>
-                                    <SelectContent>
-                                        {samples.map((sample) => (
-                                            <SelectItem key={sample.id} value={sample.id.toString()}>
-                                                {sample.code} ({sample.siteName})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="sampleId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Source Sample</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a sample" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {samples.map((sample) => (
+                                                <SelectItem key={sample.id} value={sample.id.toString()}>
+                                                    {sample.code} ({sample.siteName})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="gramStain"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Gram Stain</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select result" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="POSITIVE">Positive (+)</SelectItem>
+                                            <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
+                                            <SelectItem value="VARIABLE">Variable</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="isolationRegion"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Isolation Region</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select region" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="RHIZOSPHERE">Rhizosphere</SelectItem>
+                                            <SelectItem value="ENDOSPHERE">Endosphere</SelectItem>
+                                            <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
+                                            <SelectItem value="SOIL">Soil</SelectItem>
+                                            <SelectItem value="OTHER">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <FormField
                         control={form.control}
                         name="taxonomy16s"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Taxonomy (16S)</FormLabel>
                                 <FormControl>
                                     <TaxonomyAutocomplete
@@ -177,12 +247,11 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="otherTaxonomy"
                         render={({ field }) => (
-                            <FormItem className="col-span-2">
+                            <FormItem>
                                 <FormLabel>Other Identification Methods</FormLabel>
                                 <FormControl>
                                     <Textarea
@@ -190,68 +259,76 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         {...field}
                                     />
                                 </FormControl>
-                                <FormDescription>
-                                    Non-DNA/RNA based identification methods
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="gramStain"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Gram Stain</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select result" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="POSITIVE">Positive (+)</SelectItem>
-                                        <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
-                                        <SelectItem value="VARIABLE">Variable</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="amylase"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Amylase</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select result" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="POSITIVE">Positive (+)</SelectItem>
-                                        <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormDescription>Non-DNA/RNA based identification methods</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                 </div>
 
-                <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Characteristics</h3>
-                    <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold">Growth & Traits</h3>
+                        <p className="text-xs text-muted-foreground">Quick toggles and enzymes</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <FormField
+                            control={form.control}
+                            name="amylase"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amylase</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select result" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="POSITIVE">Positive (+)</SelectItem>
+                                            <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="iuk"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>IUK / IAA</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Indole acetic acid production..." {...field} />
+                                    </FormControl>
+                                    <FormDescription className="text-xs">
+                                        Auxin/IAA production
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="antibioticActivity"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Antibiotic Activity</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. active vs E. coli" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         <FormField
                             control={form.control}
                             name="seq"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border bg-muted/30 p-3">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
@@ -259,10 +336,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel>Sequenced (SEQ)</FormLabel>
-                                        <FormDescription>
-                                            Has this strain been sequenced?
-                                        </FormDescription>
+                                        <FormLabel className="text-sm">Sequenced (SEQ)</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -271,7 +345,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             control={form.control}
                             name="phosphates"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border bg-muted/30 p-3">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
@@ -279,7 +353,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel>Phosphates</FormLabel>
+                                        <FormLabel className="text-sm">Phosphates</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -288,7 +362,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             control={form.control}
                             name="siderophores"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border bg-muted/30 p-3">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
@@ -296,7 +370,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel>Siderophores</FormLabel>
+                                        <FormLabel className="text-sm">Siderophores</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -305,7 +379,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                             control={form.control}
                             name="pigmentSecretion"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border bg-muted/30 p-3">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
@@ -313,7 +387,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel>Pigment Secretion</FormLabel>
+                                        <FormLabel className="text-sm">Pigment Secretion</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -321,41 +395,127 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="features"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Features</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Describe any special features..."
-                                        className="resize-none"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="comments"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Comments</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Additional notes..."
-                                        className="resize-none"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold">Genetics & Biochemistry</h3>
+                        <p className="text-xs text-muted-foreground">Genomic context and assays</p>
+                    </div>
+                    <div className="grid gap-4 lg:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="genome"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Genome</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Assembly info, accession numbers..."
+                                            className="resize-none min-h-[80px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="biochemistry"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Biochemistry</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Biochemical tests, metabolic capabilities..."
+                                            className="resize-none min-h-[80px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold">Notes</h3>
+                        <p className="text-xs text-muted-foreground">Context and free-form notes</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="features"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Features</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Describe any special features..."
+                                            className="resize-none min-h-[80px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="comments"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Comments</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Additional notes..."
+                                            className="resize-none min-h-[80px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-base font-semibold">Indexing</h3>
+                        <p className="text-xs text-muted-foreground">Who cataloged this strain</p>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                            control={form.control}
+                            name="indexerInitials"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Indexer Initials</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. AB, JS" {...field} />
+                                    </FormControl>
+                                    <FormDescription>Person who isolated this strain</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="collectionRcam"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Collection RCAM</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. RCAM-12345" {...field} />
+                                    </FormControl>
+                                    <FormDescription>Repository accession number</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
 
                 <div className="flex justify-end gap-4">
@@ -378,6 +538,6 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                     </Button>
                 </div>
             </form>
-        </Form >
+        </Form>
     )
 }

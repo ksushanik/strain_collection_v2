@@ -54,6 +54,18 @@ model SamplePhoto {
   @@map("sample_photos")
 }
 
+model StrainPhoto {
+  id        Int      @id @default(autoincrement())
+  strainId  Int      @map("strain_id")
+  url       String
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  strain Strain @relation(fields: [strainId], references: [id], onDelete: Cascade)
+
+  @@map("strain_photos")
+}
+
 model Strain {
   id         Int    @id @default(autoincrement())
   identifier String @unique
@@ -94,6 +106,7 @@ model Strain {
   sample  Sample          @relation(fields: [sampleId], references: [id])
   media   StrainMedia[]
   storage StrainStorage[]
+  photos  StrainPhoto[]
 
   @@map("strains")
 }

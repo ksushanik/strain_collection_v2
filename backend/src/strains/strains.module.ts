@@ -4,11 +4,13 @@ import { StrainsService } from './strains.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CaslModule } from '../casl/casl.module';
 import { AuditModule } from '../audit/audit.module';
+import { ImageKitService } from '../services/imagekit.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, CaslModule, AuditModule],
+  imports: [ConfigModule, PrismaModule, CaslModule, AuditModule],
   controllers: [StrainsController],
-  providers: [StrainsService],
+  providers: [StrainsService, ImageKitService],
   exports: [StrainsService],
 })
 export class StrainsModule {}

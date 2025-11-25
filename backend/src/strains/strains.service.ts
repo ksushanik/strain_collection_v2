@@ -8,10 +8,14 @@ import { Prisma } from '@prisma/client';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
+import { ImageKitService } from '../services/imagekit.service';
 
 @Injectable()
 export class StrainsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private imagekitService: ImageKitService,
+  ) { }
 
   async findAll(query: StrainQueryDto) {
     const {
@@ -136,6 +140,7 @@ export class StrainsService {
             },
           },
         },
+        photos: true,
       },
     });
 
@@ -220,5 +225,62 @@ export class StrainsService {
     });
 
     return { message: 'Media link removed' };
+  }
+
+  async uploadPhoto(strainId: number, file: Express.Multer.File) {
+    await this.findOne(strainId); // Check strain exists
+
+    try {
+      const result = await this.imagekitService.uploadImage(
+        file.buffer,
+        file.originalname,
+        `strain-photos/${strainId}`,
+      );
+
+      const photo = await this.prisma.strainPhoto.create({
+        data: {
+          strainId,
+          url: result.url,
+          meta: {
+            originalName: file.originalname,
+            size: result.size,
+            width: result.width,
+            height: result.height,
+            fileType: result.fileType,
+            fileId: result.fileId,
+          },
+        },
+      });
+
+      return photo;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new BadRequestException('Failed to upload photo: ' + message);
+    }
+  }
+
+  async deletePhoto(photoId: number) {
+    const photo = await this.prisma.strainPhoto.findUnique({
+      where: { id: photoId },
+    });
+
+    if (!photo) {
+      throw new NotFoundException(`Photo with ID ${photoId} not found`);
+    }
+
+    try {
+      const meta = photo.meta as { fileId?: string } | null;
+      if (meta?.fileId) {
+        await this.imagekitService.deleteImage(meta.fileId);
+      }
+    } catch (error) {
+      console.error('Failed to delete file from ImageKit:', error);
+    }
+
+    await this.prisma.strainPhoto.delete({
+      where: { id: photoId },
+    });
+
+    return { message: 'Photo deleted successfully' };
   }
 }

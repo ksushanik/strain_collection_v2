@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
@@ -184,6 +185,18 @@ function StrainDetailContent({ id }: { id: string }) {
                                 <p className="text-muted-foreground mt-1">{strain.antibioticActivity}</p>
                             </div>
                         )}
+                        {strain.iuk && (
+                            <div className="mt-3 text-sm">
+                                <span className="font-medium">IAA / IUK:</span>
+                                <p className="text-muted-foreground mt-1">{strain.iuk}</p>
+                            </div>
+                        )}
+                        {strain.isolationRegion && (
+                            <div className="mt-3 text-sm">
+                                <span className="font-medium">Isolation Region:</span>
+                                <p className="text-muted-foreground mt-1">{strain.isolationRegion}</p>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -226,6 +239,12 @@ function StrainDetailContent({ id }: { id: string }) {
                                 <p className="text-muted-foreground">{strain.features}</p>
                             </div>
                         )}
+                        {strain.biochemistry && (
+                            <div>
+                                <span className="font-medium block mb-1">Biochemistry:</span>
+                                <p className="text-muted-foreground whitespace-pre-line">{strain.biochemistry}</p>
+                            </div>
+                        )}
                         {strain.comments && (
                             <div>
                                 <span className="font-medium block mb-1">Comments:</span>
@@ -237,6 +256,10 @@ function StrainDetailContent({ id }: { id: string }) {
                             <span>{strain.indexerInitials || '-'}</span>
                             <span className="font-medium">RCAM:</span>
                             <span>{strain.collectionRcam || '-'}</span>
+                            <span className="font-medium">Isolation Region:</span>
+                            <span>{strain.isolationRegion || '-'}</span>
+                            <span className="font-medium">IAA / IUK:</span>
+                            <span>{strain.iuk || '-'}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -344,6 +367,19 @@ function StrainDetailContent({ id }: { id: string }) {
                     </CardContent>
                 </Card>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Strain Photos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <StrainPhotoUpload
+                        strainId={strain.id}
+                        existingPhotos={strain.photos || []}
+                        readOnly
+                    />
+                </CardContent>
+            </Card>
         </div>
     )
 }
