@@ -30,6 +30,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
+      forbidNonWhitelisted: true,
       transformOptions: { enableImplicitConversion: true },
       exceptionFactory: (errors) => {
         console.error('Validation errors:', JSON.stringify(errors, null, 2));

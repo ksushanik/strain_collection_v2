@@ -16,9 +16,10 @@ export class CreateSampleDto {
   @IsEnum(['PLANT', 'ANIMAL', 'WATER', 'SOIL', 'OTHER'])
   sampleType?: 'PLANT' | 'ANIMAL' | 'WATER' | 'SOIL' | 'OTHER';
 
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  sampleTypeId: number;
+  sampleTypeId?: number;
 
   @IsOptional()
   @IsString()

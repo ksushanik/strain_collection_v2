@@ -24,6 +24,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { useApiError } from "@/hooks/use-api-error"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -32,6 +33,7 @@ interface StrainListProps {
 
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const router = useRouter()
+    const { handleError } = useApiError()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -84,7 +86,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
-            console.error('Failed to load strains:', err)
+            handleError(err, "Не удалось загрузить список штаммов")
             setLoading(false)
         })
     }, [search, filters, page, sortBy, sortOrder])

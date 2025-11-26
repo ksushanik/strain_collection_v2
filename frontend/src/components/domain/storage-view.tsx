@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useApiError } from "@/hooks/use-api-error"
 
 type BoxSummary = {
   id: number;
@@ -44,6 +45,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { handleError } = useApiError()
   const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
@@ -84,8 +86,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setEditingBox(false)
       setBoxes(prev => prev.map(b => b.id === selectedBoxId ? { ...b, displayName: updated.displayName, description: updated.description } : b))
     } catch (err) {
-      console.error('Update failed', err)
-      alert('Failed to update box')
+      handleError(err, "Не удалось обновить бокс")
     } finally {
       setUpdatingBox(false)
     }
@@ -98,8 +99,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setBoxes(prev => prev.filter(b => b.id !== selectedBoxId))
       setSelectedBoxId(null)
     } catch (err: any) {
-      console.error('Delete failed', err)
-      alert(err.message)
+      handleError(err, "Не удалось удалить бокс")
     }
   }
 
@@ -108,15 +108,14 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     ApiService.getStorageBoxes().then(data => {
       setBoxes(data)
       setBoxes(data)
-      // if (data.length > 0) setSelectedBoxId(data[0].id) // Removed auto-selection
       setLoading(false)
     }).catch(err => {
-      console.error('Failed to load boxes:', err)
+      handleError(err, "Не удалось загрузить боксы")
       setLoading(false)
     })
     ApiService.getStrains({ limit: 500 })
       .then(res => setStrains(res.data))
-      .catch(err => console.error('Failed to load strains for allocation', err))
+      .catch(err => handleError(err, "Не удалось загрузить штаммы для выделения"))
   }, [])
 
   // Fetch Box details when selection changes
@@ -128,7 +127,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(null)
       setLoadingBox(false)
     }).catch(err => {
-      console.error('Failed to load box:', err)
+      handleError(err, "Не удалось загрузить ячейки")
       setLoadingBox(false)
     })
   }, [selectedBoxId])
@@ -191,7 +190,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(selectedCellCode)
       updateBoxListState(box)
     } catch (err) {
-      console.error('Allocate failed', err)
+      handleError(err, "Не удалось закрепить ячейку")
     } finally {
       setAllocating(false)
     }
@@ -212,7 +211,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       if (refreshed.length > 0) setSelectedBoxId(refreshed[0].id)
       setBoxForm({ displayName: "", rows: 9, cols: 9, description: "" })
     } catch (err) {
-      console.error('Failed to create box', err)
+      handleError(err, "Не удалось создать бокс")
     } finally {
       setCreating(false)
     }
@@ -228,7 +227,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(null)
       updateBoxListState(box)
     } catch (err) {
-      console.error('Unallocate failed', err)
+      handleError(err, "Не удалось освободить ячейку")
     } finally {
       setAllocating(false)
     }

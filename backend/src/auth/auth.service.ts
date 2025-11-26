@@ -15,16 +15,12 @@ export class AuthService {
     email: string,
     pass: string,
   ): Promise<(Omit<User, 'password'> & { role?: { key?: string } }) | null> {
-    console.log('Validating user:', email);
     const user = await this.usersService.findOne(email);
-    console.log('User found:', !!user);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      console.log('Password match');
       const { password: _password, ...result } = user;
       void _password;
       return result as Omit<User, 'password'> & { role?: { key?: string } };
     }
-    console.log('Invalid credentials');
     return null;
   }
 

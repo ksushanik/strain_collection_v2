@@ -30,6 +30,13 @@ Up-to-date documentation lives in [docs/wiki/index.md](docs/wiki/index.md) cover
 - Testing & Playbooks
 - Changelog
 
+To keep `frontend/public/wiki` in sync with the source wiki, run:
+```bash
+make sync-wiki
+# or
+node sync-wiki.mjs
+```
+
 ## 🏗️ Architecture
 
 ```
@@ -85,6 +92,11 @@ Up-to-date documentation lives in [docs/wiki/index.md](docs/wiki/index.md) cover
    npm run dev -- -p 3001
    ```
    Frontend will be available at http://localhost:3001
+
+## Testing
+
+- Backend: `cd backend && npm run lint && npm run test && npm run test:e2e`
+- Frontend smokes (Playwright): `cd frontend && npm run test:e2e` (install browsers first: `npx playwright install --with-deps chromium`)
 
 ## 📊 Database Schema
 

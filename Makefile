@@ -60,6 +60,10 @@ dev-backend:
 dev-frontend:
 	cd frontend && npm run dev
 
+# Sync wiki (docs/wiki -> frontend/public/wiki)
+sync-wiki:
+	node sync-wiki.mjs
+
 # Загрузить seed данные в production
 # Использует скомпилированный seed.js (см. backend/Dockerfile)
 seed-prod:

@@ -241,9 +241,10 @@ export class StorageService {
   }
 
   async updateBox(id: number, data: UpdateStorageBoxDto) {
+    const boxData = { ...data };
     return this.prisma.storageBox.update({
       where: { id },
-      data,
+      data: boxData,
       include: {
         cells: {
           include: {

@@ -24,9 +24,11 @@ export class AuditLogInterceptor implements NestInterceptor {
       ip?: string;
       get: (name: string) => string;
     }>();
+
     const user = request.user;
     const method = request.method;
     const url = request.url;
+
     const batchHeader = request.headers['x-batch-id'];
     const batchId =
       typeof batchHeader === 'string'
@@ -34,10 +36,12 @@ export class AuditLogInterceptor implements NestInterceptor {
         : Array.isArray(batchHeader)
           ? batchHeader[0]
           : undefined;
+
     const bodyObj =
       typeof request.body === 'object' && request.body !== null
         ? (request.body as Record<string, unknown>)
         : undefined;
+
     const commentHeader = request.headers['x-audit-comment'];
     const headerComment =
       typeof commentHeader === 'string'
@@ -50,11 +54,15 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap((data) => {
-        // Логируем только действия изменения
+        // Log only mutating actions
         if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && user) {
           try {
             const action = this.mapMethodToAction(method, url);
             const entity = this.extractEntity(url);
+            const sanitizedBody =
+              method === 'DELETE' || !bodyObj
+                ? undefined
+                : (this.sanitizePayload(bodyObj) as Prisma.InputJsonValue);
             const dataObj =
               typeof data === 'object' && data !== null
                 ? (data as Record<string, unknown>)
@@ -91,10 +99,7 @@ export class AuditLogInterceptor implements NestInterceptor {
                 entityId: entityId as number,
                 batchId,
                 comment: bodyComment ?? headerComment,
-                changes:
-                  method === 'DELETE'
-                    ? undefined
-                    : (bodyObj as unknown as Prisma.InputJsonValue),
+                changes: sanitizedBody,
                 metadata: {
                   url: request.url,
                   method: request.method,
@@ -104,7 +109,7 @@ export class AuditLogInterceptor implements NestInterceptor {
               });
             }
           } catch (error) {
-            // Не прерываем основной поток при ошибке аудита
+            // Do not break user flow due to audit failure
             console.error('Audit log error:', error);
           }
         }
@@ -133,7 +138,7 @@ export class AuditLogInterceptor implements NestInterceptor {
   }
 
   private extractEntity(url: string): string | null {
-    // Извлекаем первую часть после /api/v1/
+    // Works for routes like /api/v1/
     const match = url.match(/\/api\/v1\/([^/?]+)/);
     if (match) {
       const entity = match[1];
@@ -141,5 +146,50 @@ export class AuditLogInterceptor implements NestInterceptor {
       return singular.charAt(0).toUpperCase() + singular.slice(1);
     }
     return null;
+  }
+
+  private sanitizePayload(input: unknown): unknown {
+    const sensitiveKeys = [
+      'password',
+      'pwd',
+      'token',
+      'secret',
+      'key',
+      'privateKey',
+      'publicKey',
+      'authorization',
+      'cookie',
+      'image',
+      'file',
+      'content',
+      'data',
+    ];
+
+    const maxLength = 500;
+
+    const redact = (val: unknown): unknown => {
+      if (val === null || val === undefined) return val;
+      if (typeof val === 'string') {
+        if (val.length > maxLength) return '[REDACTED/LONG]';
+        return val;
+      }
+      if (typeof val === 'number' || typeof val === 'boolean') return val;
+      if (Array.isArray(val)) return val.map((v) => redact(v));
+      if (typeof val === 'object') {
+        const obj = val as Record<string, unknown>;
+        const result: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (sensitiveKeys.some((s) => k.toLowerCase().includes(s))) {
+            result[k] = '[REDACTED]';
+          } else {
+            result[k] = redact(v);
+          }
+        }
+        return result;
+      }
+      return '[UNSUPPORTED]';
+    };
+
+    return redact(input);
   }
 }

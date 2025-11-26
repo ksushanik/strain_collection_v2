@@ -10,9 +10,11 @@ import { Filter } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
+import { useApiError } from "@/hooks/use-api-error"
 
 export function SampleList() {
     const router = useRouter()
+    const { handleError } = useApiError()
     const [samples, setSamples] = React.useState<Sample[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -45,7 +47,7 @@ export function SampleList() {
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
-            console.error('Failed to load samples:', err)
+            handleError(err, "Не удалось загрузить образцы")
             setLoading(false)
         })
     }, [search, filters, page, sortBy, sortOrder])

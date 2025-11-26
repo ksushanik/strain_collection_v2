@@ -1,3 +1,5 @@
+process.env.SKIP_ADMIN = 'true';
+
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -9,6 +11,7 @@ describe('Storage e2e (limited smoke)', () => {
   let token: string;
   let boxId: number;
   let prisma: PrismaService;
+  let sampleTypeId: number;
 
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({
@@ -17,6 +20,24 @@ describe('Storage e2e (limited smoke)', () => {
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get(PrismaService);
+
+    await prisma.role.upsert({
+      where: { key: 'ADMIN' },
+      update: {},
+      create: { name: 'Admin', key: 'ADMIN' },
+    });
+    await prisma.role.upsert({
+      where: { key: 'USER' },
+      update: {},
+      create: { name: 'User', key: 'USER' },
+    });
+    const sampleType = await prisma.sampleTypeDictionary.upsert({
+      where: { slug: 'soil' },
+      update: {},
+      create: { name: 'Soil', slug: 'soil' },
+    });
+    sampleTypeId = sampleType.id;
+
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
@@ -36,7 +57,7 @@ describe('Storage e2e (limited smoke)', () => {
 
     await prisma.user.update({
       where: { email: registerRes.body.email },
-      data: { role: 'ADMIN' },
+      data: { role: { connect: { key: 'ADMIN' } } },
     });
 
     const loginRes = await request(app.getHttpServer())
@@ -56,7 +77,6 @@ describe('Storage e2e (limited smoke)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         displayName: 'Test Box',
-        storageType: 'FRIDGE_MINUS_20',
         rows: 9,
         cols: 9,
         description: 'e2e box',
@@ -82,6 +102,7 @@ describe('Storage e2e (limited smoke)', () => {
       .send({
         code: `E2E-SAMPLE-${Date.now()}`,
         sampleType: 'SOIL',
+        sampleTypeId,
         siteName: 'e2e site',
         collectedAt: new Date().toISOString(),
       })
