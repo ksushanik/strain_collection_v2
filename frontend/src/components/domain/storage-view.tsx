@@ -332,19 +332,41 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
             key={box.id}
             variant={selectedBoxId === box.id ? "default" : "outline"}
             onClick={() => setSelectedBoxId(box.id)}
-            className="h-24 w-full flex flex-col items-start justify-between p-4"
+            className="group h-24 w-full flex flex-col items-start justify-between p-4"
           >
-            <div className="flex items-center w-full">
-              <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
-              <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
-            </div>
-            {box._count && (
-              <Badge variant="secondary" className="w-full justify-center mt-2">
-                {box.occupiedCells !== undefined
-                  ? `${box.occupiedCells}/${box._count.cells}`
-                  : `${box._count.cells}`} cells
-              </Badge>
-            )}
+            {(() => {
+              const totalCells = box._count?.cells ?? 0
+              const occupiedCells = box.occupiedCells ?? 0
+              const ratio = totalCells ? occupiedCells / totalCells : 0
+              const occupancyClass = totalCells === 0
+                ? "bg-muted text-muted-foreground"
+                : ratio >= 0.75
+                  ? "bg-red-500 text-white"
+                  : ratio >= 0.5
+                    ? "bg-amber-500 text-white"
+                    : "bg-emerald-500 text-white"
+              return (
+                <>
+                  <div className="flex items-center w-full">
+                    <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
+                    <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
+                  </div>
+                  {box._count && (
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "w-full justify-center mt-2 transition-colors text-sm",
+                        occupancyClass,
+                        selectedBoxId === box.id && "ring-2 ring-offset-2 ring-primary",
+                        "group-hover:opacity-90"
+                      )}
+                    >
+                      {occupiedCells}/{box._count.cells} cells
+                    </Badge>
+                  )}
+                </>
+              )
+            })()}
           </Button>
         ))}
       </div>
