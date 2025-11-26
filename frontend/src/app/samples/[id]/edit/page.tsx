@@ -61,7 +61,7 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
                 <CardContent>
                     <PhotoUpload
                         sampleId={sample.id}
-                        existingPhotos={(sample as any).photos || []}
+                        existingPhotos={sample.photos || []}
                         onPhotosChange={() => ApiService.getSample(sample.id).then(setSample).catch(console.error)}
                     />
                 </CardContent>
