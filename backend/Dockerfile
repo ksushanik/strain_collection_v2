@@ -22,12 +22,8 @@ RUN npm run build
 # Compile seed script for production use
 RUN npx tsc prisma/seed.ts --outDir dist/prisma --module commonjs --esModuleInterop --skipLibCheck
 
-FROM base AS prod-deps
-COPY package*.json ./
-RUN npm ci --omit=dev
-COPY prisma ./prisma
-ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/strain_collection_v2?schema=public"
-RUN npx prisma generate
+FROM deps AS prod-deps
+RUN npm prune --omit=dev
 
 FROM base AS runner
 WORKDIR /app
