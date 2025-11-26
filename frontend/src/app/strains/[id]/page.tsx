@@ -3,13 +3,11 @@
 import * as React from "react"
 import { Suspense } from "react"
 import { ApiService, Strain, Media } from "@/services/api"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker, Trash2, Plus } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 
 function StrainDetailContent({ id }: { id: string }) {
@@ -17,21 +15,14 @@ function StrainDetailContent({ id }: { id: string }) {
     const searchParams = useSearchParams()
     const returnTo = searchParams?.get("returnTo") || undefined
     const [strain, setStrain] = React.useState<Strain | null>(null)
-    const [mediaOptions, setMediaOptions] = React.useState<Media[]>([])
     const [loading, setLoading] = React.useState(true)
-    const [savingMedia, setSavingMedia] = React.useState(false)
-    const [mediaForm, setMediaForm] = React.useState<{ mediaId?: number; notes?: string }>({})
 
     React.useEffect(() => {
         if (!id) return;
         const load = async () => {
             try {
-                const [strainData, mediaList] = await Promise.all([
-                    ApiService.getStrain(parseInt(id)),
-                    ApiService.getMedia({ page: 1, limit: 100 }),
-                ])
+                const strainData = await ApiService.getStrain(parseInt(id))
                 setStrain(strainData)
-                setMediaOptions(mediaList.data)
             } catch (err) {
                 console.error('Failed to load strain:', err)
             } finally {
@@ -47,36 +38,6 @@ function StrainDetailContent({ id }: { id: string }) {
             setStrain(updated)
         } catch (err) {
             console.error('Failed to refresh strain:', err)
-        }
-    }
-
-    const handleLinkMedia = async () => {
-        if (!strain || !mediaForm.mediaId) return
-        setSavingMedia(true)
-        try {
-            await ApiService.linkMediaToStrain(strain.id, {
-                mediaId: mediaForm.mediaId,
-                notes: mediaForm.notes,
-            })
-            await refreshStrain()
-            setMediaForm({})
-        } catch (err) {
-            console.error('Failed to link media', err)
-        } finally {
-            setSavingMedia(false)
-        }
-    }
-
-    const handleUnlinkMedia = async (mediaId: number) => {
-        if (!strain) return
-        setSavingMedia(true)
-        try {
-            await ApiService.unlinkMediaFromStrain(strain.id, mediaId)
-            await refreshStrain()
-        } catch (err) {
-            console.error('Failed to unlink media', err)
-        } finally {
-            setSavingMedia(false)
         }
     }
 
@@ -285,55 +246,12 @@ function StrainDetailContent({ id }: { id: string }) {
                                             )}
                                             {m.notes && <div className="text-muted-foreground text-xs mt-1">Notes: {m.notes}</div>}
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive"
-                                            onClick={() => handleUnlinkMedia(m.mediaId)}
-                                            disabled={savingMedia}
-                                            title="Remove"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
                                     </div>
                                 ))}
                             </div>
                         ) : (
                             <p className="text-muted-foreground">No media linked</p>
                         )}
-
-                        <div className="rounded border p-3 space-y-2">
-                            <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                                <Select
-                                    value={mediaForm.mediaId?.toString()}
-                                    onValueChange={(val) => setMediaForm((prev) => ({ ...prev, mediaId: parseInt(val) }))}
-                                >
-                                    <SelectTrigger className="md:w-64">
-                                        <SelectValue placeholder="Select media" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {mediaOptions.map((option) => (
-                                            <SelectItem key={option.id} value={option.id.toString()}>
-                                                {option.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Input
-                                    placeholder="Notes (optional)"
-                                    value={mediaForm.notes || ""}
-                                    onChange={(e) => setMediaForm((prev) => ({ ...prev, notes: e.target.value }))}
-                                />
-                                <Button
-                                    size="sm"
-                                    onClick={handleLinkMedia}
-                                    disabled={!mediaForm.mediaId || savingMedia}
-                                >
-                                    {savingMedia ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-                                    Link
-                                </Button>
-                            </div>
-                        </div>
                     </CardContent>
                 </Card>
 

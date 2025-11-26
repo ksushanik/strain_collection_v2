@@ -86,8 +86,8 @@ export class StrainQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'identifier'])
-  sortBy?: 'createdAt' | 'identifier';
+  @IsEnum(['createdAt', 'identifier', 'sampleCode', 'taxonomy16s'])
+  sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s';
 
   @IsOptional()
   @IsEnum(['asc', 'desc'])

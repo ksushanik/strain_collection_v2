@@ -59,8 +59,8 @@ export class SampleQueryDto {
   subject?: string;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'collectedAt', 'code'])
-  sortBy?: 'createdAt' | 'collectedAt' | 'code';
+  @IsEnum(['createdAt', 'collectedAt', 'code', 'siteName'])
+  sortBy?: 'createdAt' | 'collectedAt' | 'code' | 'siteName';
 
   @IsOptional()
   @IsEnum(['asc', 'desc'])

@@ -37,6 +37,8 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
     const [page, setPage] = React.useState(1)
+    const [sortBy, setSortBy] = React.useState<'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s'>('createdAt')
+    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
     const [filtersOpen, setFiltersOpen] = React.useState(false)
     const [filters, setFilters] = React.useState({
         sampleCode: "",
@@ -73,6 +75,8 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             isolationRegion: filters.isolationRegion || undefined,
             biochemistry: filters.biochemistry || undefined,
             iuk: filters.iuk || undefined,
+            sortBy,
+            sortOrder,
             page,
             limit: 10,
         }).then(res => {
@@ -83,7 +87,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             console.error('Failed to load strains:', err)
             setLoading(false)
         })
-    }, [search, filters, page])
+    }, [search, filters, page, sortBy, sortOrder])
 
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
@@ -113,7 +117,27 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap items-center">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Sort:</span>
+                        <select
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                            value={sortBy}
+                            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+                        >
+                            <option value="createdAt">Created</option>
+                            <option value="identifier">Identifier</option>
+                            <option value="sampleCode">Sample Code</option>
+                            <option value="taxonomy16s">Taxonomy</option>
+                        </select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); setPage(1); }}
+                        >
+                            {sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}
+                        </Button>
+                    </div>
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         Filters

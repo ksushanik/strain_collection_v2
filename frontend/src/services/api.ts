@@ -183,6 +183,8 @@ export const ApiService = {
         site?: string;
         dateFrom?: string;
         dateTo?: string;
+        sortBy?: 'createdAt' | 'collectedAt' | 'code' | 'siteName';
+        sortOrder?: 'asc' | 'desc';
     }): Promise<PaginatedResponse<Sample>> {
         const query = new URLSearchParams();
         if (params?.search) query.set('search', params.search);
@@ -192,6 +194,8 @@ export const ApiService = {
         if (params?.dateTo) query.set('dateTo', params.dateTo);
         if (params?.page) query.set('page', params.page.toString());
         if (params?.limit) query.set('limit', params.limit.toString());
+        if (params?.sortBy) query.set('sortBy', params.sortBy);
+        if (params?.sortOrder) query.set('sortOrder', params.sortOrder);
         const qs = query.toString();
         const response = await request(`/api/v1/samples${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
@@ -234,6 +238,8 @@ export const ApiService = {
         iuk?: string;
         page?: number;
         limit?: number;
+        sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s';
+        sortOrder?: 'asc' | 'desc';
     }): Promise<PaginatedResponse<Strain>> {
         const query = new URLSearchParams();
         if (params?.search) query.set('search', params.search);
@@ -253,6 +259,8 @@ export const ApiService = {
         if (params?.iuk) query.set('iuk', params.iuk);
         if (params?.page) query.set('page', params.page.toString());
         if (params?.limit) query.set('limit', params.limit.toString());
+        if (params?.sortBy) query.set('sortBy', params.sortBy);
+        if (params?.sortOrder) query.set('sortOrder', params.sortOrder);
         const qs = query.toString();
         const response = await request(`/api/v1/strains${qs ? `?${qs}` : ''}`);
         if (!response.ok) {

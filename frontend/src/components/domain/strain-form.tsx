@@ -392,7 +392,11 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                                 <FormItem>
                                     <FormLabel>Antibiotic Activity</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. active vs E. coli" {...field} />
+                                        <Textarea
+                                            placeholder="e.g. active vs E. coli, spectrum, assays..."
+                                            className="resize-none min-h-[96px]"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

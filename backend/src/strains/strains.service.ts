@@ -91,9 +91,10 @@ export class StrainsService {
     }
 
     // Dynamic sorting
-    const orderBy: Prisma.StrainOrderByWithRelationInput = {
-      [sortBy]: sortOrder,
-    };
+    const orderBy: Prisma.StrainOrderByWithRelationInput =
+      sortBy === 'sampleCode'
+        ? { sample: { code: sortOrder } }
+        : { [sortBy]: sortOrder } as Prisma.StrainOrderByWithRelationInput;
 
     const [strains, total] = await Promise.all([
       this.prisma.strain.findMany({

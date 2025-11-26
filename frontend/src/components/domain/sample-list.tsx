@@ -25,6 +25,8 @@ export function SampleList() {
         dateTo: "",
         sampleType: "",
     })
+    const [sortBy, setSortBy] = React.useState<'siteName' | 'createdAt' | 'collectedAt' | 'code'>('collectedAt')
+    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
     React.useEffect(() => {
         setLoading(true)
@@ -34,6 +36,8 @@ export function SampleList() {
             dateFrom: filters.dateFrom || undefined,
             dateTo: filters.dateTo || undefined,
             sampleType: filters.sampleType || undefined,
+            sortBy,
+            sortOrder,
             page,
             limit: 9,
         }).then(res => {
@@ -44,7 +48,7 @@ export function SampleList() {
             console.error('Failed to load samples:', err)
             setLoading(false)
         })
-    }, [search, filters, page])
+    }, [search, filters, page, sortBy, sortOrder])
 
     if (loading && !meta) {
         return (
@@ -70,7 +74,27 @@ export function SampleList() {
                         <MapPin className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Sort:</span>
+                        <select
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                            value={sortBy}
+                            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+                        >
+                            <option value="collectedAt">By collection date</option>
+                            <option value="createdAt">By created date</option>
+                            <option value="code">By sample code</option>
+                            <option value="siteName">By site</option>
+                        </select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); setPage(1); }}
+                        >
+                            {sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}
+                        </Button>
+                    </div>
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         Filters
@@ -81,17 +105,30 @@ export function SampleList() {
 
             {filtersOpen && (
                 <Card className="p-3 space-y-2">
-                    <div className="grid gap-2 md:grid-cols-4">
-                        <Input
-                            placeholder="Site name contains"
-                            value={filters.site}
-                            onChange={(e) => { setFilters({ ...filters, site: e.target.value }); setPage(1); }}
-                        />
-                        <Input
-                            placeholder="Sample type"
-                            value={filters.sampleType}
-                            onChange={(e) => { setFilters({ ...filters, sampleType: e.target.value }); setPage(1); }}
-                        />
+                    <div className="grid gap-3 md:grid-cols-4 items-center">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">Site name contains</span>
+                            <Input
+                                placeholder="e.g. Site 8"
+                                value={filters.site}
+                                onChange={(e) => { setFilters({ ...filters, site: e.target.value }); setPage(1); }}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-xs text-muted-foreground">Sample type</span>
+                            <select
+                                className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                                value={filters.sampleType}
+                                onChange={(e) => { setFilters({ ...filters, sampleType: e.target.value }); setPage(1); }}
+                            >
+                                <option value="">Any type</option>
+                                <option value="PLANT">Plant</option>
+                                <option value="ANIMAL">Animal</option>
+                                <option value="WATER">Water</option>
+                                <option value="SOIL">Soil</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-muted-foreground">Collected After</span>
                             <Input

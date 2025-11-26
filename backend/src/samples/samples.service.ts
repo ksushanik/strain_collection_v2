@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, SampleType } from '@prisma/client';
 import { CreateSampleDto } from './dto/create-sample.dto';
 import { UpdateSampleDto } from './dto/update-sample.dto';
 import { SampleQueryDto } from './dto/sample-query.dto';
@@ -157,7 +157,7 @@ export class SamplesService {
         data: {
           ...createSampleDto,
           code: tempCode,
-          sampleType: 'OTHER', // Default/Fallback for the enum field
+          sampleType: sampleType.slug.toUpperCase() as SampleType,
           collectedAt: new Date(createSampleDto.collectedAt),
         },
       });
@@ -188,6 +188,18 @@ export class SamplesService {
     const data: Prisma.SampleUpdateInput = { ...updateSampleDto };
     if (updateSampleDto.collectedAt) {
       data.collectedAt = new Date(updateSampleDto.collectedAt);
+    }
+
+    if (updateSampleDto.sampleTypeId !== undefined) {
+      const sampleType = await this.prisma.sampleTypeDictionary.findUnique({
+        where: { id: updateSampleDto.sampleTypeId },
+      });
+      if (!sampleType) {
+        throw new NotFoundException(
+          `Sample Type with ID ${updateSampleDto.sampleTypeId} not found`,
+        );
+      }
+      data.sampleType = sampleType.slug.toUpperCase() as SampleType;
     }
 
     return this.prisma.sample.update({
