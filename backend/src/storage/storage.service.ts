@@ -126,46 +126,73 @@ export class StorageService {
       throw new NotFoundException(`Strain with ID ${strainId} not found`);
     }
 
-    // If occupied: update primary flag if same strain, else reassign
-    if (cell.strain) {
-      const existing = await this.prisma.strainStorage.findUnique({
+    const allocation = await this.prisma.$transaction(async (tx) => {
+      const existingAllocations = await tx.strainStorage.findMany({
+        where: { strainId },
+        select: { id: true, isPrimary: true },
+      });
+      const currentPrimary = existingAllocations.find((a) => a.isPrimary);
+      const targetShouldBePrimary = isPrimary === true || !currentPrimary;
+
+      const existingInCell = await tx.strainStorage.findUnique({
         where: { cellId: cell.id },
       });
 
-      if (existing && existing.strainId === strainId) {
-        await this.prisma.strainStorage.update({
-          where: { id: existing.id },
-          data: { isPrimary },
+      if (existingInCell && existingInCell.strainId === strainId) {
+        const updated = await tx.strainStorage.update({
+          where: { id: existingInCell.id },
+          data: { isPrimary: targetShouldBePrimary },
         });
-        return this.prisma.strainStorage.findUnique({
-          where: { id: existing.id },
-          include: {
-            strain: { select: { id: true, identifier: true } },
-            cell: {
-              include: { box: { select: { id: true, displayName: true } } },
-            },
-          },
+
+        if (
+          targetShouldBePrimary &&
+          currentPrimary &&
+          currentPrimary.id !== updated.id
+        ) {
+          await tx.strainStorage.update({
+            where: { id: currentPrimary.id },
+            data: { isPrimary: false },
+          });
+        }
+
+        return updated;
+      }
+
+      if (existingInCell) {
+        await tx.strainStorage.delete({
+          where: { id: existingInCell.id },
         });
       }
 
-      // Reassign: remove old allocation, create new
-      await this.prisma.strainStorage.delete({
-        where: { cellId: cell.id },
+      await tx.storageCell.update({
+        where: { id: cell.id },
+        data: { status: 'OCCUPIED' },
       });
-    }
 
-    // Update cell status and create allocation
-    await this.prisma.storageCell.update({
-      where: { id: cell.id },
-      data: { status: 'OCCUPIED' },
+      const created = await tx.strainStorage.create({
+        data: {
+          strainId,
+          cellId: cell.id,
+          isPrimary: targetShouldBePrimary,
+        },
+      });
+
+      if (
+        targetShouldBePrimary &&
+        currentPrimary &&
+        currentPrimary.id !== created.id
+      ) {
+        await tx.strainStorage.update({
+          where: { id: currentPrimary.id },
+          data: { isPrimary: false },
+        });
+      }
+
+      return created;
     });
 
-    const allocation = await this.prisma.strainStorage.create({
-      data: {
-        strainId,
-        cellId: cell.id,
-        isPrimary,
-      },
+    return this.prisma.strainStorage.findUnique({
+      where: { id: allocation.id },
       include: {
         strain: {
           select: {
@@ -185,8 +212,6 @@ export class StorageService {
         },
       },
     });
-
-    return allocation;
   }
 
   async bulkAllocate(dto: BulkAllocateStrainDto) {
