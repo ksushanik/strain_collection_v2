@@ -3,14 +3,19 @@
 import { Suspense } from "react"
 import { StrainForm } from "@/components/domain/strain-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Loader2, Image as ImageIcon, Archive, Beaker } from "lucide-react"
+import { useState } from "react"
 
 function CreateStrainPageContent() {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const returnTo = searchParams?.get("returnTo") || undefined
+    const [formSubmitting, setFormSubmitting] = useState(false)
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
+        <div className="p-8 max-w-5xl mx-auto">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Create New Strain</h1>
                 <p className="text-muted-foreground">
@@ -18,14 +23,79 @@ function CreateStrainPageContent() {
                 </p>
             </div>
 
-            <Card>
+            <Card className="mb-6">
                 <CardHeader>
                     <CardTitle>Strain Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <StrainForm returnTo={returnTo} />
+                    <StrainForm
+                        returnTo={returnTo}
+                        formId="strain-form-create"
+                        showActions={false}
+                        onSubmittingChange={setFormSubmitting}
+                    />
                 </CardContent>
             </Card>
+
+            <Card className="mb-4">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Beaker className="h-4 w-4" />
+                        Growth Media
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    Связь с питательными средами станет доступна после создания штамма.
+                </CardContent>
+            </Card>
+
+            <Card className="mb-4">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Archive className="h-4 w-4" />
+                        Storage Allocation
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    Размещение по ячейкам можно добавить после сохранения штамма.
+                </CardContent>
+            </Card>
+
+            <Card className="mb-8">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <ImageIcon className="h-4 w-4" />
+                        Strain Photos
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground">
+                    Загрузка фотографий станет доступна после создания записи.
+                </CardContent>
+            </Card>
+
+            <div className="flex justify-end gap-3">
+                <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                        if (returnTo) {
+                            router.push(returnTo)
+                        } else {
+                            router.back()
+                        }
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    form="strain-form-create"
+                    disabled={formSubmitting}
+                >
+                    {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Strain
+                </Button>
+            </div>
         </div>
     )
 }

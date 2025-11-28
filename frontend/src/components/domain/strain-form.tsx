@@ -58,9 +58,19 @@ interface StrainFormProps {
     initialData?: Strain
     isEdit?: boolean
     returnTo?: string
+    formId?: string
+    showActions?: boolean
+    onSubmittingChange?: (isSubmitting: boolean) => void
 }
 
-export function StrainForm({ initialData, isEdit = false, returnTo }: StrainFormProps) {
+export function StrainForm({
+    initialData,
+    isEdit = false,
+    returnTo,
+    formId = "strain-form",
+    showActions = true,
+    onSubmittingChange,
+}: StrainFormProps) {
     const router = useRouter()
     const [sampleOptions, setSampleOptions] = React.useState<Array<{ id: number; code: string; siteName?: string; sampleType?: string }>>([])
     const [sampleSearch, setSampleSearch] = React.useState("")
@@ -153,6 +163,7 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
 
     async function onSubmit(data: StrainFormValues) {
         setLoading(true)
+        onSubmittingChange?.(true)
         try {
             const payload = {
                 ...data,
@@ -189,12 +200,13 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
             toast.error("Failed to save strain. Please try again.")
         } finally {
             setLoading(false)
+            onSubmittingChange?.(false)
         }
     }
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="text-base font-semibold">Basics</h3>
@@ -598,25 +610,27 @@ export function StrainForm({ initialData, isEdit = false, returnTo }: StrainForm
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-4">
-                    <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => {
-                            if (returnTo) {
-                                router.push(returnTo)
-                            } else {
-                                router.back()
-                            }
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={loading}>
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? "Update Strain" : "Create Strain"}
-                    </Button>
-                </div>
+                {showActions && (
+                    <div className="flex justify-end gap-4">
+                        <Button
+                            variant="outline"
+                            type="button"
+                            onClick={() => {
+                                if (returnTo) {
+                                    router.push(returnTo)
+                                } else {
+                                    router.back()
+                                }
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={loading} form={formId}>
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isEdit ? "Update Strain" : "Create Strain"}
+                        </Button>
+                    </div>
+                )}
             </form>
         </Form>
     )

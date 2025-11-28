@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Media, Strain } from "@/services/api"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Plus, Trash2 } from "lucide-react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
@@ -45,10 +45,12 @@ type BoxDetail = {
 
 function EditStrainContent({ id }: { id: string }) {
     const searchParams = useSearchParams()
+    const router = useRouter()
     const returnTo = searchParams?.get("returnTo") || undefined
     const { handleError } = useApiError()
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const [formSubmitting, setFormSubmitting] = React.useState(false)
     const [mediaOptions, setMediaOptions] = React.useState<Media[]>([])
     const [savingMedia, setSavingMedia] = React.useState(false)
     const [mediaForm, setMediaForm] = React.useState<{ mediaId?: number; notes?: string }>({})
@@ -231,7 +233,14 @@ function EditStrainContent({ id }: { id: string }) {
                     <CardTitle>Strain Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <StrainForm initialData={strain} isEdit returnTo={returnTo} />
+                    <StrainForm
+                        initialData={strain}
+                        isEdit
+                        returnTo={returnTo}
+                        formId="strain-form-edit"
+                        showActions={false}
+                        onSubmittingChange={setFormSubmitting}
+                    />
                 </CardContent>
             </Card>
 
@@ -417,7 +426,7 @@ function EditStrainContent({ id }: { id: string }) {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="mb-8">
                 <CardHeader>
                     <CardTitle>Strain Photos</CardTitle>
                 </CardHeader>
@@ -429,6 +438,30 @@ function EditStrainContent({ id }: { id: string }) {
                     />
                 </CardContent>
             </Card>
+
+            <div className="flex justify-end gap-3">
+                <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                        if (returnTo) {
+                            router.push(returnTo)
+                        } else {
+                            router.back()
+                        }
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    type="submit"
+                    form="strain-form-edit"
+                    disabled={formSubmitting}
+                >
+                    {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save changes
+                </Button>
+            </div>
         </div>
     )
 }

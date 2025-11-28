@@ -273,6 +273,24 @@ export class SamplesService {
   }
 
   async getSampleTypes() {
+    const defaults = [
+      { name: 'Plant', slug: 'plant' },
+      { name: 'Animal', slug: 'animal' },
+      { name: 'Water', slug: 'water' },
+      { name: 'Soil', slug: 'soil' },
+      { name: 'Other', slug: 'other' },
+    ];
+
+    await this.prisma.$transaction(
+      defaults.map((type) =>
+        this.prisma.sampleTypeDictionary.upsert({
+          where: { slug: type.slug },
+          update: {},
+          create: type,
+        }),
+      ),
+    );
+
     return this.prisma.sampleTypeDictionary.findMany({
       orderBy: { name: 'asc' },
     });
