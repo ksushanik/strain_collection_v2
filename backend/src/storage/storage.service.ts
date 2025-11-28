@@ -1,34 +1,46 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
+import {
+  AllocateStrainDto,
+  BulkAllocateStrainDto,
+} from './dto/allocate-strain.dto';
+import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
 
 @Injectable()
 export class StorageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAllBoxes() {
-    return this.prisma.storageBox.findMany({
-      include: {
-        _count: {
-          select: { cells: true },
+    return this.prisma.storageBox
+      .findMany({
+        include: {
+          _count: {
+            select: { cells: true },
+          },
+          cells: {
+            select: { status: true },
+          },
         },
-        cells: {
-          select: { status: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    }).then((boxes) =>
-      boxes.map((box) => {
-        const occupied = box.cells.filter((c) => c.status === 'OCCUPIED').length;
-        return {
-          ...box,
-          occupiedCells: occupied,
-          freeCells: box._count.cells - occupied,
-          cells: undefined,
-        };
-      }),
-    );
+        orderBy: { createdAt: 'desc' },
+      })
+      .then((boxes) =>
+        boxes.map((box) => {
+          const occupied = box.cells.filter(
+            (c) => c.status === 'OCCUPIED',
+          ).length;
+          return {
+            ...box,
+            occupiedCells: occupied,
+            freeCells: box._count.cells - occupied,
+            cells: undefined,
+          };
+        }),
+      );
   }
 
   async findBox(id: number) {
@@ -36,10 +48,7 @@ export class StorageService {
       where: { id },
       include: {
         cells: {
-          orderBy: [
-            { row: 'asc' },
-            { col: 'asc' },
-          ],
+          orderBy: [{ row: 'asc' }, { col: 'asc' }],
           include: {
             strain: {
               include: {
@@ -65,7 +74,7 @@ export class StorageService {
   }
 
   async createBox(createBoxDto: CreateStorageBoxDto) {
-    const { rows, cols, storageType, ...boxData } = createBoxDto;
+    const { rows, cols, ...boxData } = createBoxDto;
 
     if (![9, 10].includes(rows) || ![9, 10].includes(cols)) {
       throw new BadRequestException('Rows and cols must be either 9 or 10');
@@ -103,7 +112,9 @@ export class StorageService {
     });
 
     if (!cell) {
-      throw new NotFoundException(`Storage cell ${cellCode} in box ${boxId} not found`);
+      throw new NotFoundException(
+        `Storage cell ${cellCode} in box ${boxId} not found`,
+      );
     }
 
     // Check if strain exists
@@ -115,44 +126,73 @@ export class StorageService {
       throw new NotFoundException(`Strain with ID ${strainId} not found`);
     }
 
-    // If occupied: update primary flag if same strain, else reassign
-    if (cell.strain) {
-      const existing = await this.prisma.strainStorage.findUnique({
+    const allocation = await this.prisma.$transaction(async (tx) => {
+      const existingAllocations = await tx.strainStorage.findMany({
+        where: { strainId },
+        select: { id: true, isPrimary: true },
+      });
+      const currentPrimary = existingAllocations.find((a) => a.isPrimary);
+      const targetShouldBePrimary = isPrimary === true || !currentPrimary;
+
+      const existingInCell = await tx.strainStorage.findUnique({
         where: { cellId: cell.id },
       });
 
-      if (existing && existing.strainId === strainId) {
-        await this.prisma.strainStorage.update({
-          where: { id: existing.id },
-          data: { isPrimary },
+      if (existingInCell && existingInCell.strainId === strainId) {
+        const updated = await tx.strainStorage.update({
+          where: { id: existingInCell.id },
+          data: { isPrimary: targetShouldBePrimary },
         });
-        return this.prisma.strainStorage.findUnique({
-          where: { id: existing.id },
-          include: {
-            strain: { select: { id: true, identifier: true } },
-            cell: { include: { box: { select: { id: true, displayName: true } } } },
-          },
+
+        if (
+          targetShouldBePrimary &&
+          currentPrimary &&
+          currentPrimary.id !== updated.id
+        ) {
+          await tx.strainStorage.update({
+            where: { id: currentPrimary.id },
+            data: { isPrimary: false },
+          });
+        }
+
+        return updated;
+      }
+
+      if (existingInCell) {
+        await tx.strainStorage.delete({
+          where: { id: existingInCell.id },
         });
       }
 
-      // Reassign: remove old allocation, create new
-      await this.prisma.strainStorage.delete({
-        where: { cellId: cell.id },
+      await tx.storageCell.update({
+        where: { id: cell.id },
+        data: { status: 'OCCUPIED' },
       });
-    }
 
-    // Update cell status and create allocation
-    await this.prisma.storageCell.update({
-      where: { id: cell.id },
-      data: { status: 'OCCUPIED' },
+      const created = await tx.strainStorage.create({
+        data: {
+          strainId,
+          cellId: cell.id,
+          isPrimary: targetShouldBePrimary,
+        },
+      });
+
+      if (
+        targetShouldBePrimary &&
+        currentPrimary &&
+        currentPrimary.id !== created.id
+      ) {
+        await tx.strainStorage.update({
+          where: { id: currentPrimary.id },
+          data: { isPrimary: false },
+        });
+      }
+
+      return created;
     });
 
-    const allocation = await this.prisma.strainStorage.create({
-      data: {
-        strainId,
-        cellId: cell.id,
-        isPrimary,
-      },
+    return this.prisma.strainStorage.findUnique({
+      where: { id: allocation.id },
       include: {
         strain: {
           select: {
@@ -172,8 +212,6 @@ export class StorageService {
         },
       },
     });
-
-    return allocation;
   }
 
   async bulkAllocate(dto: BulkAllocateStrainDto) {
@@ -225,5 +263,55 @@ export class StorageService {
     });
 
     return { message: `Strain deallocated successfully` };
+  }
+
+  async updateBox(id: number, data: UpdateStorageBoxDto) {
+    const boxData = { ...data };
+    return this.prisma.storageBox.update({
+      where: { id },
+      data: boxData,
+      include: {
+        cells: {
+          include: {
+            strain: {
+              include: {
+                strain: true,
+              },
+            },
+          },
+          orderBy: [{ row: 'asc' }, { col: 'asc' }],
+        },
+      },
+    });
+  }
+
+  async deleteBox(id: number) {
+    const box = await this.prisma.storageBox.findUnique({
+      where: { id },
+      include: {
+        cells: {
+          where: { status: 'OCCUPIED' },
+        },
+      },
+    });
+
+    if (!box) {
+      throw new NotFoundException(`Box with ID ${id} not found`);
+    }
+
+    if (box.cells.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete box with occupied cells. Please empty it first.',
+      );
+    }
+
+    return this.prisma.$transaction([
+      this.prisma.storageCell.deleteMany({
+        where: { boxId: id },
+      }),
+      this.prisma.storageBox.delete({
+        where: { id },
+      }),
+    ]);
   }
 }

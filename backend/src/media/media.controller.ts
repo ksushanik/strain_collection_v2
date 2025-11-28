@@ -46,10 +46,7 @@ export class MediaController {
 
   @Put(':id')
   @CheckPolicies((ability) => ability.can('update', 'Media'))
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateMediaDto,
-  ) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateMediaDto) {
     return this.mediaService.update(id, dto);
   }
 

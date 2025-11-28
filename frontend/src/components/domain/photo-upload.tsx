@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash } from "lucide-react"
 import { ApiService, SamplePhoto } from "@/services/api"
 import { Button } from "@/components/ui/button"
@@ -21,9 +22,10 @@ interface PhotoUploadProps {
     sampleId: number
     existingPhotos?: SamplePhoto[]
     onPhotosChange?: () => void
+    readOnly?: boolean
 }
 
-export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: PhotoUploadProps) {
+export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, readOnly = false }: PhotoUploadProps) {
     const [photos, setPhotos] = React.useState<SamplePhoto[]>(existingPhotos)
     const [uploading, setUploading] = React.useState(false)
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
@@ -31,6 +33,8 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
     const [selectedPhotoIndex, setSelectedPhotoIndex] = React.useState<number | null>(null)
     const [photoToDelete, setPhotoToDelete] = React.useState<number | null>(null)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const [loadedPreview, setLoadedPreview] = React.useState<Record<number, boolean>>({})
+    const [fullLoaded, setFullLoaded] = React.useState(false)
 
     React.useEffect(() => {
         setPhotos(existingPhotos)
@@ -136,6 +140,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
     }
 
     const handleDeleteClick = (photoId: number, e: React.MouseEvent) => {
+        if (readOnly) return
         e.stopPropagation()
         setPhotoToDelete(photoId)
     }
@@ -183,98 +188,109 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
         return `${url}?tr=w-1600,h-1600,c-at_max,q-90`
     }
 
+    const getBlurThumbnailUrl = (url: string) => {
+        return `${url}?tr=w-40,h-40,bl-20,q-20,fo-auto`
+    }
+
+    const getBlurFullUrl = (url: string) => {
+        return `${url}?tr=w-800,h-800,bl-30,q-20,c-at_max`
+    }
+
     const openLightbox = (index: number) => {
         setSelectedPhotoIndex(index)
+        setFullLoaded(false)
     }
 
     const closeLightbox = () => {
         setSelectedPhotoIndex(null)
     }
 
-    
+
 
     const currentPhoto = selectedPhotoIndex !== null ? photos[selectedPhotoIndex] : null
 
     return (
         <div className="space-y-6">
             {/* Upload Zone */}
-            <Card>
-                <CardContent className="pt-6">
-                    <div
-                        className={cn(
-                            "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
-                            dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25",
-                            uploading && "opacity-50 pointer-events-none"
-                        )}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                    >
-                        <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                        <div className="space-y-2">
-                            <p className="text-sm font-medium">
-                                Drag and drop images here, or click to browse
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                JPEG, PNG, GIF, WebP up to 5MB
-                            </p>
-                        </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept="image/jpeg,image/png,image/gif,image/webp"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={uploading}
+            {!readOnly && (
+                <Card>
+                    <CardContent className="pt-6">
+                        <div
+                            className={cn(
+                                "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+                                dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25",
+                                uploading && "opacity-50 pointer-events-none"
+                            )}
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
                         >
-                            Select Images
-                        </Button>
-                    </div>
-
-                    {/* Selected Files Preview */}
-                    {selectedFiles.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                            <div className="flex items-center justify-between">
+                            <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                            <div className="space-y-2">
                                 <p className="text-sm font-medium">
-                                    {selectedFiles.length} file(s) selected
+                                    Drag and drop images here, or click to browse
                                 </p>
-                                <Button
-                                    onClick={uploadPhotos}
-                                    disabled={uploading}
-                                    size="sm"
-                                >
-                                    {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Upload
-                                </Button>
+                                <p className="text-xs text-muted-foreground">
+                                    JPEG, PNG, GIF, WebP up to 5MB
+                                </p>
                             </div>
-                            <div className="grid grid-cols-4 gap-2">
-                                {selectedFiles.map((file, index) => (
-                                    <div key={index} className="relative group">
-                                        <div className="aspect-square rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-                                            <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                                        </div>
-                                        <button
-                                            onClick={() => removeSelectedFile(index)}
-                                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </button>
-                                        <p className="text-xs truncate mt-1">{file.name}</p>
-                                    </div>
-                                ))}
-                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept="image/jpeg,image/png,image/gif,image/webp"
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="mt-4"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                            >
+                                Select Images
+                            </Button>
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+
+                        {/* Selected Files Preview */}
+                        {selectedFiles.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-medium">
+                                        {selectedFiles.length} file(s) selected
+                                    </p>
+                                    <Button
+                                        onClick={uploadPhotos}
+                                        disabled={uploading}
+                                        size="sm"
+                                    >
+                                        {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Upload
+                                    </Button>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {selectedFiles.map((file, index) => (
+                                        <div key={index} className="relative group">
+                                            <div className="aspect-square rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                                                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                            </div>
+                                            <button
+                                                onClick={() => removeSelectedFile(index)}
+                                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                            <p className="text-xs truncate mt-1">{file.name}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Existing Photos Grid */}
             {photos.length > 0 && (
@@ -289,23 +305,35 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
                                 className="relative group cursor-pointer"
                                 onClick={() => openLightbox(index)}
                             >
-                                <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                                    <img
+                                <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                                    <div
+                                        className={`absolute inset-0 bg-center bg-cover filter blur-sm scale-105 transition-opacity ${loadedPreview[photo.id] ? 'opacity-0' : 'opacity-100'}`}
+                                        style={{ backgroundImage: `url(${getBlurThumbnailUrl(photo.url)})` }}
+                                        aria-hidden
+                                    />
+                                    <Image
                                         src={getThumbnailUrl(photo.url)}
                                         alt={photo.meta?.originalName || 'Sample photo'}
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        loading="lazy"
+                                        fill
+                                        className="object-cover transition-transform group-hover:scale-105 opacity-0"
+                                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        onLoadingComplete={(img) => {
+                                            img.classList.remove('opacity-0')
+                                            setLoadedPreview((prev) => ({ ...prev, [photo.id]: true }))
+                                        }}
                                     />
                                 </div>
-                                <Button
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={(e) => handleDeleteClick(photo.id, e)}
-                                    className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                                    title="Delete photo"
-                                >
-                                    <Trash className="h-4 w-4" />
-                                </Button>
+                                {!readOnly && (
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={(e) => handleDeleteClick(photo.id, e)}
+                                        className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
+                                        title="Delete photo"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                )}
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
                                     <ZoomIn className="h-8 w-8 text-white" />
                                 </div>
@@ -328,7 +356,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
             {/* Lightbox Modal */}
             {currentPhoto && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
                     onClick={closeLightbox}
                 >
                     {/* Close button */}
@@ -358,11 +386,22 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
                     )}
 
                     {/* Image */}
-                    <div className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
-                        <img
+                    <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
+                        <div
+                            className={`absolute inset-0 bg-center bg-contain bg-no-repeat filter blur-md scale-105 transition-opacity ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
+                            style={{ backgroundImage: `url(${getBlurFullUrl(currentPhoto.url)})` }}
+                            aria-hidden
+                        />
+                        <Image
                             src={getFullSizeUrl(currentPhoto.url)}
                             alt={currentPhoto.meta?.originalName || 'Sample photo'}
-                            className="max-w-full max-h-full object-contain rounded-lg"
+                            fill
+                            className="object-contain rounded-lg opacity-0"
+                            sizes="100vw"
+                            onLoadingComplete={(img) => {
+                                img.classList.remove('opacity-0')
+                                setFullLoaded(true)
+                            }}
                             onClick={(e) => e.stopPropagation()}
                         />
                     </div>
@@ -389,23 +428,24 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange }: P
                 </div>
             )}
 
-            {/* Delete Confirmation Dialog */}
-            <AlertDialog open={!!photoToDelete} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the photo.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-white hover:bg-destructive/90">
-                            Delete
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {!readOnly && (
+                <AlertDialog open={!!photoToDelete} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the photo.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-white hover:bg-destructive/90">
+                                Delete
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </div>
     )
 }

@@ -1,12 +1,21 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
+import { ImageKitService } from '../services/imagekit.service';
 
 @Injectable()
 export class StrainsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private imagekitService: ImageKitService,
+  ) { }
 
   async findAll(query: StrainQueryDto) {
     const {
@@ -22,11 +31,17 @@ export class StrainsService {
       hasGenome,
       taxonomy,
       search,
+      amylase,
+      isolationRegion,
+      biochemistry,
+      iuk,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
       page = 1,
       limit = 50,
     } = query;
 
-    const where: any = {};
+    const where: Prisma.StrainWhereInput = {};
 
     if (sampleId !== undefined) where.sampleId = sampleId;
     if (seq !== undefined) where.seq = seq;
@@ -35,8 +50,16 @@ export class StrainsService {
     if (siderophores !== undefined) where.siderophores = siderophores;
     if (pigmentSecretion !== undefined)
       where.pigmentSecretion = pigmentSecretion;
+    if (amylase) where.amylase = amylase;
+    if (isolationRegion) where.isolationRegion = isolationRegion;
+    if (biochemistry)
+      where.biochemistry = { contains: biochemistry, mode: 'insensitive' };
+    if (iuk) where.iuk = { contains: iuk, mode: 'insensitive' };
     if (antibioticActivity)
-      where.antibioticActivity = { contains: antibioticActivity, mode: 'insensitive' };
+      where.antibioticActivity = {
+        contains: antibioticActivity,
+        mode: 'insensitive',
+      };
     if (genome) where.genome = { contains: genome, mode: 'insensitive' };
     if (hasGenome !== undefined) {
       where.genome = hasGenome ? { not: null } : null;
@@ -44,12 +67,12 @@ export class StrainsService {
     if (taxonomy) {
       where.OR = [
         ...(where.OR || []),
-        { otherTaxonomy: { contains: taxonomy, mode: 'insensitive' } },
+        { taxonomy16s: { contains: taxonomy, mode: 'insensitive' } },
       ];
     }
     if (sampleCode) {
       where.sample = {
-        code: { contains: sampleCode, mode: 'insensitive' },
+        is: { code: { contains: sampleCode, mode: 'insensitive' } },
       };
     }
 
@@ -61,9 +84,17 @@ export class StrainsService {
         { comments: { contains: search, mode: 'insensitive' } },
         { antibioticActivity: { contains: search, mode: 'insensitive' } },
         { genome: { contains: search, mode: 'insensitive' } },
-        { otherTaxonomy: { contains: search, mode: 'insensitive' } },
+        { taxonomy16s: { contains: search, mode: 'insensitive' } },
+        { biochemistry: { contains: search, mode: 'insensitive' } },
+        { iuk: { contains: search, mode: 'insensitive' } },
       ];
     }
+
+    // Dynamic sorting
+    const orderBy: Prisma.StrainOrderByWithRelationInput =
+      sortBy === 'sampleCode'
+        ? { sample: { code: sortOrder } }
+        : { [sortBy]: sortOrder } as Prisma.StrainOrderByWithRelationInput;
 
     const [strains, total] = await Promise.all([
       this.prisma.strain.findMany({
@@ -75,7 +106,7 @@ export class StrainsService {
         },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.strain.count({ where }),
     ]);
@@ -110,6 +141,7 @@ export class StrainsService {
             },
           },
         },
+        photos: true,
       },
     });
 
@@ -157,7 +189,9 @@ export class StrainsService {
 
   async addMedia(strainId: number, mediaId: number, notes?: string) {
     await this.findOne(strainId);
-    const media = await this.prisma.media.findUnique({ where: { id: mediaId } });
+    const media = await this.prisma.media.findUnique({
+      where: { id: mediaId },
+    });
     if (!media) {
       throw new NotFoundException(`Media with ID ${mediaId} not found`);
     }
@@ -192,5 +226,62 @@ export class StrainsService {
     });
 
     return { message: 'Media link removed' };
+  }
+
+  async uploadPhoto(strainId: number, file: Express.Multer.File) {
+    await this.findOne(strainId); // Check strain exists
+
+    try {
+      const result = await this.imagekitService.uploadImage(
+        file.buffer,
+        file.originalname,
+        `strain-photos/${strainId}`,
+      );
+
+      const photo = await this.prisma.strainPhoto.create({
+        data: {
+          strainId,
+          url: result.url,
+          meta: {
+            originalName: file.originalname,
+            size: result.size,
+            width: result.width,
+            height: result.height,
+            fileType: result.fileType,
+            fileId: result.fileId,
+          },
+        },
+      });
+
+      return photo;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new BadRequestException('Failed to upload photo: ' + message);
+    }
+  }
+
+  async deletePhoto(photoId: number) {
+    const photo = await this.prisma.strainPhoto.findUnique({
+      where: { id: photoId },
+    });
+
+    if (!photo) {
+      throw new NotFoundException(`Photo with ID ${photoId} not found`);
+    }
+
+    try {
+      const meta = photo.meta as { fileId?: string } | null;
+      if (meta?.fileId) {
+        await this.imagekitService.deleteImage(meta.fileId);
+      }
+    } catch (error) {
+      console.error('Failed to delete file from ImageKit:', error);
+    }
+
+    await this.prisma.strainPhoto.delete({
+      where: { id: photoId },
+    });
+
+    return { message: 'Photo deleted successfully' };
   }
 }

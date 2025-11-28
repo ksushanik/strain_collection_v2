@@ -8,8 +8,10 @@
 - [Storage](storage.md)
 - [Media](media.md)
 - [Legend](legend.md)
-- [Тестирование](testing.md)
-- [Playbooks (как делать типовые операции)](playbooks.md)
+- [Maps Integration](maps.md)
+- [Audit Log](audit.md)
+- [Testing](testing.md)
+- [Playbooks](playbooks.md)
 - [Changelog](changelog.md)
 - [Правила обновления wiki](contrib.md)
 

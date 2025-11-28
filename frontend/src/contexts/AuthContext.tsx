@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User } from '../types/domain';
 
 interface AuthContextType {
@@ -17,19 +17,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-        if (token && storedUser) {
-            try {
+    React.useEffect(() => {
+        try {
+            const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+            if (token && storedUser) {
                 setUser(JSON.parse(storedUser) as User);
-            } catch {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+            } else {
                 setUser(null);
             }
+        } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }, []);
 
     const login = (token: string, userData: User) => {

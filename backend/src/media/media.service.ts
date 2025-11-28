@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
 import { MediaQueryDto } from './dto/media-query.dto';
@@ -11,7 +16,7 @@ export class MediaService {
   async findAll(query: MediaQueryDto) {
     const { search, page = 1, limit = 50 } = query;
 
-    const where: any = {};
+    const where: Prisma.MediaWhereInput = {};
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },

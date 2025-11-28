@@ -11,8 +11,11 @@ import {
   ValidationPipe,
   UseGuards,
   UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { StrainsService } from './strains.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
@@ -28,7 +31,7 @@ import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StrainsController {
-  constructor(private readonly strainsService: StrainsService) {}
+  constructor(private readonly strainsService: StrainsService) { }
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))
@@ -82,5 +85,47 @@ export class StrainsController {
     @Param('mediaId', ParseIntPipe) mediaId: number,
   ) {
     return this.strainsService.removeMedia(id, mediaId);
+  }
+
+  @Post(':id/photos')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      fileFilter: (req, file, cb) => {
+        const allowedMimes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+        ];
+        if (allowedMimes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException(
+              'Only image files (JPEG, PNG, GIF, WebP) are allowed',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  uploadPhoto(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    return this.strainsService.uploadPhoto(id, file);
+  }
+
+  @Delete('photos/:photoId')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  deletePhoto(@Param('photoId', ParseIntPipe) photoId: number) {
+    return this.strainsService.deletePhoto(photoId);
   }
 }

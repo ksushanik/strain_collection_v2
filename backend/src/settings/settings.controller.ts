@@ -20,7 +20,18 @@ export class SettingsController {
 
   @Put('ui-bindings')
   @CheckPolicies((ability) => ability.can('update', 'Settings'))
-  async updateUiBindings(@Body() bindings: any[]) {
+  async updateUiBindings(
+    @Body()
+    bindings: {
+      menuLabel: string;
+      profileKey: string;
+      icon?: string | null;
+      enabledFieldPacks?: string[];
+      routeSlug: string;
+      order?: number;
+      legendId?: number | null;
+    }[],
+  ) {
     return this.settingsService.updateUiBindings(bindings);
   }
 

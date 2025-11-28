@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -15,8 +16,17 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { useApiError } from "@/hooks/use-api-error"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -24,12 +34,17 @@ interface StrainListProps {
 }
 
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const router = useRouter()
+    const { handleError } = useApiError()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
     const [page, setPage] = React.useState(1)
+    const [sortBy, setSortBy] = React.useState<'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s'>('createdAt')
+    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
     const [filtersOpen, setFiltersOpen] = React.useState(false)
     const [filters, setFilters] = React.useState({
         sampleCode: "",
@@ -37,6 +52,15 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         genome: "",
         hasGenome: false,
         antibioticActivity: "",
+        seq: false,
+        gramStain: "",
+        phosphates: false,
+        siderophores: false,
+        pigmentSecretion: false,
+        amylase: "",
+        isolationRegion: "",
+        biochemistry: "",
+        iuk: "",
     })
 
     React.useEffect(() => {
@@ -48,6 +72,17 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             genome: filters.genome || undefined,
             hasGenome: filters.hasGenome ? true : undefined,
             antibioticActivity: filters.antibioticActivity || undefined,
+            seq: filters.seq ? true : undefined,
+            gramStain: filters.gramStain || undefined,
+            phosphates: filters.phosphates ? true : undefined,
+            siderophores: filters.siderophores ? true : undefined,
+            pigmentSecretion: filters.pigmentSecretion ? true : undefined,
+            amylase: filters.amylase || undefined,
+            isolationRegion: filters.isolationRegion || undefined,
+            biochemistry: filters.biochemistry || undefined,
+            iuk: filters.iuk || undefined,
+            sortBy,
+            sortOrder,
             page,
             limit: 10,
         }).then(res => {
@@ -55,16 +90,16 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
-            console.error('Failed to load strains:', err)
+            handleError(err, "Не удалось загрузить список штаммов")
             setLoading(false)
         })
-    }, [search, filters, page])
+    }, [search, filters, page, sortBy, sortOrder])
 
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
 
-    if (loading) {
+    if (loading && !meta) {
         return (
             <div className="flex h-64 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -76,21 +111,45 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         <div className="space-y-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="relative flex-1 min-w-[220px] max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    {loading ? (
+                        <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    )}
                     <Input
-                        placeholder="Search strains..."
+                        placeholder={t('searchPlaceholder')}
                         className="pl-8"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap items-center">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{t('sort')}</span>
+                        <select
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                            value={sortBy}
+                            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+                        >
+                            <option value="createdAt">{t('created')}</option>
+                            <option value="identifier">{t('identifier')}</option>
+                            <option value="sampleCode">{t('sampleCode')}</option>
+                            <option value="taxonomy16s">{t('taxonomy')}</option>
+                        </select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); setPage(1); }}
+                        >
+                            {sortOrder === 'asc' ? `${t('asc')} ↑` : `${t('desc')} ↓`}
+                        </Button>
+                    </div>
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
-                        Filters
+                        {t('filters')}
                     </Button>
                     <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
-                        Create Strain
+                        {t('create')}
                     </Button>
                 </div>
             </div>
@@ -126,14 +185,116 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             />
                             <label htmlFor="hasGenome" className="text-sm">Has genome</label>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="seq"
+                                checked={filters.seq}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, seq: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="seq" className="text-sm">Sequenced</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="phosphates"
+                                checked={filters.phosphates}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, phosphates: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="phosphates" className="text-sm">Phosphates</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="siderophores"
+                                checked={filters.siderophores}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, siderophores: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="siderophores" className="text-sm">Siderophores</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="pigmentSecretion"
+                                checked={filters.pigmentSecretion}
+                                onCheckedChange={(checked) => { setFilters({ ...filters, pigmentSecretion: checked === true }); setPage(1); }}
+                            />
+                            <label htmlFor="pigmentSecretion" className="text-sm">Pigment</label>
+                        </div>
+                        <Select
+                            value={filters.gramStain}
+                            onValueChange={(value) => { setFilters({ ...filters, gramStain: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Any Gram Stain" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Gram Stain</SelectItem>
+                                <SelectItem value="POSITIVE">Gram Positive</SelectItem>
+                                <SelectItem value="NEGATIVE">Gram Negative</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.amylase}
+                            onValueChange={(value) => { setFilters({ ...filters, amylase: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Amylase" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Amylase</SelectItem>
+                                <SelectItem value="POSITIVE">Positive</SelectItem>
+                                <SelectItem value="NEGATIVE">Negative</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.isolationRegion}
+                            onValueChange={(value) => { setFilters({ ...filters, isolationRegion: value === "ALL" ? "" : value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Isolation Region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Any Region</SelectItem>
+                                <SelectItem value="RHIZOSPHERE">Rhizosphere</SelectItem>
+                                <SelectItem value="ENDOSPHERE">Endosphere</SelectItem>
+                                <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
+                                <SelectItem value="SOIL">Soil</SelectItem>
+                                <SelectItem value="OTHER">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input
+                            placeholder="Biochemistry contains"
+                            value={filters.biochemistry}
+                            onChange={(e) => { setFilters({ ...filters, biochemistry: e.target.value }); setPage(1); }}
+                        />
+                        <Input
+                            placeholder="IUK contains"
+                            value={filters.iuk}
+                            onChange={(e) => { setFilters({ ...filters, iuk: e.target.value }); setPage(1); }}
+                        />
                     </div>
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => { setFilters({ sampleCode: "", taxonomy: "", genome: "", hasGenome: false, antibioticActivity: "" }); setPage(1); }}
+                            onClick={() => {
+                                setFilters({
+                                    sampleCode: "",
+                                    taxonomy: "",
+                                    genome: "",
+                                    hasGenome: false,
+                                    antibioticActivity: "",
+                                    seq: false,
+                                    gramStain: "",
+                                    phosphates: false,
+                                    siderophores: false,
+                                    pigmentSecretion: false,
+                                    amylase: "",
+                                    isolationRegion: "",
+                                    biochemistry: "",
+                                    iuk: "",
+                                });
+                                setPage(1);
+                            }}
                         >
-                            Reset
+                            {t('reset')}
                         </Button>
                     </div>
                 </Card>
@@ -141,17 +302,17 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
             <Card>
                 <CardHeader className="p-4">
-                    <CardTitle className="text-lg">All Strains</CardTitle>
+                    <CardTitle className="text-lg">{t('title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[150px]">Identifier</TableHead>
-                                <TableHead>Sample Source</TableHead>
-                                {showTaxonomy && <TableHead>Taxonomy (16S)</TableHead>}
-                                {showGrowth && <TableHead>Gram Stain</TableHead>}
-                                {showGrowth && <TableHead>Characteristics</TableHead>}
+                                <TableHead className="w-[150px]">{t('identifier')}</TableHead>
+                                <TableHead>{t('sampleSource')}</TableHead>
+                                {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
+                                {showGrowth && <TableHead>{t('gramStain')}</TableHead>}
+                                {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -172,9 +333,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     {showTaxonomy && (
                                         <TableCell>
                                             {strain.taxonomy16s ? (
-                                                <span className="italic">
-                                                    {(strain.taxonomy16s as any)?.genus} {(strain.taxonomy16s as any)?.species}
-                                                </span>
+                                                <span className="italic">{strain.taxonomy16s}</span>
                                             ) : (
                                                 <span className="text-muted-foreground">-</span>
                                             )}
@@ -206,7 +365,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>
-                    Page {meta?.page ?? 1} of {meta?.totalPages ?? 1} ({meta?.total ?? strains.length} total)
+                    {tCommon('pageInfo', { current: meta?.page ?? 1, total: meta?.totalPages ?? 1, count: meta?.total ?? strains.length })}
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -215,7 +374,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         disabled={(meta?.page ?? 1) <= 1 || loading}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
-                        Prev
+                        {tCommon('prev')}
                     </Button>
                     <Button
                         variant="outline"
@@ -223,7 +382,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         disabled={meta ? meta.page >= meta.totalPages : true}
                         onClick={() => setPage((p) => p + 1)}
                     >
-                        Next
+                        {tCommon('next')}
                     </Button>
                 </div>
             </div>

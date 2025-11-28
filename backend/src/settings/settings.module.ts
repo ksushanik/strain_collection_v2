@@ -8,5 +8,6 @@ import { CaslModule } from '../casl/casl.module';
   imports: [PrismaModule, CaslModule],
   controllers: [SettingsController],
   providers: [SettingsService],
+  exports: [SettingsService],
 })
 export class SettingsModule {}

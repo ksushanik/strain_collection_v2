@@ -7,11 +7,11 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
-const toOptionalBool = ({ value }: { value: any }) => {
+const toOptionalBool = ({ value }: { value: unknown }) => {
   if (value === undefined || value === null || value === '') return undefined;
   if (value === 'true' || value === true) return true;
   if (value === 'false' || value === false) return false;
-  return value;
+  return undefined;
 };
 
 export class StrainQueryDto {
@@ -45,6 +45,22 @@ export class StrainQueryDto {
   pigmentSecretion?: boolean;
 
   @IsOptional()
+  @IsEnum(['POSITIVE', 'NEGATIVE'])
+  amylase?: 'POSITIVE' | 'NEGATIVE';
+
+  @IsOptional()
+  @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
+  isolationRegion?: 'RHIZOSPHERE' | 'ENDOSPHERE' | 'PHYLLOSPHERE' | 'SOIL' | 'OTHER';
+
+  @IsOptional()
+  @IsString()
+  biochemistry?: string;
+
+  @IsOptional()
+  @IsString()
+  iuk?: string;
+
+  @IsOptional()
   @IsString()
   sampleCode?: string;
 
@@ -68,6 +84,14 @@ export class StrainQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsEnum(['createdAt', 'identifier', 'sampleCode', 'taxonomy16s'])
+  sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s';
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  sortOrder?: 'asc' | 'desc';
 
   @IsOptional()
   @IsInt()

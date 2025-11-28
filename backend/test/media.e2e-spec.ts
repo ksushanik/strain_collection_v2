@@ -1,3 +1,5 @@
+process.env.SKIP_ADMIN = 'true';
+
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -17,6 +19,18 @@ describe('Media e2e (smoke)', () => {
 
     app = moduleFixture.createNestApplication();
     prisma = moduleFixture.get(PrismaService);
+
+    await prisma.role.upsert({
+      where: { key: 'ADMIN' },
+      update: {},
+      create: { name: 'Admin', key: 'ADMIN' },
+    });
+    await prisma.role.upsert({
+      where: { key: 'USER' },
+      update: {},
+      create: { name: 'User', key: 'USER' },
+    });
+
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
@@ -35,7 +49,7 @@ describe('Media e2e (smoke)', () => {
 
     await prisma.user.update({
       where: { email: registerRes.body.email },
-      data: { role: 'ADMIN' },
+      data: { role: { connect: { key: 'ADMIN' } } },
     });
 
     const loginRes = await request(app.getHttpServer())

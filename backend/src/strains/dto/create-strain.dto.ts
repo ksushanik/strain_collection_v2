@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsOptional,
   IsEnum,
-  IsObject,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -17,12 +16,12 @@ export class CreateStrainDto {
   sampleId: number;
 
   @IsOptional()
-  @IsObject()
-  taxonomy16s?: Record<string, any>;
+  @IsString()
+  taxonomy16s?: string; // e.g. "Bacillus subtilis"
 
   @IsOptional()
   @IsString()
-  otherTaxonomy?: string;
+  otherTaxonomy?: string; // Biochemical, morphological, etc.
 
   @IsOptional()
   @IsString()

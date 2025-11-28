@@ -31,7 +31,9 @@ describe('AnalyticsService', () => {
       .mockResolvedValueOnce(90) // total cells
       .mockResolvedValueOnce(30); // occupied
     prisma.storageBox.count = jest.fn().mockResolvedValue(2);
-    prisma.strain.findMany = jest.fn().mockResolvedValue([{ id: 1, identifier: 'S1' }]);
+    prisma.strain.findMany = jest
+      .fn()
+      .mockResolvedValue([{ id: 1, identifier: 'S1' }]);
 
     const res = await service.overview();
 
@@ -43,9 +45,8 @@ describe('AnalyticsService', () => {
       freeCells: 60,
     });
     expect(prisma.strain.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 5, orderBy: { createdAt: 'desc' } }),
+      expect.objectContaining({ take: 9, orderBy: { createdAt: 'desc' } }),
     );
     expect(res.recentAdditions).toHaveLength(1);
   });
 });
-

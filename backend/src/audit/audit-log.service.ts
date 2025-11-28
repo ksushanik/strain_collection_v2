@@ -1,9 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuditLogService {
-  constructor(private prisma: PrismaService) {}
+  private retentionDays: number;
+
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    const raw = this.configService.get<number | string>(
+      'AUDIT_RETENTION_DAYS',
+    );
+    const parsed = Number(raw);
+    this.retentionDays = Number.isFinite(parsed) && parsed > 0 ? parsed : 90;
+  }
 
   async log(params: {
     userId: number;
@@ -17,11 +30,14 @@ export class AuditLogService {
       | 'CONFIG';
     entity: string;
     entityId: number;
-    changes?: any;
-    metadata?: any;
+    changes?: Prisma.InputJsonValue;
+    metadata?: Prisma.InputJsonValue;
     batchId?: string;
     comment?: string;
   }) {
+    // Fire-and-forget retention cleanup to keep audit table bounded
+    void this.pruneOldLogs();
+
     return this.prisma.auditLog.create({
       data: {
         userId: params.userId,
@@ -30,10 +46,25 @@ export class AuditLogService {
         entityId: params.entityId,
         batchId: params.batchId,
         comment: params.comment,
-        changes: params.changes || {},
-        metadata: params.metadata || {},
+        changes: params.changes ?? ({} as Prisma.JsonObject),
+        metadata: params.metadata ?? ({} as Prisma.JsonObject),
       },
     });
+  }
+
+  private async pruneOldLogs() {
+    const cutoff = new Date(
+      Date.now() - this.retentionDays * 24 * 60 * 60 * 1000,
+    );
+    try {
+      await this.prisma.auditLog.deleteMany({
+        where: { createdAt: { lt: cutoff } },
+      });
+    } catch (error) {
+      // Do not block the main flow on cleanup failures
+      // Consider adding a dedicated cron in production if needed.
+      console.error('Audit prune error:', error);
+    }
   }
 
   async findAll(filters?: {

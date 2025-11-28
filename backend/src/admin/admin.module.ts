@@ -1,68 +1,122 @@
 import { Module } from '@nestjs/common';
-import { AdminModule as AdminJSModule } from '@adminjs/nestjs';
-import AdminJS from 'adminjs';
-import { Database, Resource } from '@adminjs/prisma';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { UsersModule } from '../users/users.module';
+import { SettingsModule } from '../settings/settings.module';
+import { SettingsService } from '../settings/settings.service';
+import { AuditModule } from '../audit/audit.module';
+import { AuditLogService } from '../audit/audit-log.service';
 import { createAdminOptions } from './admin.options';
-
-AdminJS.registerAdapter({ Database, Resource });
+import { AdminSsoController } from './admin.sso.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { adminSessionOptions } from './admin-session.config';
 
 @Module({
   imports: [
-    AdminJSModule.createAdminAsync({
-      imports: [PrismaModule, AuthModule, UsersModule],
-      inject: [PrismaService, AuthService],
-      useFactory: async (prisma: PrismaService, authService: AuthService) => {
-        const dmmf = (prisma as any)._baseDmmf;
-        const adminOptions = createAdminOptions(prisma, dmmf);
+    Promise.all([
+      import('@adminjs/nestjs'),
+      import('@adminjs/prisma'),
+      import('adminjs'),
+    ]).then(
+      ([{ AdminModule }, { Database, Resource, getModelByName }, { default: AdminJS, ComponentLoader }]) => {
+        AdminJS.registerAdapter({ Database, Resource });
 
-        return {
-          adminJsOptions: {
-            ...adminOptions,
+        const componentLoader = new ComponentLoader();
+        const dashboard = componentLoader.add('Dashboard', './components/dashboard');
+        const jsonShow = componentLoader.add('JsonShow', './components/json-show');
+
+        return AdminModule.createAdminAsync({
+          imports: [
+            PrismaModule,
+            AuthModule,
+            UsersModule,
+            SettingsModule,
+            AuditModule,
+            ConfigModule,
+            JwtModule.registerAsync({
+              imports: [ConfigModule],
+              useFactory: (config: ConfigService) => ({
+                secret:
+                  config.get<string>('JWT_SECRET') ||
+                  'dev_secret_key_do_not_use_in_prod',
+                signOptions: { expiresIn: '7d' },
+              }),
+              inject: [ConfigService],
+            }),
+          ],
+          inject: [
+            PrismaService,
+            AuthService,
+            SettingsService,
+            AuditLogService,
+          ],
+          useFactory: (
+            prisma: PrismaService,
+            authService: AuthService,
+            settingsService: SettingsService,
+            auditLogService: AuditLogService,
+          ) => {
+            const adminOptions = createAdminOptions(
+              prisma,
+              (name: string) => getModelByName(name),
+              settingsService,
+              auditLogService,
+              null,
+              jsonShow,
+            );
+
+            return {
+              adminJsOptions: {
+                ...adminOptions,
+                componentLoader,
+                dashboard: {
+                  component: dashboard,
+                },
+              },
+              auth: {
+                cookieName: adminSessionOptions.name ?? 'adminjs',
+                cookiePassword: (adminSessionOptions.secret as string) ?? '',
+                authenticate: async (email: string, password: string) => {
+                  try {
+                    const user = await authService.validateUser(
+                      email,
+                      password,
+                    );
+                    const roleKey =
+                      (user as any)?.role?.key ??
+                      (typeof (user as any)?.role === 'string'
+                        ? (user as any).role
+                        : 'USER');
+                    if (!user || roleKey !== 'ADMIN') return null;
+                    return { email: user.email, role: roleKey };
+                  } catch {
+                    return null;
+                  }
+                },
+              },
+              sessionOptions: {
+                ...adminSessionOptions,
+              },
+            };
           },
-          auth: {
-            authenticate: async (email: string, password: string) => {
-              console.log('AdminJS: Attempting authentication for', email);
-
-              try {
-                const user = await authService.validateUser(email, password);
-
-                if (!user) {
-                  console.log('AdminJS: Invalid credentials');
-                  return null;
-                }
-
-                if (user.role !== 'ADMIN') {
-                  console.log('AdminJS: User is not an admin', user.role);
-                  return null;
-                }
-
-                console.log('AdminJS: Authentication successful');
-                return { email: user.email, role: user.role };
-              } catch (error) {
-                console.error('AdminJS: Authentication error', error);
-                return null;
-              }
-            },
-            cookieName: 'adminjs',
-            cookiePassword:
-              process.env.ADMIN_COOKIE_SECRET ||
-              'admin_secret_change_in_production',
-          },
-          sessionOptions: {
-            resave: false,
-            saveUninitialized: false,
-            secret:
-              process.env.ADMIN_SESSION_SECRET ||
-              'session_secret_change_in_production',
-          },
-        };
+        });
       },
+    ),
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        secret:
+          config.get<string>('JWT_SECRET') ||
+          'dev_secret_key_do_not_use_in_prod',
+        signOptions: { expiresIn: '7d' },
+      }),
+      inject: [ConfigService],
     }),
   ],
+  controllers: [AdminSsoController],
 })
-export class AdminModule {}
+export class AdminModule { }

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Leaflet CSS for maps */
+@import "leaflet/dist/leaflet.css";
 
 @plugin "tailwindcss-animate";
 

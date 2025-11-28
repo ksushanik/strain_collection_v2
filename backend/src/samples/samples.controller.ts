@@ -31,7 +31,13 @@ import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class SamplesController {
-  constructor(private readonly samplesService: SamplesService) {}
+  constructor(private readonly samplesService: SamplesService) { }
+
+  @Get('types')
+  @CheckPolicies((ability) => ability.can('read', 'Sample'))
+  getSampleTypes() {
+    return this.samplesService.getSampleTypes();
+  }
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'Sample'))

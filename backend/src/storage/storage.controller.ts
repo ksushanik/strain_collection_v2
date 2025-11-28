@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -12,7 +13,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StorageService } from './storage.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
-import { AllocateStrainDto, BulkAllocateStrainDto } from './dto/allocate-strain.dto';
+import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
+import {
+  AllocateStrainDto,
+  BulkAllocateStrainDto,
+} from './dto/allocate-strain.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
@@ -24,7 +29,7 @@ import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(private readonly storageService: StorageService) { }
 
   @Get('boxes')
   @CheckPolicies((ability) => ability.can('read', 'Storage'))
@@ -51,7 +56,11 @@ export class StorageController {
     @Param('cellCode') cellCode: string,
     @Body() allocateDto: Omit<AllocateStrainDto, 'boxId' | 'cellCode'>,
   ) {
-    return this.storageService.allocateStrain({ ...allocateDto, boxId, cellCode });
+    return this.storageService.allocateStrain({
+      ...allocateDto,
+      boxId,
+      cellCode,
+    });
   }
 
   @Post('boxes/:boxId/bulk-allocate')
@@ -76,5 +85,20 @@ export class StorageController {
     @Param('cellCode') cellCode: string,
   ) {
     return this.storageService.deallocateStrain(boxId, cellCode);
+  }
+
+  @Put('boxes/:id')
+  @CheckPolicies((ability) => ability.can('update', 'Storage'))
+  updateBox(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBoxDto: UpdateStorageBoxDto,
+  ) {
+    return this.storageService.updateBox(id, updateBoxDto);
+  }
+
+  @Delete('boxes/:id')
+  @CheckPolicies((ability) => ability.can('delete', 'Storage'))
+  deleteBox(@Param('id', ParseIntPipe) id: number) {
+    return this.storageService.deleteBox(id);
   }
 }

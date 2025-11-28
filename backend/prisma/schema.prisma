@@ -13,6 +13,8 @@ model Sample {
   id           Int        @id @default(autoincrement())
   code         String     @unique // Constructed code, e.g. "24-PL-Rose"
   sampleType   SampleType @map("sample_type")
+  sampleTypeId Int?       @map("sample_type_id")
+  subject      String?
   siteName     String     @map("site_name")
   lat          Float?
   lng          Float?
@@ -23,10 +25,21 @@ model Sample {
   customFields Json?      @map("custom_fields")
 
   // Relations
-  photos  SamplePhoto[]
-  strains Strain[]
+  photos         SamplePhoto[]
+  strains        Strain[]
+  sampleTypeDict SampleTypeDictionary? @relation(fields: [sampleTypeId], references: [id])
 
   @@map("samples")
+}
+
+model SampleTypeDictionary {
+  id    Int    @id @default(autoincrement())
+  name  String
+  slug  String @unique
+
+  samples Sample[]
+
+  @@map("sample_types")
 }
 
 model SamplePhoto {
@@ -41,14 +54,27 @@ model SamplePhoto {
   @@map("sample_photos")
 }
 
+model StrainPhoto {
+  id        Int      @id @default(autoincrement())
+  strainId  Int      @map("strain_id")
+  url       String
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  strain Strain @relation(fields: [strainId], references: [id], onDelete: Cascade)
+
+  @@map("strain_photos")
+}
+
 model Strain {
   id         Int    @id @default(autoincrement())
   identifier String @unique
   sampleId   Int    @map("sample_id")
 
   // Taxonomy
-  taxonomy16s   Json?   @map("taxonomy_16s")
-  otherTaxonomy String? @map("other_taxonomy")
+  taxonomy16s    String? @map("taxonomy_16s") // e.g. "Bacillus subtilis"
+  otherTaxonomy  String? @map("other_taxonomy") // Biochemical, morphological, etc.
+
 
   // Indexing
   indexerInitials String? @map("indexer_initials")
@@ -80,6 +106,7 @@ model Strain {
   sample  Sample          @relation(fields: [sampleId], references: [id])
   media   StrainMedia[]
   storage StrainStorage[]
+  photos  StrainPhoto[]
 
   @@map("strains")
 }
@@ -182,18 +209,14 @@ model LegendContent {
 
 // --- Authentication & RBAC ---
 
-enum Role {
-  ADMIN
-  MANAGER
-  USER
-}
-
 model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   password String // Hashed
   name     String?
-  role     Role    @default(USER)
+
+  roleId Int    @map("role_id")
+  role   Role   @relation(fields: [roleId], references: [id])
 
   groupId Int?   @map("group_id")
   group   Group? @relation(fields: [groupId], references: [id])
@@ -212,11 +235,26 @@ model Group {
   name        String  @unique
   description String?
   users       User[]
+  permissions Json     @default("{}")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("groups")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
+  name        String
+  description String?
+  permissions Json     @default("{}")
+  users       User[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("roles")
 }
 
 // --- Enums ---

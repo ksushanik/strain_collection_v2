@@ -1,0 +1,4 @@
+# Project Overview
+- Purpose: strain collection management platform with storage boxes/cells, strains, samples, media, legend/wiki, filters, auth/ACL; backend API (NestJS/Prisma) + frontend UI (Next.js App Router).
+- Structure: root split into `backend/` (NestJS modules for strains, samples, storage, settings, users, admin, audit, casl; shared services; Prisma schema/migrations/seed in `prisma/`; tests `src/**/*.spec.ts`, e2e `backend/test/`) and `frontend/` (Next.js App Router pages under `src/app`, domain/UI components under `components/`, API clients in `services/`, DTOs in `types/`, contexts for auth/ACL, helpers in `lib/`, assets in `public/`). Docs live in `docs/` (wiki, prompts) and root has compose/nginx/Makefile scripts.
+- Environments: Backend expects `DATABASE_URL`, runs on port 3000. Frontend uses `NEXT_PUBLIC_API_URL` pointing to backend (typically port 3001 for UI). Docker compose available for local DB.

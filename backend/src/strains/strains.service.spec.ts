@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { StrainsService } from './strains.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
+import { ImageKitService } from '../services/imagekit.service';
 
 describe('StrainsService', () => {
   let service: StrainsService;
@@ -26,6 +27,13 @@ describe('StrainsService', () => {
       providers: [
         StrainsService,
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: ImageKitService,
+          useValue: {
+            uploadImage: jest.fn(),
+            deleteImage: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -67,4 +75,3 @@ describe('StrainsService', () => {
     await expect(service.remove(123)).rejects.toBeInstanceOf(NotFoundException);
   });
 });
-

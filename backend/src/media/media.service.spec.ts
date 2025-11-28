@@ -14,17 +14,16 @@ describe('MediaService', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     const module = await Test.createTestingModule({
-      providers: [
-        MediaService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [MediaService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get(MediaService);
   });
 
   it('returns paginated media with search and meta', async () => {
-    prisma.media.findMany = jest.fn().mockResolvedValue([{ id: 1, name: 'LB' }]);
+    prisma.media.findMany = jest
+      .fn()
+      .mockResolvedValue([{ id: 1, name: 'LB' }]);
     prisma.media.count = jest.fn().mockResolvedValue(3);
 
     const result = await service.findAll({ search: 'lb', page: 2, limit: 1 });
@@ -46,4 +45,3 @@ describe('MediaService', () => {
     expect(result.meta).toEqual({ total: 3, page: 2, limit: 1, totalPages: 3 });
   });
 });
-
