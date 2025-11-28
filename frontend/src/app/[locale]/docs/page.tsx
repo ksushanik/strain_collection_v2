@@ -3,6 +3,7 @@
 import React from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 type IndexedDoc = {
   id: string
@@ -14,6 +15,7 @@ type IndexedDoc = {
 }
 
 export default function DocsPage() {
+  const t = useTranslations('Wiki')
   const [docs, setDocs] = React.useState<IndexedDoc[]>([])
   const [query, setQuery] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
@@ -46,7 +48,7 @@ export default function DocsPage() {
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Wiki</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground">
               Markdown из docs/wiki (volume), поиск по тексту.
             </p>

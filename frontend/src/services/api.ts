@@ -72,6 +72,7 @@ async function assertOk(response: Response, fallback: string) {
 export interface UiBinding {
   id: number;
   menuLabel: string;
+  translationKey?: string; // Optional key for frontend translation lookup
   profileKey: string;
   icon: string;
   enabledFieldPacks: string[];

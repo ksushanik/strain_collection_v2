@@ -2,17 +2,19 @@
 
 import * as React from "react"
 import { useParams } from "next/navigation"
-import { ApiService, UiBinding } from "@/services/api"
 import { Loader2 } from "lucide-react"
-
-// Domain components
+import { ApiService, UiBinding } from "@/services/api"
 import { StrainList } from "@/components/domain/strain-list"
 import { SampleList } from "@/components/domain/sample-list"
 import { StorageView } from "@/components/domain/storage-view"
+import { useTranslations } from "next-intl"
+import { translateDynamic } from "@/lib/translate-dynamic"
 
 export default function DynamicPage() {
     const params = useParams()
     const slug = params?.slug as string
+    const t = useTranslations('Common')
+    const tDynamic = useTranslations('DynamicPages')
 
     const [binding, setBinding] = React.useState<UiBinding | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -40,8 +42,8 @@ export default function DynamicPage() {
     if (!binding) {
         return (
             <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold">Page Not Found</h1>
-                <p className="text-muted-foreground">The requested section does not exist in the current configuration.</p>
+                <h1 className="text-2xl font-bold">{t('pageNotFound')}</h1>
+                <p className="text-muted-foreground">{t('pageNotFoundDescription')}</p>
             </div>
         )
     }
@@ -50,9 +52,9 @@ export default function DynamicPage() {
         <div className="p-8">
             <div className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{binding.menuLabel}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{translateDynamic(tDynamic, binding.translationKey, binding.menuLabel)}</h1>
                     <p className="text-muted-foreground">
-                        Profile: <span className="font-mono text-xs bg-muted px-1 rounded">{binding.profileKey}</span>
+                        {t('profile')}: <span className="font-mono text-xs bg-muted px-1 rounded">{binding.profileKey}</span>
                     </p>
                 </div>
             </div>

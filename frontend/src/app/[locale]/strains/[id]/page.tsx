@@ -7,13 +7,15 @@ import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Arch
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter, useSearchParams } from "next/navigation"
+import { notFound, useSearchParams } from "next/navigation"
+import { useRouter, Link } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const returnTo = searchParams?.get("returnTo") || undefined
+    const returnTo = searchParams?.get('returnTo')
+
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
 

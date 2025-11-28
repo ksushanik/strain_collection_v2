@@ -1,11 +1,14 @@
+
+
 "use client"
 
 import { Suspense } from "react"
 import { StrainForm } from "@/components/domain/strain-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Loader2, Image as ImageIcon, Archive, Beaker } from "lucide-react"
+import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
 
 function CreateStrainPageContent() {

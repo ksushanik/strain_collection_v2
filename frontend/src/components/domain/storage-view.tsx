@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname } from "@/i18n/routing"
+import { useSearchParams } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useApiError } from "@/hooks/use-api-error"
-
+import { useTranslations } from "next-intl"
 type BoxSummary = {
   id: number;
   displayName: string;
@@ -46,6 +47,8 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { handleError } = useApiError()
+  const t = useTranslations('Storage')
+  const tCommon = useTranslations('Common')
   const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
@@ -86,20 +89,20 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setEditingBox(false)
       setBoxes(prev => prev.map(b => b.id === selectedBoxId ? { ...b, displayName: updated.displayName, description: updated.description } : b))
     } catch (err) {
-      handleError(err, "Не удалось обновить бокс")
+      handleError(err, t('failedToUpdateBox'))
     } finally {
       setUpdatingBox(false)
     }
   }
 
   async function handleDeleteBox() {
-    if (!selectedBoxId || !confirm('Are you sure you want to delete this box? All cells must be empty.')) return
+    if (!selectedBoxId || !confirm(t('deleteConfirm'))) return
     try {
       await ApiService.deleteStorageBox(selectedBoxId)
       setBoxes(prev => prev.filter(b => b.id !== selectedBoxId))
       setSelectedBoxId(null)
     } catch (err: any) {
-      handleError(err, "Не удалось удалить бокс")
+      handleError(err, t('failedToDeleteBox'))
     }
   }
 
@@ -107,15 +110,14 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   React.useEffect(() => {
     ApiService.getStorageBoxes().then(data => {
       setBoxes(data)
-      setBoxes(data)
       setLoading(false)
     }).catch(err => {
-      handleError(err, "Не удалось загрузить боксы")
+      handleError(err, t('failedToLoadBoxes'))
       setLoading(false)
     })
     ApiService.getStrains({ limit: 500 })
       .then(res => setStrains(res.data))
-      .catch(err => handleError(err, "Не удалось загрузить штаммы для выделения"))
+      .catch(err => handleError(err, t('failedToLoadStrains')))
   }, [])
 
   // Fetch Box details when selection changes
@@ -127,7 +129,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(null)
       setLoadingBox(false)
     }).catch(err => {
-      handleError(err, "Не удалось загрузить ячейки")
+      handleError(err, t('failedToLoadCells'))
       setLoadingBox(false)
     })
   }, [selectedBoxId])
@@ -190,7 +192,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(selectedCellCode)
       updateBoxListState(box)
     } catch (err) {
-      handleError(err, "Не удалось закрепить ячейку")
+      handleError(err, t('failedToAllocate'))
     } finally {
       setAllocating(false)
     }
@@ -211,7 +213,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       if (refreshed.length > 0) setSelectedBoxId(refreshed[0].id)
       setBoxForm({ displayName: "", rows: 9, cols: 9, description: "" })
     } catch (err) {
-      handleError(err, "Не удалось создать бокс")
+      handleError(err, t('failedToCreateBox'))
     } finally {
       setCreating(false)
     }
@@ -227,7 +229,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedCellCode(null)
       updateBoxListState(box)
     } catch (err) {
-      handleError(err, "Не удалось освободить ячейку")
+      handleError(err, t('failedToUnallocate'))
     } finally {
       setAllocating(false)
     }
@@ -260,13 +262,13 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No Storage Boxes</CardTitle>
-          <CardDescription>Create your first storage box to start organizing strains</CardDescription>
+          <CardTitle>{t('noBoxes')}</CardTitle>
+          <CardDescription>{t('createFirstBox')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Create Storage Box
+            {t('createBox')}
           </Button>
         </CardContent>
       </Card>
@@ -277,13 +279,13 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Create Storage Box</CardTitle>
-          <CardDescription>Rows/cols must be 9 or 10.</CardDescription>
+          <CardTitle className="text-lg">{t('createBox')}</CardTitle>
+          <CardDescription>{t('rowsColsRule')}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-4">
           <div className="md:col-span-2">
             <Input
-              placeholder="Display name"
+              placeholder={t('displayNamePlaceholder')}
               value={boxForm.displayName}
               onChange={(e) => setBoxForm({ ...boxForm, displayName: e.target.value })}
             />
@@ -293,32 +295,32 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               value={boxForm.rows.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, rows: parseInt(val) })}
             >
-              <SelectTrigger><SelectValue placeholder="Rows" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('rows')} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="9">9 rows</SelectItem>
-                <SelectItem value="10">10 rows</SelectItem>
+                <SelectItem value="9">{t('rows9')}</SelectItem>
+                <SelectItem value="10">{t('rows10')}</SelectItem>
               </SelectContent>
             </Select>
             <Select
               value={boxForm.cols.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, cols: parseInt(val) })}
             >
-              <SelectTrigger><SelectValue placeholder="Cols" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('cols')} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="9">9 cols</SelectItem>
-                <SelectItem value="10">10 cols</SelectItem>
+                <SelectItem value="9">{t('cols9')}</SelectItem>
+                <SelectItem value="10">{t('cols10')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="md:col-span-4 flex gap-2">
             <Input
-              placeholder="Description (optional)"
+              placeholder={t('descriptionPlaceholder')}
               value={boxForm.description}
               onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })}
             />
             <Button onClick={handleCreateBox} disabled={creating || !boxForm.displayName.trim()}>
               {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              Create
+              {t('create')}
             </Button>
           </div>
         </CardContent>
@@ -350,7 +352,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               >
                 {box.occupiedCells !== undefined
                   ? `${box.occupiedCells}/${box._count.cells}`
-                  : `${box._count.cells}`} cells
+                  : `${box._count.cells}`} {tCommon('cells')}
               </Badge>
             )}
           </Button>
@@ -368,7 +370,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                     value={editForm.displayName}
                     onChange={e => setEditForm({ ...editForm, displayName: e.target.value })}
                     className="h-8"
-                    placeholder="Display Name"
+                    placeholder={t('displayNamePlaceholder')}
                   />
                   <Button size="sm" onClick={handleUpdateBox} disabled={updatingBox}>
                     {updatingBox ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -380,7 +382,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               ) : (
                 <>
                   <div className="flex items-center gap-2">
-                    <span>{selectedBox?.displayName || 'Loading...'}</span>
+                    <span>{selectedBox?.displayName || t('loading')}</span>
                     {selectedBox && (
                       <>
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingBox(true)}>
@@ -407,7 +409,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               <Input
                 value={editForm.description}
                 onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                placeholder="Description"
+                placeholder={t('descriptionPlaceholder')}
                 className="mt-2 h-8"
               />
             )}
@@ -445,7 +447,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                             : "bg-muted/30 border-muted-foreground/30 text-muted-foreground hover:bg-muted/60",
                           selectedCellCode === cell.cellCode && "ring-2 ring-primary"
                         )}
-                        title={isOccupied ? `Strain: ${strainId}` : `Empty ${cell.cellCode}`}
+                        title={isOccupied ? `${t('strain')}: ${strainId}` : `${t('empty')} ${cell.cellCode}`}
                         onClick={() => setSelectedCellCode(cell.cellCode)}
                       >
                         {isOccupied ? (
@@ -461,11 +463,11 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                 <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground justify-center">
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded border bg-background" />
-                    <span>Free</span>
+                    <span>{t('free')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded border border-green-300 bg-green-100 dark:bg-green-900/30 dark:border-green-800" />
-                    <span>Occupied</span>
+                    <span>{t('occupied')}</span>
                   </div>
                 </div>
 
@@ -473,18 +475,18 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                   <div className="mt-6 rounded border p-4 bg-muted/10">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">Cell</p>
+                        <p className="text-sm text-muted-foreground">{t('cell')}</p>
                         <p className="text-lg font-semibold">{selectedCell.cellCode}</p>
                       </div>
                       <Badge variant={selectedCell.status === 'OCCUPIED' ? "secondary" : "outline"}>
-                        {selectedCell.status === 'OCCUPIED' ? "Occupied" : "Free"}
+                        {selectedCell.status === 'OCCUPIED' ? t('occupied') : t('free')}
                       </Badge>
                     </div>
 
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <p className="text-sm font-medium">
-                          {selectedCell.status === 'OCCUPIED' ? 'Reassign strain' : 'Assign strain'}
+                          {selectedCell.status === 'OCCUPIED' ? t('reassignStrain') : t('assignStrain')}
                         </p>
                         <Select
                           value={allocForm.strainId ? allocForm.strainId.toString() : undefined}
@@ -493,7 +495,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                           }
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select strain" />
+                            <SelectValue placeholder={t('selectStrain')} />
                           </SelectTrigger>
                           <SelectContent>
                             {strains.map((s) => (
@@ -514,7 +516,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                           }
                         />
                         <label htmlFor="isPrimary" className="text-sm leading-none">
-                          Primary allocation
+                          {t('primaryAllocation')}
                         </label>
                       </div>
 
@@ -531,7 +533,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                               }
                             }}
                           >
-                            <Check className="h-4 w-4 mr-1" /> Open strain
+                            <Check className="h-4 w-4 mr-1" /> {t('openStrain')}
                           </Button>
                         )}
                         <Button
@@ -542,7 +544,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                             setAllocForm({ strainId: undefined, isPrimary: false });
                           }}
                         >
-                          <X className="h-4 w-4 mr-1" /> Deselect
+                          <X className="h-4 w-4 mr-1" /> {t('deselect')}
                         </Button>
                         <Button
                           size="sm"
@@ -554,7 +556,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                           ) : (
                             <Check className="h-4 w-4 mr-1" />
                           )}
-                          {selectedCell.status === 'OCCUPIED' ? 'Reassign' : 'Allocate'}
+                          {selectedCell.status === 'OCCUPIED' ? t('reassign') : t('allocate')}
                         </Button>
                         {selectedCell.status === 'OCCUPIED' && (
                           <Button
@@ -564,7 +566,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                             disabled={allocating}
                           >
                             {allocating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                            Unallocate
+                            {t('unallocate')}
                           </Button>
                         )}
                       </div>

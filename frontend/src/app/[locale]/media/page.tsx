@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { ApiService, Media, PaginatedResponse } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,10 +10,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Plus, Search, Pencil, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const PAGE_SIZE = 10
 
 export default function MediaPage() {
+  const t = useTranslations('Media')
+  const tCommon = useTranslations('Common')
   const router = useRouter()
   const [data, setData] = React.useState<PaginatedResponse<Media> | null>(null)
   const [search, setSearch] = React.useState("")
@@ -95,12 +98,12 @@ export default function MediaPage() {
     <div className="p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Media Catalog</h1>
-          <p className="text-muted-foreground">Manage nutrient media definitions.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button onClick={handleCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Media
+          {t('addMedia')}
         </Button>
       </div>
 
@@ -108,7 +111,7 @@ export default function MediaPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search media..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8"
@@ -122,9 +125,9 @@ export default function MediaPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead>{tCommon('name')}</TableHead>
+              <TableHead>{tCommon('description')}</TableHead>
+              <TableHead className="w-[100px]">{tCommon('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -1,12 +1,16 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { ApiService } from "@/services/api"
 import { Loader2, Microscope, Beaker, Archive, Boxes } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 export default function Home() {
+  const t = useTranslations('Dashboard')
+  const tCommon = useTranslations('Common')
+
   const [stats, setStats] = React.useState({
     totalStrains: 0,
     totalSamples: 0,
@@ -37,15 +41,15 @@ export default function Home() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold tracking-tight">Welcome to BioCollection</h1>
+      <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
       <p className="mt-2 text-muted-foreground">
-        Microbiological Data Management System
+        {t('subtitle')}
       </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Strains</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalStrains')}</CardTitle>
             <Microscope className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -59,7 +63,7 @@ export default function Home() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Samples</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeSamples')}</CardTitle>
             <Beaker className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -73,7 +77,7 @@ export default function Home() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Storage Occupancy</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('storageOccupancy')}</CardTitle>
             <Archive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -82,7 +86,7 @@ export default function Home() {
             ) : (
               <>
                 <div className="text-3xl font-bold">{stats.occupiedCells}/{stats.occupiedCells + stats.freeCells}</div>
-                <p className="text-xs text-muted-foreground mt-1">Occupied / Total cells</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('occupiedTotal')}</p>
               </>
             )}
           </CardContent>
@@ -90,7 +94,7 @@ export default function Home() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Storage Boxes</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('storageBoxes')}</CardTitle>
             <Boxes className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -105,7 +109,7 @@ export default function Home() {
 
       {!stats.loading && stats.recent.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-3">Recent Strains</h2>
+          <h2 className="text-lg font-semibold mb-3">{t('recentStrains')}</h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {stats.recent.map((r) => (
               <Link key={r.id} href={`/strains/${r.id}`} className="block">
@@ -113,7 +117,7 @@ export default function Home() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">{r.identifier}</CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Sample: {r.sample?.code || 'Unknown'}
+                      {tCommon('sample')}: {r.sample?.code || tCommon('unknown')}
                     </p>
                   </CardHeader>
                 </Card>

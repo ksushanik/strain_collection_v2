@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -7,12 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Filter } from "lucide-react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useRouter, usePathname } from "@/i18n/routing"
+import { Link } from "@/i18n/routing"
 import { Input } from "@/components/ui/input"
 import { useApiError } from "@/hooks/use-api-error"
+import { useTranslations } from "next-intl"
 
 export function SampleList() {
+    const t = useTranslations('Samples')
+    const tCommon = useTranslations('Common')
     const router = useRouter()
     const { handleError } = useApiError()
     const [samples, setSamples] = React.useState<Sample[]>([])
@@ -47,10 +51,10 @@ export function SampleList() {
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
-            handleError(err, "Не удалось загрузить образцы")
+            handleError(err, t('failedToLoadSamples'))
             setLoading(false)
         })
-    }, [search, filters, page, sortBy, sortOrder])
+    }, [search, filters, page, sortBy, sortOrder, t])
 
     if (loading && !meta) {
         return (
@@ -65,7 +69,7 @@ export function SampleList() {
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="relative flex-1 min-w-[220px] max-w-sm">
                     <Input
-                        placeholder="Search samples..."
+                        placeholder={t('searchPlaceholder')}
                         className="pl-8"
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -78,30 +82,30 @@ export function SampleList() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Sort:</span>
+                        <span>{t('sort')}</span>
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
                             onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
                         >
-                            <option value="collectedAt">By collection date</option>
-                            <option value="createdAt">By created date</option>
-                            <option value="code">By sample code</option>
-                            <option value="siteName">By site</option>
+                            <option value="collectedAt">{t('byCollectionDate')}</option>
+                            <option value="createdAt">{t('byCreatedDate')}</option>
+                            <option value="code">{t('bySampleCode')}</option>
+                            <option value="siteName">{t('bySite')}</option>
                         </select>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => { setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); setPage(1); }}
                         >
-                            {sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}
+                            {sortOrder === 'asc' ? t('ascSort') : t('descSort')}
                         </Button>
                     </div>
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
-                        Filters
+                        {t('filters')}
                     </Button>
-                    <Button size="sm" onClick={() => router.push('/samples/new')}>Create Sample</Button>
+                    <Button size="sm" onClick={() => router.push('/samples/new')}>{t('createSample')}</Button>
                 </div>
             </div>
 
@@ -109,30 +113,30 @@ export function SampleList() {
                 <Card className="p-3 space-y-2">
                     <div className="grid gap-3 md:grid-cols-4 items-center">
                         <div className="flex flex-col gap-1">
-                            <span className="text-xs text-muted-foreground">Site name contains</span>
+                            <span className="text-xs text-muted-foreground">{t('siteNameContains')}</span>
                             <Input
-                                placeholder="e.g. Site 8"
+                                placeholder={t('siteNamePlaceholder')}
                                 value={filters.site}
                                 onChange={(e) => { setFilters({ ...filters, site: e.target.value }); setPage(1); }}
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-xs text-muted-foreground">Sample type</span>
+                            <span className="text-xs text-muted-foreground">{t('sampleType')}</span>
                             <select
                                 className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                                 value={filters.sampleType}
                                 onChange={(e) => { setFilters({ ...filters, sampleType: e.target.value }); setPage(1); }}
                             >
-                                <option value="">Any type</option>
-                                <option value="PLANT">Plant</option>
-                                <option value="ANIMAL">Animal</option>
-                                <option value="WATER">Water</option>
-                                <option value="SOIL">Soil</option>
-                                <option value="OTHER">Other</option>
+                                <option value="">{t('anyType')}</option>
+                                <option value="PLANT">{t('plant')}</option>
+                                <option value="ANIMAL">{t('animal')}</option>
+                                <option value="WATER">{t('water')}</option>
+                                <option value="SOIL">{t('soil')}</option>
+                                <option value="OTHER">{t('other')}</option>
                             </select>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-xs text-muted-foreground">Collected After</span>
+                            <span className="text-xs text-muted-foreground">{t('collectedAfter')}</span>
                             <Input
                                 type="date"
                                 value={filters.dateFrom}
@@ -140,7 +144,7 @@ export function SampleList() {
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-xs text-muted-foreground">Collected Before</span>
+                            <span className="text-xs text-muted-foreground">{t('collectedBefore')}</span>
                             <Input
                                 type="date"
                                 value={filters.dateTo}
@@ -154,7 +158,7 @@ export function SampleList() {
                             size="sm"
                             onClick={() => { setFilters({ site: "", sampleType: "", dateFrom: "", dateTo: "" }); setPage(1); }}
                         >
-                            Reset
+                            {tCommon('reset')}
                         </Button>
                     </div>
                 </Card>
@@ -188,10 +192,10 @@ export function SampleList() {
                                     {sample._count && (
                                         <div className="flex gap-2 pt-2">
                                             <Badge variant="secondary" className="text-xs">
-                                                {sample._count.strains} strains
+                                                {sample._count.strains} {tCommon('strains')}
                                             </Badge>
                                             <Badge variant="secondary" className="text-xs">
-                                                {sample._count.photos} photos
+                                                {sample._count.photos} {tCommon('photos')}
                                             </Badge>
                                         </div>
                                     )}
@@ -204,7 +208,7 @@ export function SampleList() {
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>
-                    Page {meta?.page ?? 1} of {meta?.totalPages ?? 1} ({meta?.total ?? samples.length} total)
+                    {tCommon('page')} {meta?.page ?? 1} {tCommon('of')} {meta?.totalPages ?? 1} ({meta?.total ?? samples.length} {tCommon('total')})
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -213,7 +217,7 @@ export function SampleList() {
                         disabled={(meta?.page ?? 1) <= 1 || loading}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
-                        Prev
+                        {tCommon('prev')}
                     </Button>
                     <Button
                         variant="outline"
@@ -221,7 +225,7 @@ export function SampleList() {
                         disabled={meta ? meta.page >= meta.totalPages : true}
                         onClick={() => setPage((p) => p + 1)}
                     >
-                        Next
+                        {tCommon('next')}
                     </Button>
                 </div>
             </div>

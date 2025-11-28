@@ -9,10 +9,12 @@ import { Loader2, Plus, ArrowUp, ArrowDown, Save, Shield } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
+import { useTranslations } from "next-intl"
 
 type EditableBinding = UiBinding & { enabledFieldPacks: string[] }
 
 export default function SettingsPage() {
+  const t = useTranslations('Settings')
   const { user } = useAuth()
   const [bindings, setBindings] = React.useState<EditableBinding[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -95,24 +97,24 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">UI bindings: order, labels, icons</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+            <p className="text-muted-foreground">{t('uiBindingsDescription')}</p>
           </div>
           <Button variant="outline" onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" />
-            Add section
+            {t('addSection')}
           </Button>
         </div>
 
         {user?.role === 'ADMIN' && (
           <Card>
             <CardHeader>
-              <CardTitle>Admin Panel</CardTitle>
+              <CardTitle>{t('adminPanel')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Open AdminJS without re-login (single sign-on)
+                  {t('adminDescription')}
                 </p>
                 <Button
                   variant="default"
@@ -129,7 +131,7 @@ export default function SettingsPage() {
                   }}
                 >
                   <Shield className="mr-2 h-4 w-4" />
-                  Open AdminJS
+                  {t('openAdminJS')}
                 </Button>
               </div>
             </CardContent>
@@ -138,7 +140,7 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Menu sections</CardTitle>
+            <CardTitle>{t('menuSections')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {loading ? (
@@ -156,19 +158,19 @@ export default function SettingsPage() {
                           className="w-48"
                           value={binding.menuLabel}
                           onChange={(e) => updateBinding(index, { menuLabel: e.target.value })}
-                          placeholder="Label"
+                          placeholder={t('labelPlaceholder')}
                         />
                         <Input
                           className="w-32"
                           value={binding.profileKey}
                           onChange={(e) => updateBinding(index, { profileKey: e.target.value.toUpperCase() })}
-                          placeholder="PROFILE"
+                          placeholder={t('profilePlaceholder')}
                         />
                         <Input
                           className="w-32"
                           value={binding.icon}
                           onChange={(e) => updateBinding(index, { icon: e.target.value })}
-                          placeholder="Icon (e.g. Box)"
+                          placeholder={t('iconPlaceholder')}
                         />
                       </div>
                       <div className="flex items-center gap-1">
@@ -177,7 +179,7 @@ export default function SettingsPage() {
                           size="icon"
                           onClick={() => handleReorder(index, "up")}
                           disabled={index === 0}
-                          title="Up"
+                          title={t('up')}
                         >
                           <ArrowUp className="h-4 w-4" />
                         </Button>
@@ -186,7 +188,7 @@ export default function SettingsPage() {
                           size="icon"
                           onClick={() => handleReorder(index, "down")}
                           disabled={index === bindings.length - 1}
-                          title="Down"
+                          title={t('down')}
                         >
                           <ArrowDown className="h-4 w-4" />
                         </Button>
@@ -194,7 +196,7 @@ export default function SettingsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setBindings((prev) => prev.filter((_, i) => i !== index))}
-                          title="Remove section"
+                          title={t('removeSection')}
                         >
                           ✕
                         </Button>
@@ -205,13 +207,13 @@ export default function SettingsPage() {
                         className="w-64"
                         value={binding.routeSlug}
                         onChange={(e) => updateBinding(index, { routeSlug: e.target.value })}
-                        placeholder="route-slug"
+                        placeholder={t('routeSlugPlaceholder')}
                       />
                       <Input
                         className="flex-1"
                         value={binding.enabledFieldPacks.join(",")}
                         onChange={(e) => updateBinding(index, { enabledFieldPacks: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
-                        placeholder="enabled field packs (comma separated)"
+                        placeholder={t('enabledPacksPlaceholder')}
                       />
                       <Textarea
                         className="w-64"
@@ -225,7 +227,7 @@ export default function SettingsPage() {
                               : { legend: null, legendId: null }
                           )
                         }
-                        placeholder="Legend override (optional)"
+                        placeholder={t('legendOverridePlaceholder')}
                       />
                     </div>
                   </div>

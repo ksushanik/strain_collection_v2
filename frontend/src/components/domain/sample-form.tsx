@@ -32,7 +32,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 
 const sampleSchema = z.object({

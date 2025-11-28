@@ -26,7 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 import { TaxonomyAutocomplete } from "./taxonomy-autocomplete"
 
@@ -130,7 +130,7 @@ export function StrainForm({
                                     code: initialData.sample.code,
                                     siteName: initialData.sample.siteName || 'Unknown site',
                                     sampleType: 'UNKNOWN',
-                                  }
+                                }
                                 : undefined
                         setSampleOptions((prev) => {
                             const merged = [...options]

@@ -1,10 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
     LayoutDashboard,
     Microscope,
@@ -22,6 +18,11 @@ import {
 import { ApiService, UiBinding } from "@/services/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { Separator } from "@/components/ui/separator"
+import { Link, usePathname, useRouter } from "@/i18n/routing"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
+import { translateDynamic } from "@/lib/translate-dynamic"
 
 // Map string icon names to components
 const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -33,6 +34,8 @@ const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function Sidebar() {
+    const t = useTranslations('Navigation')
+    const tDynamic = useTranslations('DynamicPages')
     const pathname = usePathname()
     const router = useRouter()
     const { user, logout } = useAuth()
@@ -83,7 +86,7 @@ export function Sidebar() {
                         )}
                     >
                         <LayoutDashboard className="h-4 w-4" />
-                        {!isCollapsed && <span>Dashboard</span>}
+                        {!isCollapsed && <span>{t('dashboard')}</span>}
                     </Link>
 
                     {loading ? (
@@ -107,7 +110,7 @@ export function Sidebar() {
                                     )}
                                 >
                                     <Icon className="h-4 w-4" />
-                                    {!isCollapsed && <span>{item.menuLabel}</span>}
+                                    {!isCollapsed && <span>{translateDynamic(tDynamic, item.translationKey, item.menuLabel)}</span>}
                                 </Link>
                             )
                         })
@@ -122,7 +125,7 @@ export function Sidebar() {
                         )}
                     >
                         <FlaskConical className="h-4 w-4" />
-                        {!isCollapsed && <span>Media</span>}
+                        {!isCollapsed && <span>{t('media')}</span>}
                     </Link>
 
                     <Link
@@ -134,7 +137,7 @@ export function Sidebar() {
                         )}
                     >
                         <BookOpen className="h-4 w-4" />
-                        {!isCollapsed && <span>Legend</span>}
+                        {!isCollapsed && <span>{t('legend')}</span>}
                     </Link>
 
                     <Link
@@ -146,7 +149,7 @@ export function Sidebar() {
                         )}
                     >
                         <BookOpen className="h-4 w-4" />
-                        {!isCollapsed && <span>Wiki</span>}
+                        {!isCollapsed && <span>{t('wiki')}</span>}
                     </Link>
 
                     {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
@@ -159,7 +162,7 @@ export function Sidebar() {
                             )}
                         >
                             <ShieldCheck className="h-4 w-4" />
-                            {!isCollapsed && <span>Audit Logs</span>}
+                            {!isCollapsed && <span>{t('audit')}</span>}
                         </Link>
                     )}
                 </nav>
@@ -175,7 +178,7 @@ export function Sidebar() {
                     )}
                 >
                     <Settings className="h-4 w-4" />
-                    {!isCollapsed && <span>Settings</span>}
+                    {!isCollapsed && <span>{t('settings')}</span>}
                 </Link>
 
                 <Separator />
@@ -206,7 +209,7 @@ export function Sidebar() {
                             className={cn("w-full", isCollapsed && "h-8 w-8")}
                         >
                             <LogOut className="h-4 w-4" />
-                            {!isCollapsed && <span className="ml-2">Logout</span>}
+                            {!isCollapsed && <span className="ml-2">{t('logout')}</span>}
                         </Button>
                     </div>
                 )}

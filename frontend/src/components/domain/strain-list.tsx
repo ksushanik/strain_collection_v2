@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -15,7 +16,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
     Select,
@@ -32,6 +34,8 @@ interface StrainListProps {
 }
 
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const router = useRouter()
     const { handleError } = useApiError()
     const [strains, setStrains] = React.useState<Strain[]>([])
@@ -113,7 +117,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     )}
                     <Input
-                        placeholder="Search strains..."
+                        placeholder={t('searchPlaceholder')}
                         className="pl-8"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -121,31 +125,31 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Sort:</span>
+                        <span>{t('sort')}</span>
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
                             onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
                         >
-                            <option value="createdAt">Created</option>
-                            <option value="identifier">Identifier</option>
-                            <option value="sampleCode">Sample Code</option>
-                            <option value="taxonomy16s">Taxonomy</option>
+                            <option value="createdAt">{t('created')}</option>
+                            <option value="identifier">{t('identifier')}</option>
+                            <option value="sampleCode">{t('sampleCode')}</option>
+                            <option value="taxonomy16s">{t('taxonomy')}</option>
                         </select>
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => { setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc'); setPage(1); }}
                         >
-                            {sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}
+                            {sortOrder === 'asc' ? `${t('asc')} ↑` : `${t('desc')} ↓`}
                         </Button>
                     </div>
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
-                        Filters
+                        {t('filters')}
                     </Button>
                     <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
-                        Create Strain
+                        {t('create')}
                     </Button>
                 </div>
             </div>
@@ -290,7 +294,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 setPage(1);
                             }}
                         >
-                            Reset
+                            {t('reset')}
                         </Button>
                     </div>
                 </Card>
@@ -298,17 +302,17 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
             <Card>
                 <CardHeader className="p-4">
-                    <CardTitle className="text-lg">All Strains</CardTitle>
+                    <CardTitle className="text-lg">{t('title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[150px]">Identifier</TableHead>
-                                <TableHead>Sample Source</TableHead>
-                                {showTaxonomy && <TableHead>Taxonomy (16S)</TableHead>}
-                                {showGrowth && <TableHead>Gram Stain</TableHead>}
-                                {showGrowth && <TableHead>Characteristics</TableHead>}
+                                <TableHead className="w-[150px]">{t('identifier')}</TableHead>
+                                <TableHead>{t('sampleSource')}</TableHead>
+                                {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
+                                {showGrowth && <TableHead>{t('gramStain')}</TableHead>}
+                                {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -361,7 +365,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
             <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <div>
-                    Page {meta?.page ?? 1} of {meta?.totalPages ?? 1} ({meta?.total ?? strains.length} total)
+                    {tCommon('pageInfo', { current: meta?.page ?? 1, total: meta?.totalPages ?? 1, count: meta?.total ?? strains.length })}
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -370,7 +374,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         disabled={(meta?.page ?? 1) <= 1 || loading}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
-                        Prev
+                        {tCommon('prev')}
                     </Button>
                     <Button
                         variant="outline"
@@ -378,7 +382,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         disabled={meta ? meta.page >= meta.totalPages : true}
                         onClick={() => setPage((p) => p + 1)}
                     >
-                        Next
+                        {tCommon('next')}
                     </Button>
                 </div>
             </div>
