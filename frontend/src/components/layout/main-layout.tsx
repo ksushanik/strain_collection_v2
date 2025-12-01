@@ -7,7 +7,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
-    const isLoginPage = pathname === '/login'
+    const isLoginPage = pathname === '/login' || pathname?.endsWith('/login')
 
     return (
         <AuthGuard>

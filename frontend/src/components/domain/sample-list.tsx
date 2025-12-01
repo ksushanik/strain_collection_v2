@@ -66,8 +66,8 @@ export function SampleList() {
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="relative flex-1 min-w-[220px] max-w-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div className="relative flex-1 min-w-[220px] sm:max-w-sm">
                     <Input
                         placeholder={t('searchPlaceholder')}
                         className="pl-8"
@@ -80,8 +80,8 @@ export function SampleList() {
                         <MapPin className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     )}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                         <span>{t('sort')}</span>
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
@@ -111,7 +111,7 @@ export function SampleList() {
 
             {filtersOpen && (
                 <Card className="p-3 space-y-2">
-                    <div className="grid gap-3 md:grid-cols-4 items-center">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-center">
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-muted-foreground">{t('siteNameContains')}</span>
                             <Input

@@ -282,7 +282,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
           <CardTitle className="text-lg">{t('createBox')}</CardTitle>
           <CardDescription>{t('rowsColsRule')}</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="md:col-span-2">
             <Input
               placeholder={t('displayNamePlaceholder')}
@@ -327,7 +327,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       </Card>
 
       {/* Box Selection */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
         {boxes.map(box => (
           <Button
             key={box.id}
@@ -428,9 +428,9 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
             ) : selectedBox ? (
               <>
                 <div
-                  className="grid gap-1 mx-auto w-fit p-2"
+                  className="grid gap-1 mx-auto w-full max-w-3xl p-2"
                   style={{
-                    gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(32px, 1fr))`
+                    gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(28px, 1fr))`
                   }}
                 >
                   {selectedBox.cells?.map((cell) => {

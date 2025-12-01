@@ -12,13 +12,13 @@ const mockAssertOk = assertOk as unknown as ReturnType<typeof vi.fn>;
 
 describe('uploads service', () => {
   beforeEach(() => {
-    (mockRequest as any).mockReset();
-    (mockAssertOk as any).mockReset();
+    (mockRequest as unknown as { mockReset: () => void }).mockReset();
+    (mockAssertOk as unknown as { mockReset: () => void }).mockReset();
   });
 
   it('uploads sample photo', async () => {
     const sampleResponse = { json: vi.fn().mockResolvedValue({ id: 1 }) };
-    (mockRequest as any).mockResolvedValue(sampleResponse);
+    (mockRequest as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue(sampleResponse);
     const file = new File(['x'], 'photo.png', { type: 'image/png' });
 
     const result = await uploadSamplePhoto(5, file);
@@ -30,7 +30,7 @@ describe('uploads service', () => {
 
   it('deletes sample photo', async () => {
     const sampleResponse = {};
-    (mockRequest as any).mockResolvedValue(sampleResponse);
+    (mockRequest as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue(sampleResponse);
 
     await deleteSamplePhoto(10);
 
@@ -40,7 +40,7 @@ describe('uploads service', () => {
 
   it('uploads strain photo', async () => {
     const strainResponse = { json: vi.fn().mockResolvedValue({ id: 2 }) };
-    (mockRequest as any).mockResolvedValue(strainResponse);
+    (mockRequest as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue(strainResponse);
     const file = new File(['y'], 'photo.png', { type: 'image/png' });
 
     const result = await uploadStrainPhoto(7, file);
@@ -52,7 +52,7 @@ describe('uploads service', () => {
 
   it('deletes strain photo', async () => {
     const strainResponse = {};
-    (mockRequest as any).mockResolvedValue(strainResponse);
+    (mockRequest as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue(strainResponse);
 
     await deleteStrainPhoto(11);
 
