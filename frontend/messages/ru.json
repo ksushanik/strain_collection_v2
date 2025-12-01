@@ -75,6 +75,24 @@
         "occupiedTotal": "Занято / Всего ячеек",
         "recentStrains": "Недавние штаммы"
     },
+    "Audit": {
+        "title": "Журнал аудита",
+        "description": "Просмотр и фильтрация системных журналов аудита.",
+        "filters": "Фильтры",
+        "filtersDescription": "Фильтровать записи по пользователю или типу сущности.",
+        "userId": "ID пользователя",
+        "userIdPlaceholder": "Поиск по ID пользователя...",
+        "entity": "Сущность",
+        "entityPlaceholder": "например, Strain, Sample...",
+        "clear": "Очистить",
+        "date": "Дата",
+        "user": "Пользователь",
+        "action": "Действие",
+        "entityId": "ID сущности",
+        "comment": "Комментарий",
+        "details": "Детали",
+        "noLogs": "Записи не найдены."
+    },
     "Strains": {
         "title": "Коллекция штаммов",
         "pageTitle": "Штаммы",

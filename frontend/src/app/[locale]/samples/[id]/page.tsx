@@ -8,8 +8,7 @@ import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit } from "lu
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
-import { Link } from "@/i18n/routing"
+import { useRouter, Link } from "@/i18n/routing"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useTranslations } from "next-intl"
 

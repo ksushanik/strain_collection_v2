@@ -16,8 +16,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Search } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 export default function AuditPage() {
+    const t = useTranslations('Audit');
+    const tCommon = useTranslations('Common');
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
@@ -66,25 +69,25 @@ export default function AuditPage() {
         <div className="p-8">
             <div className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        View and filter system audit logs.
+                        {t('description')}
                     </p>
                 </div>
             </div>
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Filters</CardTitle>
-                    <CardDescription>Filter logs by user or entity type.</CardDescription>
+                    <CardTitle>{t('filters')}</CardTitle>
+                    <CardDescription>{t('filtersDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex gap-4">
                     <div className="flex-1">
-                        <label className="text-sm font-medium mb-2 block">User ID</label>
+                        <label className="text-sm font-medium mb-2 block">{t('userId')}</label>
                         <div className="relative">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search by User ID..."
+                                placeholder={t('userIdPlaceholder')}
                                 value={filters.userId}
                                 onChange={(e) => setFilters({ ...filters, userId: e.target.value })}
                                 className="pl-8"
@@ -92,19 +95,19 @@ export default function AuditPage() {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <label className="text-sm font-medium mb-2 block">Entity</label>
+                        <label className="text-sm font-medium mb-2 block">{t('entity')}</label>
                         <Input
-                            placeholder="e.g. Strain, Sample..."
+                            placeholder={t('entityPlaceholder')}
                             value={filters.entity}
                             onChange={(e) => setFilters({ ...filters, entity: e.target.value })}
                         />
                     </div>
                     <div className="flex items-end">
                         <Button variant="outline" onClick={() => { setFilters({ userId: '', entity: '' }); fetchLogs(); }}>
-                            Clear
+                            {t('clear')}
                         </Button>
                         <Button onClick={fetchLogs} className="ml-2">
-                            Search
+                            {tCommon('search')}
                         </Button>
                     </div>
                 </CardContent>
@@ -114,13 +117,13 @@ export default function AuditPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>User</TableHead>
-                            <TableHead>Action</TableHead>
-                            <TableHead>Entity</TableHead>
-                            <TableHead>Entity ID</TableHead>
-                            <TableHead>Comment</TableHead>
-                            <TableHead>Details</TableHead>
+                            <TableHead>{t('date')}</TableHead>
+                            <TableHead>{t('user')}</TableHead>
+                            <TableHead>{t('action')}</TableHead>
+                            <TableHead>{t('entity')}</TableHead>
+                            <TableHead>{t('entityId')}</TableHead>
+                            <TableHead>{t('comment')}</TableHead>
+                            <TableHead>{t('details')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -133,7 +136,7 @@ export default function AuditPage() {
                         ) : logs.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                    No logs found.
+                                    {t('noLogs')}
                                 </TableCell>
                             </TableRow>
                         ) : (

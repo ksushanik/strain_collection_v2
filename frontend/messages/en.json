@@ -76,6 +76,24 @@
         "occupiedTotal": "Occupied / Total cells",
         "recentStrains": "Recent Strains"
     },
+    "Audit": {
+        "title": "Audit Logs",
+        "description": "View and filter system audit logs.",
+        "filters": "Filters",
+        "filtersDescription": "Filter logs by user or entity type.",
+        "userId": "User ID",
+        "userIdPlaceholder": "Search by User ID...",
+        "entity": "Entity",
+        "entityPlaceholder": "e.g. Strain, Sample...",
+        "clear": "Clear",
+        "date": "Date",
+        "user": "User",
+        "action": "Action",
+        "entityId": "Entity ID",
+        "comment": "Comment",
+        "details": "Details",
+        "noLogs": "No logs found."
+    },
     "Strains": {
         "title": "Strain Collection",
         "pageTitle": "Strains",

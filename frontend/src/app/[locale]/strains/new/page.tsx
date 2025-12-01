@@ -10,8 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Image as ImageIcon, Archive, Beaker } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 function CreateStrainPageContent() {
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const searchParams = useSearchParams()
     const router = useRouter()
     const returnTo = searchParams?.get("returnTo") || undefined
@@ -20,15 +23,15 @@ function CreateStrainPageContent() {
     return (
         <div className="p-8 max-w-5xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Create New Strain</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('createStrain')}</h1>
                 <p className="text-muted-foreground">
-                    Register a new bacterial strain in the collection.
+                    {t('pageDescription')}
                 </p>
             </div>
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Strain Details</CardTitle>
+                    <CardTitle>{t('title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <StrainForm
@@ -44,7 +47,7 @@ function CreateStrainPageContent() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Beaker className="h-4 w-4" />
-                        Growth Media
+                        {t('media')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
@@ -56,7 +59,7 @@ function CreateStrainPageContent() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Archive className="h-4 w-4" />
-                        Storage Allocation
+                        {t('storageLocations')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
@@ -68,7 +71,7 @@ function CreateStrainPageContent() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <ImageIcon className="h-4 w-4" />
-                        Strain Photos
+                        {t('strainPhotos')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
@@ -88,7 +91,7 @@ function CreateStrainPageContent() {
                         }
                     }}
                 >
-                    Cancel
+                    {tCommon('cancel')}
                 </Button>
                 <Button
                     type="submit"
@@ -96,7 +99,7 @@ function CreateStrainPageContent() {
                     disabled={formSubmitting}
                 >
                     {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Strain
+                    {t('createStrain')}
                 </Button>
             </div>
         </div>
