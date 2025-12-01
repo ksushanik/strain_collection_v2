@@ -29,6 +29,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 import { TaxonomyAutocomplete } from "./taxonomy-autocomplete"
+import { useTranslations } from "next-intl"
 
 const strainSchema = z.object({
     identifier: z.string().min(1, "Identifier is required"),
@@ -72,6 +73,8 @@ export function StrainForm({
     onSubmittingChange,
 }: StrainFormProps) {
     const router = useRouter()
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const [sampleOptions, setSampleOptions] = React.useState<Array<{ id: number; code: string; siteName?: string; sampleType?: string }>>([])
     const [sampleSearch, setSampleSearch] = React.useState("")
     const [loadingSamples, setLoadingSamples] = React.useState(false)
@@ -185,19 +188,19 @@ export function StrainForm({
 
             if (isEdit && initialData) {
                 await ApiService.updateStrain(initialData.id, payload)
-                toast.success("Strain updated successfully")
+                toast.success(t('strainUpdated'))
                 router.back()
                 router.refresh()
             } else {
                 await ApiService.createStrain(payload)
-                toast.success("Strain created successfully")
+                toast.success(t('strainCreated'))
                 const target = returnTo || "/strains"
                 router.push(target)
                 router.refresh()
             }
         } catch (error) {
             console.error("Failed to save strain:", error)
-            toast.error("Failed to save strain. Please try again.")
+            toast.error(t('failedToSaveStrain'))
         } finally {
             setLoading(false)
             onSubmittingChange?.(false)
@@ -209,8 +212,8 @@ export function StrainForm({
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold">Basics</h3>
-                        <p className="text-xs text-muted-foreground">Core identifiers & origin</p>
+                        <h3 className="text-base font-semibold">{t('basics')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('basicsDesc')}</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                         <FormField
@@ -218,9 +221,9 @@ export function StrainForm({
                             name="identifier"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Identifier</FormLabel>
+                                    <FormLabel>{t('identifier')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. STR-2024-001" {...field} />
+                                        <Input placeholder={t('identifierPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -231,17 +234,17 @@ export function StrainForm({
                             name="sampleId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Source Sample</FormLabel>
+                                    <FormLabel>{t('sourceSample')}</FormLabel>
                                     <div className="space-y-2">
                                         <Input
-                                            placeholder="Search by code or site..."
+                                            placeholder={t('searchSamplePlaceholder')}
                                             value={sampleSearch}
                                             onChange={(e) => setSampleSearch(e.target.value)}
                                         />
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder={loadingSamples ? "Loading samples..." : "Select a sample"} />
+                                                    <SelectValue placeholder={loadingSamples ? t('loadingSamples') : t('selectSample')} />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
@@ -249,13 +252,13 @@ export function StrainForm({
                                                     <SelectItem value="loading" disabled>
                                                         <div className="flex items-center gap-2">
                                                             <Loader2 className="h-4 w-4 animate-spin" />
-                                                            Loading...
+                                                            {tCommon('loading')}
                                                         </div>
                                                     </SelectItem>
                                                 )}
                                                 {!loadingSamples && sampleOptions.length === 0 && (
                                                     <SelectItem value="empty" disabled>
-                                                        No samples found
+                                                        {t('noSamplesFound')}
                                                     </SelectItem>
                                                 )}
                                                 {!loadingSamples &&
@@ -276,17 +279,17 @@ export function StrainForm({
                             name="gramStain"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Gram Stain</FormLabel>
+                                    <FormLabel>{t('gramStain')}</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select result" />
+                                                <SelectValue placeholder={t('selectResult')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="POSITIVE">Positive (+)</SelectItem>
-                                            <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
-                                            <SelectItem value="VARIABLE">Variable</SelectItem>
+                                            <SelectItem value="POSITIVE">{t('positive')}</SelectItem>
+                                            <SelectItem value="NEGATIVE">{t('negative')}</SelectItem>
+                                            <SelectItem value="VARIABLE">{t('variable')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -298,19 +301,19 @@ export function StrainForm({
                             name="isolationRegion"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Isolation Region</FormLabel>
+                                    <FormLabel>{t('isolationRegion')}</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select region" />
+                                                <SelectValue placeholder={t('selectRegion')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="RHIZOSPHERE">Rhizosphere</SelectItem>
-                                            <SelectItem value="ENDOSPHERE">Endosphere</SelectItem>
-                                            <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
-                                            <SelectItem value="SOIL">Soil</SelectItem>
-                                            <SelectItem value="OTHER">Other</SelectItem>
+                                            <SelectItem value="RHIZOSPHERE">{t('rhizosphere')}</SelectItem>
+                                            <SelectItem value="ENDOSPHERE">{t('endosphere')}</SelectItem>
+                                            <SelectItem value="PHYLLOSPHERE">{t('phyllosphere')}</SelectItem>
+                                            <SelectItem value="SOIL">{t('soil')}</SelectItem>
+                                            <SelectItem value="OTHER">{t('other')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -323,12 +326,12 @@ export function StrainForm({
                         name="taxonomy16s"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Taxonomy (16S)</FormLabel>
+                                <FormLabel>{t('taxonomy16s')}</FormLabel>
                                 <FormControl>
                                     <TaxonomyAutocomplete
                                         value={field.value}
                                         onChange={field.onChange}
-                                        placeholder="Search NCBI Taxonomy (e.g. Bacillus subtilis)..."
+                                        placeholder={t('searchTaxonomyPlaceholder')}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -340,14 +343,14 @@ export function StrainForm({
                         name="otherTaxonomy"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Other Identification Methods</FormLabel>
+                                <FormLabel>{t('otherIdentificationMethods')}</FormLabel>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="e.g. Biochemical tests, morphological characteristics..."
+                                        placeholder={t('otherTaxonomyPlaceholder')}
                                         {...field}
                                     />
                                 </FormControl>
-                                <FormDescription>Non-DNA/RNA based identification methods</FormDescription>
+                                <FormDescription>{t('nonDnaMethods')}</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -356,8 +359,8 @@ export function StrainForm({
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold">Growth & Traits</h3>
-                        <p className="text-xs text-muted-foreground">Quick toggles and enzymes</p>
+                        <h3 className="text-base font-semibold">{t('growthAndTraits')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('growthAndTraitsDesc')}</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-3">
                         <FormField
@@ -365,16 +368,16 @@ export function StrainForm({
                             name="amylase"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Amylase</FormLabel>
+                                    <FormLabel>{t('amylase')}</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select result" />
+                                                <SelectValue placeholder={t('selectResult')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="POSITIVE">Positive (+)</SelectItem>
-                                            <SelectItem value="NEGATIVE">Negative (-)</SelectItem>
+                                            <SelectItem value="POSITIVE">{t('positive')}</SelectItem>
+                                            <SelectItem value="NEGATIVE">{t('negative')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -386,12 +389,12 @@ export function StrainForm({
                             name="iuk"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>IUK / IAA</FormLabel>
+                                    <FormLabel>{t('iukIaa')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Indole acetic acid production..." {...field} />
+                                        <Input placeholder={t('iukPlaceholder')} {...field} />
                                     </FormControl>
                                     <FormDescription className="text-xs">
-                                        Auxin/IAA production
+                                        {t('auxinProduction')}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -402,10 +405,10 @@ export function StrainForm({
                             name="antibioticActivity"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Antibiotic Activity</FormLabel>
+                                    <FormLabel>{t('antibioticActivity')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="e.g. active vs E. coli, spectrum, assays..."
+                                            placeholder={t('antibioticActivityPlaceholder')}
                                             className="resize-none min-h-[96px]"
                                             {...field}
                                         />
@@ -428,7 +431,7 @@ export function StrainForm({
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-sm">Sequenced (SEQ)</FormLabel>
+                                        <FormLabel className="text-sm">{t('sequenced')}</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -445,7 +448,7 @@ export function StrainForm({
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-sm">Phosphates</FormLabel>
+                                        <FormLabel className="text-sm">{t('phosphates')}</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -462,7 +465,7 @@ export function StrainForm({
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-sm">Siderophores</FormLabel>
+                                        <FormLabel className="text-sm">{t('siderophores')}</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -479,7 +482,7 @@ export function StrainForm({
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-sm">Pigment Secretion</FormLabel>
+                                        <FormLabel className="text-sm">{t('pigmentSecretion')}</FormLabel>
                                     </div>
                                 </FormItem>
                             )}
@@ -489,8 +492,8 @@ export function StrainForm({
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold">Genetics & Biochemistry</h3>
-                        <p className="text-xs text-muted-foreground">Genomic context and assays</p>
+                        <h3 className="text-base font-semibold">{t('geneticsAndBiochemistry')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('geneticsAndBiochemistryDesc')}</p>
                     </div>
                     <div className="grid gap-4 lg:grid-cols-2">
                         <FormField
@@ -498,10 +501,10 @@ export function StrainForm({
                             name="genome"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Genome</FormLabel>
+                                    <FormLabel>{t('genome')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Assembly info, accession numbers..."
+                                            placeholder={t('genomePlaceholder')}
                                             className="resize-none min-h-[80px]"
                                             {...field}
                                         />
@@ -515,10 +518,10 @@ export function StrainForm({
                             name="biochemistry"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Biochemistry</FormLabel>
+                                    <FormLabel>{t('biochemistry')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Biochemical tests, metabolic capabilities..."
+                                            placeholder={t('biochemistryPlaceholder')}
                                             className="resize-none min-h-[80px]"
                                             {...field}
                                         />
@@ -532,8 +535,8 @@ export function StrainForm({
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold">Notes</h3>
-                        <p className="text-xs text-muted-foreground">Context and free-form notes</p>
+                        <h3 className="text-base font-semibold">{t('notes')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('notesDesc')}</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                         <FormField
@@ -541,10 +544,10 @@ export function StrainForm({
                             name="features"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Features</FormLabel>
+                                    <FormLabel>{t('features')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Describe any special features..."
+                                            placeholder={t('featuresPlaceholder')}
                                             className="resize-none min-h-[80px]"
                                             {...field}
                                         />
@@ -558,10 +561,10 @@ export function StrainForm({
                             name="comments"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Comments</FormLabel>
+                                    <FormLabel>{t('comments')}</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Additional notes..."
+                                            placeholder={t('commentsPlaceholder')}
                                             className="resize-none min-h-[80px]"
                                             {...field}
                                         />
@@ -575,8 +578,8 @@ export function StrainForm({
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold">Indexing</h3>
-                        <p className="text-xs text-muted-foreground">Who cataloged this strain</p>
+                        <h3 className="text-base font-semibold">{t('indexing')}</h3>
+                        <p className="text-xs text-muted-foreground">{t('indexingDesc')}</p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                         <FormField
@@ -584,11 +587,11 @@ export function StrainForm({
                             name="indexerInitials"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Indexer Initials</FormLabel>
+                                    <FormLabel>{t('indexerInitials')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. AB, JS" {...field} />
+                                        <Input placeholder={t('indexerInitialsPlaceholder')} {...field} />
                                     </FormControl>
-                                    <FormDescription>Person who isolated this strain</FormDescription>
+                                    <FormDescription>{t('indexerDesc')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -598,11 +601,11 @@ export function StrainForm({
                             name="collectionRcam"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Collection RCAM</FormLabel>
+                                    <FormLabel>{t('collectionRcam')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. RCAM-12345" {...field} />
+                                        <Input placeholder={t('collectionRcamPlaceholder')} {...field} />
                                     </FormControl>
-                                    <FormDescription>Repository accession number</FormDescription>
+                                    <FormDescription>{t('repositoryAccession')}</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -623,11 +626,11 @@ export function StrainForm({
                                 }
                             }}
                         >
-                            Cancel
+                            {tCommon('cancel')}
                         </Button>
                         <Button type="submit" disabled={loading} form={formId}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isEdit ? "Update Strain" : "Create Strain"}
+                            {isEdit ? t('updateStrain') : t('createStrain')}
                         </Button>
                     </div>
                 )}

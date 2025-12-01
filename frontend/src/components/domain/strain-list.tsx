@@ -90,7 +90,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
-            handleError(err, "Не удалось загрузить список штаммов")
+            handleError(err, t('failedToLoadStrains'))
             setLoading(false)
         })
     }, [search, filters, page, sortBy, sortOrder])
@@ -158,22 +158,22 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                 <Card className="p-3 space-y-2">
                     <div className="grid gap-2 md:grid-cols-3">
                         <Input
-                            placeholder="Sample code"
+                            placeholder={t('sampleCodePlaceholder')}
                             value={filters.sampleCode}
                             onChange={(e) => { setFilters({ ...filters, sampleCode: e.target.value }); setPage(1); }}
                         />
                         <Input
-                            placeholder="Taxonomy or text search"
+                            placeholder={t('taxonomySearchPlaceholder')}
                             value={filters.taxonomy}
                             onChange={(e) => { setFilters({ ...filters, taxonomy: e.target.value }); setPage(1); }}
                         />
                         <Input
-                            placeholder="Genome contains"
+                            placeholder={t('genomePlaceholder')}
                             value={filters.genome}
                             onChange={(e) => { setFilters({ ...filters, genome: e.target.value }); setPage(1); }}
                         />
                         <Input
-                            placeholder="Antibiotic activity contains"
+                            placeholder={t('antibioticActivityPlaceholder')}
                             value={filters.antibioticActivity}
                             onChange={(e) => { setFilters({ ...filters, antibioticActivity: e.target.value }); setPage(1); }}
                         />
@@ -183,7 +183,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 checked={filters.hasGenome}
                                 onCheckedChange={(checked) => { setFilters({ ...filters, hasGenome: checked === true }); setPage(1); }}
                             />
-                            <label htmlFor="hasGenome" className="text-sm">Has genome</label>
+                            <label htmlFor="hasGenome" className="text-sm">{t('hasGenome')}</label>
                         </div>
                         <div className="flex items-center gap-2">
                             <Checkbox
@@ -191,7 +191,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 checked={filters.seq}
                                 onCheckedChange={(checked) => { setFilters({ ...filters, seq: checked === true }); setPage(1); }}
                             />
-                            <label htmlFor="seq" className="text-sm">Sequenced</label>
+                            <label htmlFor="seq" className="text-sm">{t('sequenced')}</label>
                         </div>
                         <div className="flex items-center gap-2">
                             <Checkbox
@@ -199,7 +199,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 checked={filters.phosphates}
                                 onCheckedChange={(checked) => { setFilters({ ...filters, phosphates: checked === true }); setPage(1); }}
                             />
-                            <label htmlFor="phosphates" className="text-sm">Phosphates</label>
+                            <label htmlFor="phosphates" className="text-sm">{t('phosphates')}</label>
                         </div>
                         <div className="flex items-center gap-2">
                             <Checkbox
@@ -207,7 +207,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 checked={filters.siderophores}
                                 onCheckedChange={(checked) => { setFilters({ ...filters, siderophores: checked === true }); setPage(1); }}
                             />
-                            <label htmlFor="siderophores" className="text-sm">Siderophores</label>
+                            <label htmlFor="siderophores" className="text-sm">{t('siderophores')}</label>
                         </div>
                         <div className="flex items-center gap-2">
                             <Checkbox
@@ -215,19 +215,19 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 checked={filters.pigmentSecretion}
                                 onCheckedChange={(checked) => { setFilters({ ...filters, pigmentSecretion: checked === true }); setPage(1); }}
                             />
-                            <label htmlFor="pigmentSecretion" className="text-sm">Pigment</label>
+                            <label htmlFor="pigmentSecretion" className="text-sm">{t('pigmentSecretion')}</label>
                         </div>
                         <Select
                             value={filters.gramStain}
                             onValueChange={(value) => { setFilters({ ...filters, gramStain: value === "ALL" ? "" : value }); setPage(1); }}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Any Gram Stain" />
+                                <SelectValue placeholder={t('anyGramStain')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="ALL">Any Gram Stain</SelectItem>
-                                <SelectItem value="POSITIVE">Gram Positive</SelectItem>
-                                <SelectItem value="NEGATIVE">Gram Negative</SelectItem>
+                                <SelectItem value="ALL">{t('anyGramStain')}</SelectItem>
+                                <SelectItem value="POSITIVE">{t('gramPositive')}</SelectItem>
+                                <SelectItem value="NEGATIVE">{t('gramNegative')}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -235,12 +235,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             onValueChange={(value) => { setFilters({ ...filters, amylase: value === "ALL" ? "" : value }); setPage(1); }}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Amylase" />
+                                <SelectValue placeholder={t('amylase')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="ALL">Any Amylase</SelectItem>
-                                <SelectItem value="POSITIVE">Positive</SelectItem>
-                                <SelectItem value="NEGATIVE">Negative</SelectItem>
+                                <SelectItem value="ALL">{t('anyAmylase')}</SelectItem>
+                                <SelectItem value="POSITIVE">{t('positive')}</SelectItem>
+                                <SelectItem value="NEGATIVE">{t('negative')}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select
@@ -248,24 +248,24 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             onValueChange={(value) => { setFilters({ ...filters, isolationRegion: value === "ALL" ? "" : value }); setPage(1); }}
                         >
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Isolation Region" />
+                                <SelectValue placeholder={t('isolationRegion')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="ALL">Any Region</SelectItem>
-                                <SelectItem value="RHIZOSPHERE">Rhizosphere</SelectItem>
-                                <SelectItem value="ENDOSPHERE">Endosphere</SelectItem>
-                                <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
-                                <SelectItem value="SOIL">Soil</SelectItem>
-                                <SelectItem value="OTHER">Other</SelectItem>
+                                <SelectItem value="ALL">{t('anyRegion')}</SelectItem>
+                                <SelectItem value="RHIZOSPHERE">{t('rhizosphere')}</SelectItem>
+                                <SelectItem value="ENDOSPHERE">{t('endosphere')}</SelectItem>
+                                <SelectItem value="PHYLLOSPHERE">{t('phyllosphere')}</SelectItem>
+                                <SelectItem value="SOIL">{t('soil')}</SelectItem>
+                                <SelectItem value="OTHER">{t('other')}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Input
-                            placeholder="Biochemistry contains"
+                            placeholder={t('biochemistryPlaceholder')}
                             value={filters.biochemistry}
                             onChange={(e) => { setFilters({ ...filters, biochemistry: e.target.value }); setPage(1); }}
                         />
                         <Input
-                            placeholder="IUK contains"
+                            placeholder={t('iukPlaceholder')}
                             value={filters.iuk}
                             onChange={(e) => { setFilters({ ...filters, iuk: e.target.value }); setPage(1); }}
                         />
@@ -325,7 +325,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     <TableCell className="font-medium">
                                         {strain.identifier}
                                         {strain.seq && (
-                                            <Badge variant="secondary" className="ml-2 text-[10px]">SEQ</Badge>
+                                            <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
                                         )}
                                     </TableCell>
                                     <TableCell>{strain.sample?.code || '-'}</TableCell>
@@ -342,17 +342,17 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
                                     {showGrowth && (
                                         <TableCell>
-                                            {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">Gram +</Badge>}
-                                            {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">Gram -</Badge>}
+                                            {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">{t('gramPosBadge')}</Badge>}
+                                            {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">{t('gramNegBadge')}</Badge>}
                                         </TableCell>
                                     )}
 
                                     {showGrowth && (
                                         <TableCell>
                                             <div className="flex gap-1 flex-wrap">
-                                                {strain.phosphates && <Badge variant="secondary" className="text-[10px]">P+</Badge>}
-                                                {strain.siderophores && <Badge variant="secondary" className="text-[10px]">Sid+</Badge>}
-                                                {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">Pigment</Badge>}
+                                                {strain.phosphates && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
+                                                {strain.siderophores && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
+                                                {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
                                             </div>
                                         </TableCell>
                                     )}

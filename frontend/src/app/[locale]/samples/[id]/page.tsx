@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { Link } from "@/i18n/routing"
 import { PhotoUpload } from "@/components/domain/photo-upload"
+import { useTranslations } from "next-intl"
 
 // Dynamic import for map to avoid SSR issues
 const SampleMap = dynamic(
@@ -38,6 +39,9 @@ interface SampleWithStrains extends Sample {
 export default function SampleDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter()
     const { id } = React.use(params)
+    const t = useTranslations('Samples')
+    const tCommon = useTranslations('Common')
+    const tStrains = useTranslations('Strains')
     const [sample, setSample] = React.useState<SampleWithStrains | null>(null)
     const [loading, setLoading] = React.useState(true)
 
@@ -69,8 +73,8 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
     if (!sample) {
         return (
             <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold">Sample not found</h1>
-                <Button variant="link" onClick={() => router.back()}>Go back</Button>
+                <h1 className="text-2xl font-bold">{t('sampleNotFound')}</h1>
+                <Button variant="link" onClick={() => router.back()}>{tCommon('back')}</Button>
             </div>
         )
     }
@@ -81,11 +85,11 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
             <div className="flex items-center gap-4 mb-6">
                 <Button variant="outline" size="sm" onClick={() => router.back()}>
                     <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back
+                    {tCommon('back')}
                 </Button>
                 <Button variant="default" size="sm" onClick={() => router.push(`/samples/${sample.id}/edit`)}>
                     <Edit className="h-4 w-4 mr-1" />
-                    Edit Sample
+                    {t('editSample')}
                 </Button>
             </div>
 
@@ -93,7 +97,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{sample.code}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                        <Badge variant="outline">{sample.sampleType}</Badge>
+                        <Badge variant="outline">{t(sample.sampleType.toLowerCase())}</Badge>
                         <span>•</span>
                         <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -110,7 +114,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Leaf className="h-5 w-5" />
-                                Collection Site
+                                {t('collectionSite')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -119,13 +123,13 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                 <div>
                                     <p className="font-medium">{sample.siteName}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        Lat: {sample.lat}, Lng: {sample.lng}
+                                        {tCommon('lat')}: {sample.lat}, {tCommon('lng')}: {sample.lng}
                                     </p>
                                 </div>
                             </div>
                             {sample.description && (
                                 <div className="pt-4 border-t">
-                                    <span className="text-sm font-medium block mb-1">Description:</span>
+                                    <span className="text-sm font-medium block mb-1">{tCommon('description')}:</span>
                                     <p className="text-muted-foreground">{sample.description}</p>
                                 </div>
                             )}
@@ -142,8 +146,8 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                 <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
                                     <div className="text-center text-muted-foreground">
                                         <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                        <p>No coordinates available</p>
-                                        <p className="text-xs">Add coordinates to see map</p>
+                                        <p>{t('noCoordinates')}</p>
+                                        <p className="text-xs">{t('addCoordinates')}</p>
                                     </div>
                                 </div>
                             )}
@@ -153,7 +157,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                     {/* Photos */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sample Photos</CardTitle>
+                            <CardTitle>{t('samplePhotos')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <PhotoUpload
@@ -171,7 +175,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Microscope className="h-5 w-5" />
-                                Isolated Strains
+                                {t('isolatedStrains')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -185,12 +189,12 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="font-medium">{strain.identifier}</span>
-                                                {strain.seq && <Badge className="text-[10px] h-5">SEQ</Badge>}
+                                                {strain.seq && <Badge className="text-[10px] h-5">{tStrains('seqBadge')}</Badge>}
                                             </div>
                                             <div className="flex gap-2 text-xs text-muted-foreground">
                                                 {strain.gramStain && (
                                                     <Badge variant="outline" className="text-[10px] h-5">
-                                                        Gram {strain.gramStain === 'POSITIVE' ? '+' : '-'}
+                                                        {tStrains('gramStain')} {strain.gramStain === 'POSITIVE' ? '+' : '-'}
                                                     </Badge>
                                                 )}
                                             </div>
@@ -199,7 +203,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                 </div>
                             ) : (
                                 <p className="text-sm text-muted-foreground text-center py-8">
-                                    No strains isolated yet
+                                    {t('noStrainsIsolated')}
                                 </p>
                             )}
                         </CardContent>

@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 const sampleSchema = z.object({
     sampleTypeId: z.number().min(1, "Type is required"),
@@ -54,6 +55,8 @@ interface SampleFormProps {
 
 export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
     const router = useRouter()
+    const t = useTranslations('Samples')
+    const tCommon = useTranslations('Common')
     const [loading, setLoading] = React.useState(false)
     const [sampleTypes, setSampleTypes] = React.useState<Array<{ id: number; name: string; slug: string }>>([])
 
@@ -64,11 +67,11 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                 setSampleTypes(types)
             } catch (error) {
                 console.error('Failed to fetch sample types:', error)
-                toast.error('Failed to load sample types')
+                toast.error(t('failedToLoadSamples'))
             }
         }
         fetchSampleTypes()
-    }, [])
+    }, [t])
 
     const form = useForm<SampleFormValues>({
         resolver: zodResolver(sampleSchema),
@@ -95,16 +98,18 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
 
             if (isEdit && initialData) {
                 await ApiService.updateSample(initialData.id, payload)
-                toast.success("Sample updated successfully")
+                toast.success(t('sampleUpdated'))
+                router.back()
+                router.refresh()
             } else {
                 await ApiService.createSample(payload)
-                toast.success("Sample created successfully")
+                toast.success(t('sampleCreated'))
+                router.push("/samples")
+                router.refresh()
             }
-            router.push("/samples")
-            router.refresh()
         } catch (error) {
             console.error("Failed to save sample:", error)
-            toast.error("Failed to save sample. Please try again.")
+            toast.error(t('failedToSaveSample'))
         } finally {
             setLoading(false)
         }
@@ -119,14 +124,14 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         name="sampleTypeId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Sample Type</FormLabel>
+                                <FormLabel>{t('sampleType')}</FormLabel>
                                 <Select
                                     onValueChange={(value) => field.onChange(parseInt(value))}
                                     value={field.value?.toString()}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select sample type" />
+                                            <SelectValue placeholder={t('selectSampleType')} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -147,11 +152,9 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         name="subject"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Subject (Species/Object)</FormLabel>
+                                <FormLabel>{t('subject')}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g. Hedysarum zunduk
-
-ii" {...field} />
+                                    <Input placeholder={t('subjectPlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -163,9 +166,9 @@ ii" {...field} />
                         name="siteName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Collection Site</FormLabel>
+                                <FormLabel>{t('siteName')}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="e.g. Lake Baikal, Station 1" {...field} />
+                                    <Input placeholder={t('collectionSitePlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -177,7 +180,7 @@ ii" {...field} />
                         name="collectedAt"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Collection Date</FormLabel>
+                                <FormLabel>{t('collectionDate')}</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -191,7 +194,7 @@ ii" {...field} />
                                                 {field.value ? (
                                                     format(field.value, "PPP")
                                                 ) : (
-                                                    <span>Pick a date</span>
+                                                    <span>{t('pickDate')}</span>
                                                 )}
                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                             </Button>
@@ -219,9 +222,9 @@ ii" {...field} />
                         name="lat"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Latitude</FormLabel>
+                                <FormLabel>{t('latitude')}</FormLabel>
                                 <FormControl>
-                                    <Input type="number" step="any" placeholder="51.2345" {...field} />
+                                    <Input type="number" step="any" placeholder="0.000000" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -233,9 +236,9 @@ ii" {...field} />
                         name="lng"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Longitude</FormLabel>
+                                <FormLabel>{t('longitude')}</FormLabel>
                                 <FormControl>
-                                    <Input type="number" step="any" placeholder="104.5678" {...field} />
+                                    <Input type="number" step="any" placeholder="0.000000" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -248,11 +251,11 @@ ii" {...field} />
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description</FormLabel>
+                            <FormLabel>{t('description')}</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Detailed description of the sample and collection conditions..."
-                                    className="resize-none"
+                                    placeholder={t('descriptionPlaceholder')}
+                                    className="resize-none min-h-[120px]"
                                     {...field}
                                 />
                             </FormControl>
@@ -263,11 +266,11 @@ ii" {...field} />
 
                 <div className="flex justify-end gap-4">
                     <Button variant="outline" type="button" onClick={() => router.back()}>
-                        Cancel
+                        {tCommon('cancel')}
                     </Button>
                     <Button type="submit" disabled={loading}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isEdit ? "Update Sample" : "Create Sample"}
+                        {isEdit ? t('updateSample') : t('createSample')}
                     </Button>
                 </div>
             </form>

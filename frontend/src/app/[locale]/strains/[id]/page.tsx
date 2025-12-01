@@ -10,11 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { notFound, useSearchParams } from "next/navigation"
 import { useRouter, Link } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
+import { useTranslations } from "next-intl"
+import { format } from "date-fns"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const returnTo = searchParams?.get('returnTo')
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
 
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -54,8 +58,8 @@ function StrainDetailContent({ id }: { id: string }) {
     if (!strain) {
         return (
             <div className="p-8 text-center">
-                <h1 className="text-2xl font-bold">Strain not found</h1>
-                <Button variant="link" onClick={() => router.back()}>Go back</Button>
+                <h1 className="text-2xl font-bold">{t('strainNotFound')}</h1>
+                <Button variant="link" onClick={() => router.back()}>{tCommon('prev')}</Button>
             </div>
         )
     }
@@ -65,7 +69,7 @@ function StrainDetailContent({ id }: { id: string }) {
             <div className="flex items-center gap-4 mb-6">
                 <Button variant="outline" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
                     <ArrowLeft className="h-4 w-4 mr-1" />
-                    Back
+                    {tCommon('back')}
                 </Button>
                 <Button
                     variant="default"
@@ -75,7 +79,7 @@ function StrainDetailContent({ id }: { id: string }) {
                     }
                 >
                     <Edit className="h-4 w-4 mr-1" />
-                    Edit Strain
+                    {t('editStrain')}
                 </Button>
             </div>
 
@@ -83,14 +87,14 @@ function StrainDetailContent({ id }: { id: string }) {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{strain.identifier}</h1>
                     <p className="text-muted-foreground">
-                        Sample: {strain.sample?.code || 'Unknown'}   ID: {strain.id}
+                        {t('sample')}: {strain.sample?.code || t('unknown')}   ID: {strain.id}
                     </p>
                 </div>
                 <div className="ml-auto flex gap-2">
-                    {strain.seq && <Badge>SEQ</Badge>}
+                    {strain.seq && <Badge>{t('sequenced')}</Badge>}
                     {strain.gramStain && (
                         <Badge variant={strain.gramStain === 'POSITIVE' ? 'default' : 'secondary'}>
-                            Gram {strain.gramStain === 'POSITIVE' ? '+' : '-'}
+                            {t('gramStain')} {strain.gramStain === 'POSITIVE' ? '+' : '-'}
                         </Badge>
                     )}
                 </div>
@@ -101,7 +105,7 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Microscope className="h-5 w-5" />
-                            Taxonomy
+                            {t('taxonomy')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -110,12 +114,12 @@ function StrainDetailContent({ id }: { id: string }) {
                                 <span className="font-medium italic">{strain.taxonomy16s}</span>
                             </div>
                         ) : (
-                            <p className="text-sm text-muted-foreground">No taxonomy information</p>
+                            <p className="text-sm text-muted-foreground">{t('noTaxonomyInfo')}</p>
                         )}
                         {strain.otherTaxonomy && (
                             <div className="pt-4 border-t">
                                 <span className="text-xs font-medium text-muted-foreground block mb-1">
-                                    Other Identification Methods:
+                                    {t('otherIdentificationMethods')}:
                                 </span>
                                 <p className="text-sm">{strain.otherTaxonomy}</p>
                             </div>
@@ -127,36 +131,36 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FlaskConical className="h-5 w-5" />
-                            Growth Characteristics
+                            {t('growthAndTraits')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-2">
-                            {strain.phosphates && <Badge variant="outline">Phosphates +</Badge>}
-                            {strain.siderophores && <Badge variant="outline">Siderophores +</Badge>}
-                            {strain.pigmentSecretion && <Badge variant="outline">Pigment +</Badge>}
-                            {strain.amylase && <Badge variant="outline">Amylase {strain.amylase}</Badge>}
+                            {strain.phosphates && <Badge variant="outline">{t('phosphates')} +</Badge>}
+                            {strain.siderophores && <Badge variant="outline">{t('siderophores')} +</Badge>}
+                            {strain.pigmentSecretion && <Badge variant="outline">{t('pigmentSecretion')} +</Badge>}
+                            {strain.amylase && <Badge variant="outline">{t('amylase')} {strain.amylase}</Badge>}
                             {strain.antibioticActivity && (
                                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
-                                    Antibiotic Activity
+                                    {t('antibioticActivity')}
                                 </Badge>
                             )}
                         </div>
                         {strain.antibioticActivity && (
                             <div className="mt-4 text-sm">
-                                <span className="font-medium">Antibiotic Activity Details:</span>
+                                <span className="font-medium">{t('antibioticActivityDetails')}:</span>
                                 <p className="text-muted-foreground mt-1">{strain.antibioticActivity}</p>
                             </div>
                         )}
                         {strain.iuk && (
                             <div className="mt-3 text-sm">
-                                <span className="font-medium">IAA / IUK:</span>
+                                <span className="font-medium">{t('iukIaa')}:</span>
                                 <p className="text-muted-foreground mt-1">{strain.iuk}</p>
                             </div>
                         )}
                         {strain.isolationRegion && (
                             <div className="mt-3 text-sm">
-                                <span className="font-medium">Isolation Region:</span>
+                                <span className="font-medium">{t('isolationRegion')}:</span>
                                 <p className="text-muted-foreground mt-1">{strain.isolationRegion}</p>
                             </div>
                         )}
@@ -167,19 +171,19 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Dna className="h-5 w-5" />
-                            Genetics
+                            {t('genetics')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Sequenced:</span>
+                            <span className="text-sm font-medium">{t('sequenced')}:</span>
                             <Badge variant={strain.seq ? "default" : "secondary"}>
-                                {strain.seq ? "Yes" : "No"}
+                                {strain.seq ? t('yes') : t('no')}
                             </Badge>
                         </div>
                         {strain.genome && (
                             <div>
-                                <span className="text-sm font-medium block mb-1">Genome:</span>
+                                <span className="text-sm font-medium block mb-1">{t('genome')}:</span>
                                 <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
                                     {strain.genome}
                                 </p>
@@ -192,36 +196,36 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="h-5 w-5" />
-                            Additional Info
+                            {t('additionalInfo')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm">
                         {strain.features && (
                             <div>
-                                <span className="font-medium block mb-1">Features:</span>
+                                <span className="font-medium block mb-1">{t('features')}:</span>
                                 <p className="text-muted-foreground">{strain.features}</p>
                             </div>
                         )}
                         {strain.biochemistry && (
                             <div>
-                                <span className="font-medium block mb-1">Biochemistry:</span>
+                                <span className="font-medium block mb-1">{t('biochemistry')}:</span>
                                 <p className="text-muted-foreground whitespace-pre-line">{strain.biochemistry}</p>
                             </div>
                         )}
                         {strain.comments && (
                             <div>
-                                <span className="font-medium block mb-1">Comments:</span>
+                                <span className="font-medium block mb-1">{t('comments')}:</span>
                                 <p className="text-muted-foreground">{strain.comments}</p>
                             </div>
                         )}
                         <div className="grid grid-cols-2 gap-2 pt-4 border-t mt-4">
-                            <span className="font-medium">Indexer:</span>
+                            <span className="font-medium">{t('indexer')}:</span>
                             <span>{strain.indexerInitials || '-'}</span>
-                            <span className="font-medium">RCAM:</span>
+                            <span className="font-medium">{t('rcam')}:</span>
                             <span>{strain.collectionRcam || '-'}</span>
-                            <span className="font-medium">Isolation Region:</span>
+                            <span className="font-medium">{t('isolationRegion')}:</span>
                             <span>{strain.isolationRegion || '-'}</span>
-                            <span className="font-medium">IAA / IUK:</span>
+                            <span className="font-medium">{t('iukIaa')}:</span>
                             <span>{strain.iuk || '-'}</span>
                         </div>
                     </CardContent>
@@ -231,7 +235,7 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Beaker className="h-5 w-5" />
-                            Media
+                            {t('media')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm">
@@ -246,13 +250,13 @@ function StrainDetailContent({ id }: { id: string }) {
                                                     {m.media.composition}
                                                 </div>
                                             )}
-                                            {m.notes && <div className="text-muted-foreground text-xs mt-1">Notes: {m.notes}</div>}
+                                            {m.notes && <div className="text-muted-foreground text-xs mt-1">{t('notes')}: {m.notes}</div>}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-muted-foreground">No media linked</p>
+                            <p className="text-muted-foreground">{t('noMediaLinked')}</p>
                         )}
                     </CardContent>
                 </Card>
@@ -261,7 +265,7 @@ function StrainDetailContent({ id }: { id: string }) {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Archive className="h-5 w-5" />
-                            Storage Locations
+                            {t('storageLocations')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
@@ -276,13 +280,13 @@ function StrainDetailContent({ id }: { id: string }) {
                                 >
                                     <div>
                                         <div className="font-medium">{s.cell.box.displayName}</div>
-                                        <div className="text-muted-foreground text-xs">Cell: {s.cell.cellCode}</div>
+                                        <div className="text-muted-foreground text-xs">{t('cell')}: {s.cell.cellCode}</div>
                                     </div>
-                                    {s.isPrimary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
+                                    {s.isPrimary && <Badge variant="secondary" className="text-[10px]">{t('primary')}</Badge>}
                                 </button>
                             ))
                         ) : (
-                            <p className="text-muted-foreground">Not allocated</p>
+                            <p className="text-muted-foreground">{t('notAllocated')}</p>
                         )}
                     </CardContent>
                 </Card>
@@ -290,7 +294,7 @@ function StrainDetailContent({ id }: { id: string }) {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Strain Photos</CardTitle>
+                    <CardTitle>{t('strainPhotos')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <StrainPhotoUpload

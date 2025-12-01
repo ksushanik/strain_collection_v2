@@ -17,6 +17,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useTranslations } from "next-intl"
 
 interface PhotoUploadProps {
     sampleId: number
@@ -35,6 +36,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
     const fileInputRef = React.useRef<HTMLInputElement>(null)
     const [loadedPreview, setLoadedPreview] = React.useState<Record<number, boolean>>({})
     const [fullLoaded, setFullLoaded] = React.useState(false)
+    const t = useTranslations('Common')
 
     React.useEffect(() => {
         setPhotos(existingPhotos)
@@ -106,7 +108,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
         // Validate file sizes (5MB limit)
         const validFiles = files.filter(file => {
             if (file.size > 5 * 1024 * 1024) {
-                alert(`File ${file.name} is too large. Maximum size is 5MB.`)
+                alert(t('fileTooLarge', { name: file.name }))
                 return false
             }
             return true
@@ -133,7 +135,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             onPhotosChange?.()
         } catch (error) {
             console.error('Failed to upload photos:', error)
-            alert('Failed to upload photos. Please try again.')
+            alert(t('uploadFailed'))
         } finally {
             setUploading(false)
         }
@@ -175,7 +177,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             setPhotoToDelete(null)
         } catch (error) {
             console.error('Failed to delete photo:', error)
-            alert('Failed to delete photo. Please try again.')
+            alert(t('deleteFailed'))
             setPhotoToDelete(null)
         }
     }
@@ -229,10 +231,10 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                             <div className="space-y-2">
                                 <p className="text-sm font-medium">
-                                    Drag and drop images here, or click to browse
+                                    {t('dragDrop')}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    JPEG, PNG, GIF, WebP up to 5MB
+                                    {t('fileTypes')}
                                 </p>
                             </div>
                             <input
@@ -250,7 +252,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploading}
                             >
-                                Select Images
+                                {t('selectImages')}
                             </Button>
                         </div>
 
@@ -259,7 +261,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                             <div className="mt-4 space-y-2">
                                 <div className="flex items-center justify-between">
                                     <p className="text-sm font-medium">
-                                        {selectedFiles.length} file(s) selected
+                                        {selectedFiles.length} {t('filesSelected')}
                                     </p>
                                     <Button
                                         onClick={uploadPhotos}
@@ -267,7 +269,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                         size="sm"
                                     >
                                         {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Upload
+                                        {t('upload')}
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-4 gap-2">
@@ -296,7 +298,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             {photos.length > 0 && (
                 <div>
                     <h3 className="text-lg font-semibold mb-4">
-                        Photos ({photos.length})
+                        {t('photos')} ({photos.length})
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {photos.map((photo, index) => (
@@ -329,17 +331,11 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                         size="icon"
                                         onClick={(e) => handleDeleteClick(photo.id, e)}
                                         className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                                        title="Delete photo"
+                                        title={t('deletePhoto')}
                                     >
                                         <Trash className="h-4 w-4" />
                                     </Button>
                                 )}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                                    <ZoomIn className="h-8 w-8 text-white" />
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {photo.meta?.originalName}
-                                </div>
                             </div>
                         ))}
                     </div>
@@ -349,7 +345,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             {photos.length === 0 && selectedFiles.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
                     <ImageIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                    <p>No photos uploaded yet</p>
+                    <p>{t('noPhotos')}</p>
                 </div>
             )}
 
@@ -432,15 +428,15 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                 <AlertDialog open={!!photoToDelete} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the photo.
+                                {t('deletePhotoConfirm')}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-white hover:bg-destructive/90">
-                                Delete
+                                {t('delete')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

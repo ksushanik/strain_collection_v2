@@ -177,7 +177,7 @@ export function SampleList() {
                                             {sample.siteName}
                                         </CardDescription>
                                     </div>
-                                    <Badge variant="outline">{sample.sampleType}</Badge>
+                                    <Badge variant="outline">{t(sample.sampleType.toLowerCase())}</Badge>
                                 </div>
                             </CardHeader>
                             <CardContent>

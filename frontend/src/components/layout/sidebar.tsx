@@ -89,31 +89,44 @@ export function Sidebar() {
                         {!isCollapsed && <span>{t('dashboard')}</span>}
                     </Link>
 
+                    <Link
+                        href="/strains"
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/strains" || pathname.startsWith("/strains/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <Microscope className="h-4 w-4" />
+                        {!isCollapsed && <span>{t('strains')}</span>}
+                    </Link>
                     {loading ? (
                         <div className="flex justify-center py-4">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
-                        bindings.map((item, index) => {
-                            const Icon = IconMap[item.icon] || Box
-                            const href = `/dynamic/${item.routeSlug}`
-                            const isActive = pathname === href
+                        bindings
+                            .filter(item => item.translationKey !== 'myCollection' && item.routeSlug !== 'my-collection')
+                            .map((item, index) => {
+                                const Icon = IconMap[item.icon] || Box
+                                const href = `/dynamic/${item.routeSlug}`
+                                const isActive = pathname === href
 
-                            return (
-                                <Link
-                                    key={index}
-                                    href={href}
-                                    className={cn(
-                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                        isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                                        isCollapsed && "justify-center px-2"
-                                    )}
-                                >
-                                    <Icon className="h-4 w-4" />
-                                    {!isCollapsed && <span>{translateDynamic(tDynamic, item.translationKey, item.menuLabel)}</span>}
-                                </Link>
-                            )
-                        })
+                                return (
+                                    <Link
+                                        key={index}
+                                        href={href}
+                                        className={cn(
+                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                            isCollapsed && "justify-center px-2"
+                                        )}
+                                    >
+                                        <Icon className="h-4 w-4" />
+                                        {!isCollapsed && <span>{translateDynamic(tDynamic, item.translationKey, item.menuLabel)}</span>}
+                                    </Link>
+                                )
+                            })
                     )}
 
                     <Link
