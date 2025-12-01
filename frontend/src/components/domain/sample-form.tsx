@@ -118,7 +118,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 sm:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="sampleTypeId"
