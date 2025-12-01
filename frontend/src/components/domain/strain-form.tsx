@@ -135,7 +135,7 @@ export function StrainForm({
                                     sampleType: 'UNKNOWN',
                                 }
                                 : undefined
-                        setSampleOptions((prev) => {
+                        setSampleOptions(() => {
                             const merged = [...options]
                             if (fallback) merged.unshift(fallback)
                             return merged
@@ -150,7 +150,7 @@ export function StrainForm({
                 setLoadingSamples(false)
             }
         },
-        [form, initialData?.sample?.id, initialData?.sample?.code, initialData?.sample?.siteName],
+        [form, initialData?.sample],
     )
 
     React.useEffect(() => {

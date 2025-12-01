@@ -6,6 +6,7 @@ import * as settings from './settings';
 import * as storage from './storage';
 import * as strains from './strains';
 import * as taxonomy from './taxonomy';
+import * as uploads from './uploads';
 import { assertOk, request, toApiError } from './http';
 import type { ApiError } from './http';
 
@@ -33,6 +34,7 @@ export const ApiService = {
   ...media,
   ...taxonomy,
   ...analytics,
+  ...uploads,
 };
 
 export {

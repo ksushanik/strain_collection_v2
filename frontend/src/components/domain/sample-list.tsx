@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Filter } from "lucide-react"
-import { useRouter, usePathname } from "@/i18n/routing"
+import { useRouter } from "@/i18n/routing"
 import { Link } from "@/i18n/routing"
 import { Input } from "@/components/ui/input"
 import { useApiError } from "@/hooks/use-api-error"
@@ -54,7 +54,7 @@ export function SampleList() {
             handleError(err, t('failedToLoadSamples'))
             setLoading(false)
         })
-    }, [search, filters, page, sortBy, sortOrder, t])
+    }, [search, filters, page, sortBy, sortOrder, t, handleError])
 
     if (loading && !meta) {
         return (

@@ -18,7 +18,7 @@
         "name": "next"
       }
     ],
-    "types": ["@types/node", "@playwright/test"],
+    "types": ["@types/node", "@playwright/test", "vitest"],
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "@/i18n/routing"
 import { ApiService, Media, PaginatedResponse } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,10 +16,9 @@ const PAGE_SIZE = 10
 export default function MediaPage() {
   const t = useTranslations('Media')
   const tCommon = useTranslations('Common')
-  const router = useRouter()
   const [data, setData] = React.useState<PaginatedResponse<Media> | null>(null)
   const [search, setSearch] = React.useState("")
-  const [page, setPage] = React.useState(1)
+  const [page] = React.useState(1)
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [formData, setFormData] = React.useState<{ name: string; composition?: string }>({ name: "", composition: "" })

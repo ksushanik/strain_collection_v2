@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash } from "lucide-react"
+import { Upload, X, Loader2, ImageIcon, ChevronLeft, ChevronRight, Trash } from "lucide-react"
 import { ApiService, SamplePhoto } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"

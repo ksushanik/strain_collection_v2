@@ -118,7 +118,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     ApiService.getStrains({ limit: 500 })
       .then(res => setStrains(res.data))
       .catch(err => handleError(err, t('failedToLoadStrains')))
-  }, [])
+  }, [handleError, t])
 
   // Fetch Box details when selection changes
   React.useEffect(() => {
@@ -132,7 +132,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       handleError(err, t('failedToLoadCells'))
       setLoadingBox(false)
     })
-  }, [selectedBoxId])
+  }, [selectedBoxId, handleError, t])
 
   const selectedCell = selectedBox?.cells.find(c => c.cellCode === selectedCellCode) || null
 

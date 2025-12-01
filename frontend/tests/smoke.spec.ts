@@ -1,4 +1,4 @@
-import { test, expect, Page, Route } from '@playwright/test';
+import { test, expect, Route } from '@playwright/test';
 
 const fakeUser = {
   id: 1,

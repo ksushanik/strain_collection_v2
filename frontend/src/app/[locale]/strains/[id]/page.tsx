@@ -2,16 +2,15 @@
 
 import * as React from "react"
 import { Suspense } from "react"
-import { ApiService, Strain, Media } from "@/services/api"
+import { ApiService, Strain } from "@/services/api"
 import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { notFound, useSearchParams } from "next/navigation"
-import { useRouter, Link } from "@/i18n/routing"
+import { useSearchParams } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { useTranslations } from "next-intl"
-import { format } from "date-fns"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
@@ -38,14 +37,6 @@ function StrainDetailContent({ id }: { id: string }) {
         load()
     }, [id])
 
-    const refreshStrain = async () => {
-        try {
-            const updated = await ApiService.getStrain(parseInt(id))
-            setStrain(updated)
-        } catch (err) {
-            console.error('Failed to refresh strain:', err)
-        }
-    }
 
     if (loading) {
         return (

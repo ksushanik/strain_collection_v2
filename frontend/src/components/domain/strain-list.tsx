@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter, usePathname } from "@/i18n/routing"
+import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -93,7 +93,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             handleError(err, t('failedToLoadStrains'))
             setLoading(false)
         })
-    }, [search, filters, page, sortBy, sortOrder])
+    }, [search, filters, page, sortBy, sortOrder, handleError, t])
 
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
