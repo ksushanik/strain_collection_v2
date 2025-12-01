@@ -18,7 +18,7 @@ const SampleMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
+            <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center px-4 text-center">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
         )
@@ -79,9 +79,9 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="p-8 space-y-6">
+        <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
                 <Button variant="outline" size="sm" onClick={() => router.back()}>
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
@@ -92,7 +92,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                 </Button>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{sample.code}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mt-1">
@@ -142,7 +142,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                                     className="h-64"
                                 />
                             ) : (
-                                <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center">
+                                <div className="h-64 bg-muted/30 rounded-md border flex items-center justify-center px-4 text-center">
                                     <div className="text-center text-muted-foreground">
                                         <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                         <p>{t('noCoordinates')}</p>
