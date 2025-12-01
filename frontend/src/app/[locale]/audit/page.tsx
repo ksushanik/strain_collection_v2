@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { AuditService, AuditLog } from '@/services/audit.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -28,7 +28,7 @@ export default function AuditPage() {
         entity: '',
     });
 
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
         setLoading(true);
         try {
             const data = await AuditService.getLogs({
@@ -41,18 +41,15 @@ export default function AuditPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters.entity, filters.userId]);
 
     useEffect(() => {
         fetchLogs();
-    }, []);
+    }, [fetchLogs]);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        fetchLogs();
-    };
-
-    const getActionColor = (action: string) => {
+    const getActionColor = (
+        action: string,
+    ): 'default' | 'secondary' | 'destructive' | 'outline' => {
         switch (action) {
             case 'CREATE':
                 return 'default'; // usually black/primary
@@ -156,7 +153,7 @@ export default function AuditPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getActionColor(log.action) as any}>
+                                        <Badge variant={getActionColor(log.action)}>
                                             {log.action}
                                         </Badge>
                                     </TableCell>

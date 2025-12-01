@@ -11,9 +11,7 @@ export class AuditLogService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    const raw = this.configService.get<number | string>(
-      'AUDIT_RETENTION_DAYS',
-    );
+    const raw = this.configService.get<number | string>('AUDIT_RETENTION_DAYS');
     const parsed = Number(raw);
     this.retentionDays = Number.isFinite(parsed) && parsed > 0 ? parsed : 90;
   }

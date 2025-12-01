@@ -13,7 +13,7 @@ import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
 
 @Injectable()
 export class StorageService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAllBoxes() {
     return this.prisma.storageBox

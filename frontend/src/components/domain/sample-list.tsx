@@ -86,7 +86,7 @@ export function SampleList() {
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
-                            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+                            onChange={(e) => { setSortBy(e.target.value as 'siteName' | 'createdAt' | 'collectedAt' | 'code'); setPage(1); }}
                         >
                             <option value="collectedAt">{t('byCollectionDate')}</option>
                             <option value="createdAt">{t('byCreatedDate')}</option>

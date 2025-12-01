@@ -129,7 +129,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
-                            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+                            onChange={(e) => { setSortBy(e.target.value as 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s'); setPage(1); }}
                         >
                             <option value="createdAt">{t('created')}</option>
                             <option value="identifier">{t('identifier')}</option>

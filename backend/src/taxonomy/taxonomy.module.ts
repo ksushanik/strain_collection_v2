@@ -4,9 +4,9 @@ import { TaxonomyService } from './taxonomy.service';
 import { TaxonomyController } from './taxonomy.controller';
 
 @Module({
-    imports: [HttpModule],
-    controllers: [TaxonomyController],
-    providers: [TaxonomyService],
-    exports: [TaxonomyService],
+  imports: [HttpModule],
+  controllers: [TaxonomyController],
+  providers: [TaxonomyService],
+  exports: [TaxonomyService],
 })
-export class TaxonomyModule { }
+export class TaxonomyModule {}

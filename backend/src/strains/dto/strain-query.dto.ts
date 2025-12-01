@@ -50,7 +50,12 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
-  isolationRegion?: 'RHIZOSPHERE' | 'ENDOSPHERE' | 'PHYLLOSPHERE' | 'SOIL' | 'OTHER';
+  isolationRegion?:
+    | 'RHIZOSPHERE'
+    | 'ENDOSPHERE'
+    | 'PHYLLOSPHERE'
+    | 'SOIL'
+    | 'OTHER';
 
   @IsOptional()
   @IsString()

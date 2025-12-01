@@ -76,8 +76,8 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
     const form = useForm<SampleFormValues>({
         resolver: zodResolver(sampleSchema),
         defaultValues: {
-            sampleTypeId: (initialData as any)?.sampleTypeId || undefined,
-            subject: (initialData as any)?.subject || "",
+            sampleTypeId: initialData?.sampleTypeId || undefined,
+            subject: initialData?.subject || "",
             siteName: initialData?.siteName || "",
             collectedAt: initialData?.collectedAt ? new Date(initialData.collectedAt) : undefined,
             lat: initialData?.lat?.toString() || "",
@@ -224,7 +224,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                             <FormItem>
                                 <FormLabel>{t('latitude')}</FormLabel>
                                 <FormControl>
-                                    <Input type="number" step="any" placeholder="0.000000" {...field} />
+                                    <Input type="number" step="0.000001" placeholder="0.000000" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -238,7 +238,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                             <FormItem>
                                 <FormLabel>{t('longitude')}</FormLabel>
                                 <FormControl>
-                                    <Input type="number" step="any" placeholder="0.000000" {...field} />
+                                    <Input type="number" step="0.000001" placeholder="0.000000" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

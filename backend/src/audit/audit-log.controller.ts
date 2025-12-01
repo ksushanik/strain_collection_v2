@@ -10,7 +10,7 @@ import { CheckPolicies } from '../casl/check-policies.decorator';
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 export class AuditLogController {
-  constructor(private auditLogService: AuditLogService) { }
+  constructor(private auditLogService: AuditLogService) {}
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'AuditLog'))

@@ -31,7 +31,7 @@ import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditLogInterceptor)
 export class StrainsController {
-  constructor(private readonly strainsService: StrainsService) { }
+  constructor(private readonly strainsService: StrainsService) {}
 
   @Get()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))

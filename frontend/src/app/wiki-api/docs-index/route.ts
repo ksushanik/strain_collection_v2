@@ -50,7 +50,8 @@ export async function GET() {
       }),
     )
     return NextResponse.json(docsWithContent)
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Failed to load wiki" }, { status: 500 })
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Failed to load wiki"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -15,7 +15,7 @@ export class StrainsService {
   constructor(
     private prisma: PrismaService,
     private imagekitService: ImageKitService,
-  ) { }
+  ) {}
 
   async findAll(query: StrainQueryDto) {
     const {
@@ -94,7 +94,7 @@ export class StrainsService {
     const orderBy: Prisma.StrainOrderByWithRelationInput =
       sortBy === 'sampleCode'
         ? { sample: { code: sortOrder } }
-        : { [sortBy]: sortOrder } as Prisma.StrainOrderByWithRelationInput;
+        : ({ [sortBy]: sortOrder } as Prisma.StrainOrderByWithRelationInput);
 
     const [strains, total] = await Promise.all([
       this.prisma.strain.findMany({

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useApiError } from "@/hooks/use-api-error"
+import { useTranslations } from "next-intl"
 
 type BoxSummary = {
     id: number;
@@ -47,6 +48,7 @@ type BoxDetail = {
 function EditStrainContent({ id }: { id: string }) {
     const searchParams = useSearchParams()
     const router = useRouter()
+    const t = useTranslations('Strains')
     const returnTo = searchParams?.get("returnTo") || undefined
     const { handleError } = useApiError()
     const [strain, setStrain] = React.useState<Strain | null>(null)
@@ -74,10 +76,10 @@ function EditStrainContent({ id }: { id: string }) {
             })
             .catch(err => {
                 console.error(err)
-                handleError(err, "Не удалось загрузить данные штамма")
+                handleError(err, t('failedToLoadStrain'))
             })
             .finally(() => setLoading(false))
-    }, [handleError, id])
+    }, [handleError, id, t])
 
     const refreshStrain = React.useCallback(async () => {
         try {
@@ -97,9 +99,9 @@ function EditStrainContent({ id }: { id: string }) {
             const box = await ApiService.getBoxCells(boxId)
             setSelectedBox(box)
         } catch (err) {
-            handleError(err, "Не удалось загрузить ячейки бокса")
+            handleError(err, t('failedToLoadCells'))
         }
-    }, [handleError])
+    }, [handleError, t])
 
     React.useEffect(() => {
         if (boxes.length > 0 && !selectedBoxId) {
@@ -168,7 +170,7 @@ function EditStrainContent({ id }: { id: string }) {
                 isPrimary: strain.storage && strain.storage.length > 0 ? false : true,
             }))
         } catch (err) {
-            handleError(err, "Не удалось добавить размещение")
+            handleError(err, t('failedToAllocate'))
         } finally {
             setAllocatingStorage(false)
         }
@@ -182,7 +184,7 @@ function EditStrainContent({ id }: { id: string }) {
             await refreshStrain()
             await refreshSelectedBox(boxId)
         } catch (err) {
-            handleError(err, "Не удалось изменить основной слот")
+            handleError(err, t('failedToAllocate'))
         } finally {
             setAllocatingStorage(false)
         }
@@ -195,7 +197,7 @@ function EditStrainContent({ id }: { id: string }) {
             await refreshStrain()
             await refreshSelectedBox(boxId)
         } catch (err) {
-            handleError(err, "Не удалось удалить размещение")
+            handleError(err, t('failedToUnallocate'))
         } finally {
             setAllocatingStorage(false)
         }
@@ -215,7 +217,7 @@ function EditStrainContent({ id }: { id: string }) {
     if (!strain) {
         return (
             <div className="p-8 text-center text-muted-foreground">
-                Strain not found
+                {t('strainNotFound')}
             </div>
         )
     }
@@ -223,15 +225,15 @@ function EditStrainContent({ id }: { id: string }) {
     return (
         <div className="p-8 max-w-5xl mx-auto">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Edit Strain</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('editTitle')}</h1>
                 <p className="text-muted-foreground">
-                    Update strain details.
+                    {t('editSubtitle')}
                 </p>
             </div>
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Strain Details</CardTitle>
+                    <CardTitle>{t('detailsCardTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <StrainForm
@@ -247,7 +249,7 @@ function EditStrainContent({ id }: { id: string }) {
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Growth Media</CardTitle>
+                    <CardTitle>{t('mediaCardTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {strain.media && strain.media.length > 0 ? (
@@ -261,7 +263,7 @@ function EditStrainContent({ id }: { id: string }) {
                                                 {m.media.composition}
                                             </div>
                                         )}
-                                        {m.notes && <div className="text-muted-foreground text-xs mt-1">Notes: {m.notes}</div>}
+                                        {m.notes && <div className="text-muted-foreground text-xs mt-1">{t('mediaNotes')}: {m.notes}</div>}
                                     </div>
                                     <Button
                                         variant="ghost"
@@ -269,7 +271,7 @@ function EditStrainContent({ id }: { id: string }) {
                                         className="text-destructive"
                                         onClick={() => handleUnlinkMedia(m.mediaId)}
                                         disabled={savingMedia}
-                                        title="Remove"
+                                        title={t('remove')}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -277,7 +279,7 @@ function EditStrainContent({ id }: { id: string }) {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-muted-foreground">No media linked</p>
+                        <p className="text-muted-foreground">{t('noMedia')}</p>
                     )}
 
                     <div className="rounded border p-3 space-y-2">
@@ -287,7 +289,7 @@ function EditStrainContent({ id }: { id: string }) {
                                 onValueChange={(val) => setMediaForm((prev) => ({ ...prev, mediaId: parseInt(val) }))}
                             >
                                 <SelectTrigger className="md:w-64">
-                                    <SelectValue placeholder="Select media" />
+                                    <SelectValue placeholder={t('selectMedia')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {mediaOptions.map((option) => (
@@ -298,7 +300,7 @@ function EditStrainContent({ id }: { id: string }) {
                                 </SelectContent>
                             </Select>
                             <Input
-                                placeholder="Notes (optional)"
+                                placeholder={t('notesOptional')}
                                 value={mediaForm.notes || ""}
                                 onChange={(e) => setMediaForm((prev) => ({ ...prev, notes: e.target.value }))}
                             />
@@ -308,7 +310,7 @@ function EditStrainContent({ id }: { id: string }) {
                                 disabled={!mediaForm.mediaId || savingMedia}
                             >
                                 {savingMedia ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-                                Link
+                                {t('link')}
                             </Button>
                         </div>
                     </div>
@@ -317,7 +319,7 @@ function EditStrainContent({ id }: { id: string }) {
 
             <Card className="mb-6">
                 <CardHeader>
-                    <CardTitle>Storage Allocation</CardTitle>
+                    <CardTitle>{t('storageCardTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {strain.storage && strain.storage.length > 0 ? (
@@ -326,10 +328,10 @@ function EditStrainContent({ id }: { id: string }) {
                                 <div key={s.id} className="flex flex-col gap-2 rounded border p-3 md:flex-row md:items-center md:justify-between">
                                     <div>
                                         <div className="font-medium">{s.cell.box.displayName}</div>
-                                        <div className="text-xs text-muted-foreground">Cell: {s.cell.cellCode}</div>
+                                        <div className="text-xs text-muted-foreground">{t('cellLabel')}: {s.cell.cellCode}</div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {s.isPrimary && <Badge variant="secondary">Primary</Badge>}
+                                        {s.isPrimary && <Badge variant="secondary">{t('primary')}</Badge>}
                                         {!s.isPrimary && (
                                             <Button
                                                 size="sm"
@@ -337,7 +339,7 @@ function EditStrainContent({ id }: { id: string }) {
                                                 onClick={() => handleMakePrimary(s.cell.box.id, s.cell.cellCode)}
                                                 disabled={allocatingStorage}
                                             >
-                                                Make primary
+                                                {t('makePrimary')}
                                             </Button>
                                         )}
                                         <Button
@@ -355,7 +357,7 @@ function EditStrainContent({ id }: { id: string }) {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-muted-foreground">Strain is not allocated to storage.</p>
+                        <p className="text-muted-foreground">{t('noStorage')}</p>
                     )}
 
                     <div className="rounded border p-3 space-y-3">
@@ -369,7 +371,7 @@ function EditStrainContent({ id }: { id: string }) {
                                 }}
                             >
                                 <SelectTrigger className="md:w-64">
-                                    <SelectValue placeholder="Select box" />
+                                    <SelectValue placeholder={t('selectBox')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {boxes.map((box) => (
@@ -386,10 +388,10 @@ function EditStrainContent({ id }: { id: string }) {
                                 disabled={!storageForm.boxId || freeCells.length === 0}
                             >
                                 <SelectTrigger className="md:w-48">
-                                    <SelectValue placeholder={storageForm.boxId ? "Select cell" : "Choose box first"} />
+                                    <SelectValue placeholder={storageForm.boxId ? t('selectCell') : t('chooseBoxFirst')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {freeCells.length === 0 && <SelectItem value="none" disabled>No free cells</SelectItem>}
+                                    {freeCells.length === 0 && <SelectItem value="none" disabled>{t('noFreeCells')}</SelectItem>}
                                     {freeCells.map((cell) => (
                                         <SelectItem key={cell.id} value={cell.cellCode}>
                                             {cell.cellCode}
@@ -407,7 +409,7 @@ function EditStrainContent({ id }: { id: string }) {
                                     }
                                 />
                                 <label htmlFor="storage-primary" className="text-sm leading-none">
-                                    Primary allocation
+                                    {t('primaryAllocation')}
                                 </label>
                             </div>
 
@@ -421,7 +423,7 @@ function EditStrainContent({ id }: { id: string }) {
                             </Button>
                         </div>
                         {!hasPrimary && strain.storage && strain.storage.length > 0 && (
-                            <p className="text-xs text-muted-foreground">У штамма пока нет Primary allocation. Выберите выделение, чтобы отметить его основным.</p>
+                            <p className="text-xs text-muted-foreground">{t('noPrimaryWarning')}</p>
                         )}
                     </div>
                 </CardContent>
@@ -429,7 +431,7 @@ function EditStrainContent({ id }: { id: string }) {
 
             <Card className="mb-8">
                 <CardHeader>
-                    <CardTitle>Strain Photos</CardTitle>
+                    <CardTitle>{t('photosCardTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <StrainPhotoUpload
@@ -452,7 +454,7 @@ function EditStrainContent({ id }: { id: string }) {
                         }
                     }}
                 >
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 <Button
                     type="submit"
@@ -460,7 +462,7 @@ function EditStrainContent({ id }: { id: string }) {
                     disabled={formSubmitting}
                 >
                     {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save changes
+                    {t('saveChanges')}
                 </Button>
             </div>
         </div>
@@ -469,8 +471,9 @@ function EditStrainContent({ id }: { id: string }) {
 
 export default function EditStrainPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
+    const tCommon = useTranslations('Common')
     return (
-        <Suspense fallback={<div className="p-8">Loading...</div>}>
+        <Suspense fallback={<div className="p-8">{tCommon('loading')}</div>}>
             <EditStrainContent id={id} />
         </Suspense>
     )

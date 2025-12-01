@@ -101,7 +101,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       await ApiService.deleteStorageBox(selectedBoxId)
       setBoxes(prev => prev.filter(b => b.id !== selectedBoxId))
       setSelectedBoxId(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
       handleError(err, t('failedToDeleteBox'))
     }
   }

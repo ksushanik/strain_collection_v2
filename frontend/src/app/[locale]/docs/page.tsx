@@ -28,8 +28,9 @@ export default function DocsPage() {
         if (!res.ok) throw new Error(`Failed to load docs index: ${res.statusText}`)
         const data = (await res.json()) as IndexedDoc[]
         setDocs(data)
-      } catch (e: any) {
-        setError(e?.message || "Не удалось загрузить wiki")
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Не удалось загрузить wiki"
+        setError(message)
       } finally {
         setLoading(false)
       }

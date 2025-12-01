@@ -3,10 +3,7 @@ import { toast } from "sonner";
 
 export function useApiError() {
   const handleError = useCallback((err: unknown, fallback = "?????? ???????") => {
-    const message =
-      err && typeof err === "object" && "message" in err && typeof (err as any).message === "string"
-        ? (err as any).message
-        : fallback;
+    const message = err instanceof Error ? err.message : fallback;
     toast.error(message);
     console.error(message, err);
   }, []);

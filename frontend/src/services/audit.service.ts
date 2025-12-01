@@ -1,4 +1,4 @@
-import { request, PaginatedResponse } from './api';
+import { request } from './api';
 
 export interface AuditLog {
     id: number;
@@ -14,8 +14,8 @@ export interface AuditLog {
     entityId: number;
     batchId?: string;
     comment?: string;
-    changes?: Record<string, any>;
-    metadata?: Record<string, any>;
+    changes?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
     createdAt: string;
 }
 

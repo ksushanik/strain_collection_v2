@@ -42,70 +42,66 @@ const PermissionsGrid = (props: BasePropertyProps) => {
     onChange(property.path, next);
   };
 
-  return React.createElement(
-    Box,
-    { variant: 'grey' },
-    [
-      React.createElement(
-        Text,
-        { key: 'title', mb: 'sm', fontWeight: 'bold' },
-        'Права доступа',
-      ),
-      React.createElement(
-        Box,
-        {
-          key: 'grid',
-          display: 'grid',
-          gridTemplateColumns: '160px repeat(5, 1fr)',
-          gridRowGap: 'md',
-          gridColumnGap: 'md',
-        },
-        [
-          React.createElement(Box, { key: 'empty' }),
-          ...ACTIONS.map((action) =>
-            React.createElement(
-              Label,
-              { key: action, style: { textAlign: 'center' } },
-              action,
-            ),
+  return React.createElement(Box, { variant: 'grey' }, [
+    React.createElement(
+      Text,
+      { key: 'title', mb: 'sm', fontWeight: 'bold' },
+      'Права доступа',
+    ),
+    React.createElement(
+      Box,
+      {
+        key: 'grid',
+        display: 'grid',
+        gridTemplateColumns: '160px repeat(5, 1fr)',
+        gridRowGap: 'md',
+        gridColumnGap: 'md',
+      },
+      [
+        React.createElement(Box, { key: 'empty' }),
+        ...ACTIONS.map((action) =>
+          React.createElement(
+            Label,
+            { key: action, style: { textAlign: 'center' } },
+            action,
           ),
-          ...SUBJECTS.flatMap((subject) => [
-            React.createElement(
+        ),
+        ...SUBJECTS.flatMap((subject) => [
+          React.createElement(
+            Box,
+            {
+              key: `${subject}-label`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'xs',
+            },
+            React.createElement(Badge, { variant: 'info' }, subject),
+          ),
+          ...ACTIONS.map((action) => {
+            const checked = ensureArray(value[subject]).includes(action);
+            return React.createElement(
               Box,
               {
-                key: `${subject}-label`,
+                key: `${subject}-${action}`,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 'xs',
+                justifyContent: 'center',
               },
-              React.createElement(Badge, { variant: 'info' }, subject),
-            ),
-            ...ACTIONS.map((action) => {
-              const checked = ensureArray(value[subject]).includes(action);
-              return React.createElement(
-                Box,
-                {
-                  key: `${subject}-${action}`,
-                  display: 'flex',
-                  justifyContent: 'center',
-                },
-                React.createElement(CheckBox, {
-                  id: `${subject}-${action}`,
-                  checked,
-                  onChange: () => toggle(subject, action),
-                }),
-              );
-            }),
-          ]),
-        ],
-      ),
-      React.createElement(
-        Text,
-        { key: 'hint', mt: 'md', fontSize: 12, color: 'grey60' },
-        'Подсказка: используйте «all» + «manage» для полного доступа. При пустой карте будут использованы права роли/группы по умолчанию.',
-      ),
-    ],
-  );
+              React.createElement(CheckBox, {
+                id: `${subject}-${action}`,
+                checked,
+                onChange: () => toggle(subject, action),
+              }),
+            );
+          }),
+        ]),
+      ],
+    ),
+    React.createElement(
+      Text,
+      { key: 'hint', mt: 'md', fontSize: 12, color: 'grey60' },
+      'Подсказка: используйте «all» + «manage» для полного доступа. При пустой карте будут использованы права роли/группы по умолчанию.',
+    ),
+  ]);
 };
 
 export default PermissionsGrid;

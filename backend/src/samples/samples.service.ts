@@ -11,7 +11,7 @@ export class SamplesService {
   constructor(
     private prisma: PrismaService,
     private imagekitService: ImageKitService,
-  ) { }
+  ) {}
 
   async findAll(query: SampleQueryDto) {
     const {

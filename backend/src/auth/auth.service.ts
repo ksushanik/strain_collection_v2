@@ -28,7 +28,7 @@ export class AuthService {
     const payload: { email: string; sub: number; role: string } = {
       email: user.email,
       sub: user.id,
-      role: (user as any)?.role?.key ?? 'USER',
+      role: user.role?.key ?? 'USER',
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -36,7 +36,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: (user as any)?.role?.key ?? 'USER',
+        role: user.role?.key ?? 'USER',
       },
     };
   }

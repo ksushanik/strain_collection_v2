@@ -22,7 +22,13 @@ export type AppAbility = Ability<[Actions, Subjects]>;
 
 type PermissionMap = Partial<Record<Subjects, Actions[]>>;
 
-const VALID_ACTIONS: Actions[] = ['manage', 'create', 'read', 'update', 'delete'];
+const VALID_ACTIONS: Actions[] = [
+  'manage',
+  'create',
+  'read',
+  'update',
+  'delete',
+];
 const VALID_SUBJECTS: Subjects[] = [
   'Strain',
   'Sample',
@@ -68,27 +74,37 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey, PermissionMap> = {
 
 @Injectable()
 export class CaslAbilityFactory {
-  createForUser(user: Partial<User> & { role?: { key?: string }; roleId?: number }) {
+  createForUser(
+    user: Partial<User> & {
+      role?: { key?: string; permissions?: PermissionMap | null } | string;
+      roleId?: number;
+      group?: { permissions?: PermissionMap | null } | null;
+    },
+  ) {
     const { can, build } = new AbilityBuilder<AppAbility>(
       Ability as AbilityClass<AppAbility>,
     );
 
     const roleKey =
-      (user.role as any)?.key ??
-      (typeof (user as any).role === 'string' ? (user as any).role : null);
+      (typeof user.role === 'object' && user.role?.key) ||
+      (typeof user.role === 'string' ? user.role : null);
 
     if (roleKey === 'ADMIN') {
       can('manage', 'all');
       return build();
     }
 
-    const groupPermissionsRaw = (user as any)?.group?.permissions;
+    const groupPermissionsRaw =
+      typeof user.group === 'object' ? (user.group?.permissions ?? null) : null;
     const normalizedGroupPermissions =
       groupPermissionsRaw === null || groupPermissionsRaw === undefined
         ? null
-        : this.normalizePermissions(groupPermissionsRaw as PermissionMap | null);
+        : this.normalizePermissions(
+            groupPermissionsRaw as PermissionMap | null,
+          );
 
-    const rolePermissionsRaw = (user as any)?.role?.permissions;
+    const rolePermissionsRaw =
+      typeof user.role === 'object' ? (user.role?.permissions ?? null) : null;
     const normalizedRolePermissions =
       rolePermissionsRaw === null || rolePermissionsRaw === undefined
         ? null
@@ -104,9 +120,9 @@ export class CaslAbilityFactory {
       Object.keys(normalizedRolePermissions).length > 0;
 
     const permissions: PermissionMap = useGroupPermissions
-      ? (normalizedGroupPermissions as PermissionMap)
+      ? normalizedGroupPermissions
       : useRolePermissions
-        ? (normalizedRolePermissions as PermissionMap)
+        ? normalizedRolePermissions
         : DEFAULT_ROLE_PERMISSIONS[(roleKey as RoleKey) ?? 'USER'] || {};
 
     this.applyPermissions(can, permissions);
@@ -114,7 +130,9 @@ export class CaslAbilityFactory {
     return build();
   }
 
-  private normalizePermissions(raw: PermissionMap | null): PermissionMap | null {
+  private normalizePermissions(
+    raw: PermissionMap | null,
+  ): PermissionMap | null {
     if (raw === null) {
       return null;
     }
@@ -130,7 +148,7 @@ export class CaslAbilityFactory {
       if (!Array.isArray(actions)) return;
 
       const filtered = actions.filter((action): action is Actions =>
-        VALID_ACTIONS.includes(action as Actions),
+        VALID_ACTIONS.includes(action),
       );
 
       if (filtered.length > 0) {

@@ -14,13 +14,9 @@ import { AuditModule } from './audit/audit.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { MediaModule } from './media/media.module';
 import { TaxonomyModule } from './taxonomy/taxonomy.module';
+import { AdminModule } from './admin/admin.module';
 
 const includeAdmin = process.env.SKIP_ADMIN !== 'true';
-// Lazy-load AdminModule to avoid dynamic import issues in tests (vm modules)
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const AdminModule = includeAdmin
-  ? require('./admin/admin.module').AdminModule
-  : null;
 
 @Module({
   imports: [
@@ -40,9 +36,9 @@ const AdminModule = includeAdmin
     AnalyticsModule,
     MediaModule,
     TaxonomyModule,
-    ...(includeAdmin && AdminModule ? [AdminModule] : []),
+    ...(includeAdmin ? [AdminModule] : []),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
