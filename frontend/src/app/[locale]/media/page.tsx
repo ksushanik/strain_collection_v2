@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Plus, Search, Pencil, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const PAGE_SIZE = 10
 
@@ -93,20 +94,20 @@ export default function MediaPage() {
   const filteredMedia = data?.data || []
 
   return (
-    <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           {t('addMedia')}
         </Button>
       </div>
 
-      <div className="mb-6 flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t('searchPlaceholder')}
@@ -119,7 +120,42 @@ export default function MediaPage() {
 
       {error && <div className="mb-4 text-sm text-destructive">{error}</div>}
 
-      <div className="rounded-md border bg-white">
+      <div className="grid gap-4 md:hidden">
+        {loading ? (
+          <Card>
+            <CardContent className="py-6 text-center">
+              <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+            </CardContent>
+          </Card>
+        ) : filteredMedia.length === 0 ? (
+          <Card>
+            <CardContent className="py-6 text-center text-muted-foreground">
+              No media found.
+            </CardContent>
+          </Card>
+        ) : (
+          filteredMedia.map((item) => (
+            <Card key={item.id}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{item.name}</CardTitle>
+                <CardDescription>{item.composition || '-'}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleEdit(item)} className="flex-1 min-w-[120px]">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  {tCommon('edit')}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="flex-1 min-w-[120px]">
+                  <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                  {tCommon('delete')}
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      <div className="hidden rounded-md border bg-white md:block">
         <Table>
           <TableHeader>
             <TableRow>

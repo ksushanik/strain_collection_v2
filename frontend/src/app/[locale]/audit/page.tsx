@@ -63,8 +63,8 @@ export default function AuditPage() {
     };
 
     return (
-        <div className="p-8">
-            <div className="mb-8 flex items-center justify-between">
+        <div className="px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
                     <p className="text-muted-foreground">
@@ -78,8 +78,8 @@ export default function AuditPage() {
                     <CardTitle>{t('filters')}</CardTitle>
                     <CardDescription>{t('filtersDescription')}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex gap-4">
-                    <div className="flex-1">
+                <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
+                    <div className="flex-1 w-full">
                         <label className="text-sm font-medium mb-2 block">{t('userId')}</label>
                         <div className="relative">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -91,7 +91,7 @@ export default function AuditPage() {
                             />
                         </div>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                         <label className="text-sm font-medium mb-2 block">{t('entity')}</label>
                         <Input
                             placeholder={t('entityPlaceholder')}
@@ -99,18 +99,69 @@ export default function AuditPage() {
                             onChange={(e) => setFilters({ ...filters, entity: e.target.value })}
                         />
                     </div>
-                    <div className="flex items-end">
-                        <Button variant="outline" onClick={() => { setFilters({ userId: '', entity: '' }); fetchLogs(); }}>
+                    <div className="flex w-full gap-2 sm:w-auto sm:justify-end">
+                        <Button variant="outline" className="flex-1 sm:flex-none" onClick={() => { setFilters({ userId: '', entity: '' }); fetchLogs(); }}>
                             {t('clear')}
                         </Button>
-                        <Button onClick={fetchLogs} className="ml-2">
+                        <Button onClick={fetchLogs} className="flex-1 sm:flex-none">
                             {tCommon('search')}
                         </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            <div className="rounded-md border bg-white">
+            <div className="grid gap-3 md:hidden">
+                {loading ? (
+                    <Card>
+                        <CardContent className="py-6 text-center">
+                            <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                        </CardContent>
+                    </Card>
+                ) : logs.length === 0 ? (
+                    <Card>
+                        <CardContent className="py-6 text-center text-muted-foreground">
+                            {t('noLogs')}
+                        </CardContent>
+                    </Card>
+                ) : (
+                    logs.map((log) => (
+                        <Card key={log.id}>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base flex items-center justify-between gap-2">
+                                    <span>{format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}</span>
+                                    <Badge variant={getActionColor(log.action)}>{log.action}</Badge>
+                                </CardTitle>
+                                <CardDescription className="space-y-1">
+                                    <span className="block font-medium text-foreground">
+                                        {log.user?.name || log.user?.email || `User #${log.userId}`}
+                                    </span>
+                                    {log.user?.email && log.user?.name && (
+                                        <span className="block text-xs text-muted-foreground">{log.user.email}</span>
+                                    )}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-2 text-sm">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-muted-foreground">{t('entity')}</span>
+                                    <span className="font-mono text-xs">{log.entity} / {log.entityId}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-muted-foreground">{t('comment')}</span>
+                                    <span>{log.comment || '-'}</span>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-muted-foreground">{t('details')}</span>
+                                    <span className="text-xs text-muted-foreground break-words">
+                                        {log.changes ? JSON.stringify(log.changes) : '-'}
+                                    </span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
+
+            <div className="hidden rounded-md border bg-white md:block">
                 <Table>
                     <TableHeader>
                         <TableRow>

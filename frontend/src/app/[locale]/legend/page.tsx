@@ -41,17 +41,17 @@ export default function LegendPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           {t('saveChanges')}
         </Button>
@@ -71,7 +71,7 @@ export default function LegendPage() {
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[500px] font-mono"
+            className="min-h-[320px] sm:min-h-[500px] font-mono"
             placeholder={t('placeholder')}
           />
         </CardContent>

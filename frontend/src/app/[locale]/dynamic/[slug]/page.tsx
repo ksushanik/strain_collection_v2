@@ -49,8 +49,8 @@ export default function DynamicPage() {
     }
 
     return (
-        <div className="p-8">
-            <div className="mb-8 flex items-center justify-between">
+        <div className="px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{translateDynamic(tDynamic, binding.translationKey, binding.menuLabel)}</h1>
                     <p className="text-muted-foreground">

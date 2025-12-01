@@ -40,13 +40,15 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-      <p className="mt-2 text-muted-foreground">
-        {t('subtitle')}
-      </p>
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="text-muted-foreground">
+          {t('subtitle')}
+        </p>
+      </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t('totalStrains')}</CardTitle>

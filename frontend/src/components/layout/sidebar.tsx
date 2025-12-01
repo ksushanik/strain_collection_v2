@@ -24,6 +24,12 @@ import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
 import { translateDynamic } from "@/lib/translate-dynamic"
 
+type SidebarProps = {
+    isMobile?: boolean
+    onNavigate?: () => void
+    className?: string
+}
+
 // Map string icon names to components
 const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     "LayoutDashboard": LayoutDashboard,
@@ -33,7 +39,7 @@ const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     "Box": Box,
 };
 
-export function Sidebar() {
+export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProps) {
     const t = useTranslations('Navigation')
     const tDynamic = useTranslations('DynamicPages')
     const pathname = usePathname()
@@ -53,25 +59,42 @@ export function Sidebar() {
         })
     }, [])
 
+    React.useEffect(() => {
+        if (isMobile && isCollapsed) {
+            setIsCollapsed(false)
+        }
+    }, [isCollapsed, isMobile])
+
     const handleLogout = () => {
         logout()
         router.push('/login')
     }
 
+    const handleNavigate = () => {
+        if (onNavigate) {
+            onNavigate()
+        }
+    }
+
+    const widthClass = isMobile ? "w-full" : (isCollapsed ? "w-16" : "w-64")
+
     return (
         <div className={cn(
             "flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300",
-            isCollapsed ? "w-16" : "w-64"
+            widthClass,
+            className
         )}>
             <div className="flex h-14 items-center border-b px-4">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="mr-2"
-                >
-                    <Menu className="h-4 w-4" />
-                </Button>
+                {!isMobile && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="mr-2"
+                    >
+                        <Menu className="h-4 w-4" />
+                    </Button>
+                )}
                 {!isCollapsed && <span className="font-semibold">BioCollection</span>}
             </div>
 
@@ -79,6 +102,7 @@ export function Sidebar() {
                 <nav className="grid gap-1 px-2">
                     <Link
                         href="/"
+                        onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                             pathname === "/" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -91,6 +115,7 @@ export function Sidebar() {
 
                     <Link
                         href="/strains"
+                        onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                             pathname === "/strains" || pathname.startsWith("/strains/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -116,6 +141,7 @@ export function Sidebar() {
                                     <Link
                                         key={index}
                                         href={href}
+                                        onClick={handleNavigate}
                                         className={cn(
                                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                                             isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -131,6 +157,7 @@ export function Sidebar() {
 
                     <Link
                         href="/media"
+                        onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                             pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -143,6 +170,7 @@ export function Sidebar() {
 
                     <Link
                         href="/legend"
+                        onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                             pathname === "/legend" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -155,6 +183,7 @@ export function Sidebar() {
 
                     <Link
                         href="/docs"
+                        onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                             pathname === "/docs" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -168,6 +197,7 @@ export function Sidebar() {
                     {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
                         <Link
                             href="/audit"
+                            onClick={handleNavigate}
                             className={cn(
                                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                                 pathname === "/audit" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
@@ -184,6 +214,7 @@ export function Sidebar() {
             <div className="border-t">
                 <Link
                     href="/settings"
+                    onClick={handleNavigate}
                     className={cn(
                         "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                         pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",

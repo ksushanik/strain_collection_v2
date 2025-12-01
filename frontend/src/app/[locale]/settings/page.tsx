@@ -93,14 +93,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground">{t('uiBindingsDescription')}</p>
           </div>
-          <Button variant="outline" onClick={handleAdd}>
+          <Button variant="outline" onClick={handleAdd} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             {t('addSection')}
           </Button>
@@ -112,7 +112,7 @@ export default function SettingsPage() {
               <CardTitle>{t('adminPanel')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
                   {t('adminDescription')}
                 </p>
@@ -129,6 +129,7 @@ export default function SettingsPage() {
                       console.error('SSO failed', e)
                     }
                   }}
+                  className="w-full sm:w-auto"
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   {t('openAdminJS')}
@@ -150,30 +151,30 @@ export default function SettingsPage() {
             ) : (
               <div className="space-y-3">
                 {bindings.map((binding, index) => (
-                  <div key={binding.id} className="rounded border p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
+                  <div key={binding.id} className="rounded border p-3 space-y-3">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                         <Badge variant="secondary">#{index + 1}</Badge>
                         <Input
-                          className="w-48"
+                          className="w-full sm:w-48"
                           value={binding.menuLabel}
                           onChange={(e) => updateBinding(index, { menuLabel: e.target.value })}
                           placeholder={t('labelPlaceholder')}
                         />
                         <Input
-                          className="w-32"
+                          className="w-full sm:w-32"
                           value={binding.profileKey}
                           onChange={(e) => updateBinding(index, { profileKey: e.target.value.toUpperCase() })}
                           placeholder={t('profilePlaceholder')}
                         />
                         <Input
-                          className="w-32"
+                          className="w-full sm:w-32"
                           value={binding.icon}
                           onChange={(e) => updateBinding(index, { icon: e.target.value })}
                           placeholder={t('iconPlaceholder')}
                         />
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 self-start sm:self-auto">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -202,21 +203,21 @@ export default function SettingsPage() {
                         </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                       <Input
-                        className="w-64"
+                        className="w-full sm:w-64"
                         value={binding.routeSlug}
                         onChange={(e) => updateBinding(index, { routeSlug: e.target.value })}
                         placeholder={t('routeSlugPlaceholder')}
                       />
                       <Input
-                        className="flex-1"
+                        className="w-full sm:flex-1"
                         value={binding.enabledFieldPacks.join(",")}
                         onChange={(e) => updateBinding(index, { enabledFieldPacks: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
                         placeholder={t('enabledPacksPlaceholder')}
                       />
                       <Textarea
-                        className="w-64"
+                        className="w-full sm:w-64"
                         rows={2}
                         value={binding.legend?.content || ""}
                         onChange={(e) =>
@@ -235,9 +236,9 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-muted-foreground">{message}</div>
-              <Button onClick={handleSave} disabled={saving || loading}>
+              <Button onClick={handleSave} disabled={saving || loading} className="w-full sm:w-auto">
                 {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Save order and labels
               </Button>
