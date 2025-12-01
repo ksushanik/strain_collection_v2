@@ -211,11 +211,11 @@ export function StrainForm({
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold">{t('basics')}</h3>
                         <p className="text-xs text-muted-foreground">{t('basicsDesc')}</p>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
                             control={form.control}
                             name="identifier"
@@ -358,7 +358,7 @@ export function StrainForm({
                 </div>
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold">{t('growthAndTraits')}</h3>
                         <p className="text-xs text-muted-foreground">{t('growthAndTraitsDesc')}</p>
                     </div>
@@ -491,7 +491,7 @@ export function StrainForm({
                 </div>
 
                 <div className="rounded-xl border bg-card p-4 md:p-5 space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold">{t('geneticsAndBiochemistry')}</h3>
                         <p className="text-xs text-muted-foreground">{t('geneticsAndBiochemistryDesc')}</p>
                     </div>
@@ -538,7 +538,7 @@ export function StrainForm({
                         <h3 className="text-base font-semibold">{t('notes')}</h3>
                         <p className="text-xs text-muted-foreground">{t('notesDesc')}</p>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
                             control={form.control}
                             name="features"
@@ -581,7 +581,7 @@ export function StrainForm({
                         <h3 className="text-base font-semibold">{t('indexing')}</h3>
                         <p className="text-xs text-muted-foreground">{t('indexingDesc')}</p>
                     </div>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
                             control={form.control}
                             name="indexerInitials"

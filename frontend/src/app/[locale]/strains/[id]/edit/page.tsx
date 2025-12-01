@@ -223,8 +223,8 @@ function EditStrainContent({ id }: { id: string }) {
     }
 
     return (
-        <div className="p-8 max-w-5xl mx-auto">
-            <div className="mb-8">
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">{t('editTitle')}</h1>
                 <p className="text-muted-foreground">
                     {t('editSubtitle')}
@@ -442,7 +442,7 @@ function EditStrainContent({ id }: { id: string }) {
                 </CardContent>
             </Card>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
                 <Button
                     variant="outline"
                     type="button"
