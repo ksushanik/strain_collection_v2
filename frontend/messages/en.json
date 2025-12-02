@@ -300,7 +300,13 @@
     },
     "Wiki": {
         "title": "Wiki",
-        "index": "Index"
+        "index": "Index",
+        "description": "Markdown from docs/wiki with full-text search.",
+        "searchPlaceholder": "Search wiki...",
+        "loading": "Loading wiki...",
+        "missingFile": "File not found",
+        "noResults": "No results for \"{query}\"",
+        "toc": "Table of contents"
     },
     "Settings": {
         "title": "Settings",

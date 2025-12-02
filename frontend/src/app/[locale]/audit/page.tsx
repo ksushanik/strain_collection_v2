@@ -132,22 +132,22 @@ export default function AuditPage() {
                                     <Badge variant={getActionColor(log.action)}>{log.action}</Badge>
                                 </CardTitle>
                                 <CardDescription className="space-y-1">
-                                    <span className="block font-medium text-foreground">
+                                    <span className="block font-medium text-foreground break-words">
                                         {log.user?.name || log.user?.email || `User #${log.userId}`}
                                     </span>
                                     {log.user?.email && log.user?.name && (
-                                        <span className="block text-xs text-muted-foreground">{log.user.email}</span>
+                                        <span className="block text-xs text-muted-foreground break-words">{log.user.email}</span>
                                     )}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-2 text-sm">
                                 <div className="flex flex-col gap-1">
                                     <span className="text-muted-foreground">{t('entity')}</span>
-                                    <span className="font-mono text-xs">{log.entity} / {log.entityId}</span>
+                                    <span className="font-mono text-xs break-words">{log.entity} / {log.entityId}</span>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-muted-foreground">{t('comment')}</span>
-                                    <span>{log.comment || '-'}</span>
+                                    <span className="break-words">{log.comment || '-'}</span>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-muted-foreground">{t('details')}</span>
@@ -161,7 +161,7 @@ export default function AuditPage() {
                 )}
             </div>
 
-            <div className="hidden rounded-md border bg-white md:block">
+            <div className="hidden overflow-x-auto rounded-md border bg-white md:block">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -208,13 +208,13 @@ export default function AuditPage() {
                                             {log.action}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{log.entity}</TableCell>
-                                    <TableCell className="font-mono text-xs">{log.entityId}</TableCell>
-                                    <TableCell className="max-w-[200px] truncate text-xs">
+                                    <TableCell className="break-words">{log.entity}</TableCell>
+                                    <TableCell className="font-mono text-xs break-words">{log.entityId}</TableCell>
+                                    <TableCell className="max-w-[200px] text-xs break-words">
                                         {log.comment || '-'}
                                     </TableCell>
                                     <TableCell>
-                                        <div className="max-w-[300px] truncate text-xs text-muted-foreground" title={JSON.stringify(log.changes, null, 2)}>
+                                        <div className="max-w-[300px] text-xs text-muted-foreground break-words" title={JSON.stringify(log.changes, null, 2)}>
                                             {log.changes ? JSON.stringify(log.changes) : '-'}
                                         </div>
                                     </TableCell>

@@ -299,7 +299,13 @@
     },
     "Wiki": {
         "title": "Вики",
-        "index": "Индекс"
+        "index": "Индекс",
+        "description": "Markdown из docs/wiki с полнотекстовым поиском.",
+        "searchPlaceholder": "Поиск по wiki...",
+        "loading": "Загрузка wiki...",
+        "missingFile": "Файл не найден",
+        "noResults": "Ничего не найдено по запросу \"{query}\"",
+        "toc": "Содержание"
     },
     "Settings": {
         "title": "Настройки",

@@ -12,41 +12,62 @@ import {
 import { Input } from "@/components/ui/input"
 import { ApiService } from "@/services/api"
 import { useDebounce } from "@/hooks/use-debounce"
+import { Sample } from "@/types/api"
 
-interface TaxonomyAutocompleteProps {
+interface SampleAutocompleteProps {
     value?: string
     onChange: (value: string) => void
     placeholder?: string
+    initialSample?: Pick<Sample, "id" | "code"> & Partial<Sample>
 }
 
-export function TaxonomyAutocomplete({ value, onChange, placeholder = "Search taxonomy..." }: TaxonomyAutocompleteProps) {
+export function SampleAutocomplete({ value, onChange, placeholder = "Search sample...", initialSample }: SampleAutocompleteProps) {
     const [open, setOpen] = React.useState(false)
     const [searchTerm, setSearchTerm] = React.useState("")
-    const [results, setResults] = React.useState<Array<{ taxId: string; name: string; rank: string }>>([])
+    const [results, setResults] = React.useState<Sample[]>([])
     const [loading, setLoading] = React.useState(false)
+    const [selectedSample, setSelectedSample] = React.useState<(Pick<Sample, "id" | "code"> & Partial<Sample>) | undefined>(initialSample)
 
     // Debounce search term to avoid too many API calls
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
     React.useEffect(() => {
-        if (!debouncedSearchTerm) {
-            setResults([])
+        if (!debouncedSearchTerm && !open) {
             return
         }
 
         setLoading(true)
-        ApiService.searchTaxonomy(debouncedSearchTerm)
+        ApiService.getSamples({ search: debouncedSearchTerm, limit: 20 })
             .then((data) => {
-                setResults(data)
+                setResults(data.data)
             })
             .catch((err) => {
-                console.error("Taxonomy search failed", err)
+                console.error("Sample search failed", err)
                 setResults([])
             })
             .finally(() => {
                 setLoading(false)
             })
-    }, [debouncedSearchTerm])
+    }, [debouncedSearchTerm, open])
+
+    // Update selected sample display if value changes externally or initially
+    React.useEffect(() => {
+        if (value && !selectedSample) {
+            // If we have a value (ID) but no sample object, we might want to fetch it
+            // For now, we rely on initialSample or the user selecting from the list
+            // If initialSample matches the ID, use it
+            if (initialSample && initialSample.id.toString() === value) {
+                setSelectedSample(initialSample)
+            }
+        }
+    }, [value, initialSample, selectedSample])
+
+
+    const displayValue = selectedSample
+        ? `${selectedSample.code} ${selectedSample.siteName ? `(${selectedSample.siteName})` : ""}`
+        : value
+            ? "Loading..." // Or some other placeholder if we have ID but no details yet
+            : placeholder
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -57,10 +78,10 @@ export function TaxonomyAutocomplete({ value, onChange, placeholder = "Search ta
                     aria-expanded={open}
                     className={cn(
                         "w-full justify-between",
-                        !value && "text-muted-foreground font-normal"
+                        !selectedSample && !value && "text-muted-foreground font-normal"
                     )}
                 >
-                    {value || placeholder}
+                    {displayValue}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -81,41 +102,37 @@ export function TaxonomyAutocomplete({ value, onChange, placeholder = "Search ta
                                 No results found.
                             </div>
                         )}
-                        {results.length === 0 && !searchTerm && (
+                        {results.length === 0 && !searchTerm && !loading && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                Start typing to search NCBI Taxonomy.
+                                Start typing to search samples.
                             </div>
                         )}
                         {results.map((item) => (
                             <div
-                                key={item.taxId}
+                                key={item.id}
                                 className={cn(
                                     "relative flex cursor-default select-none items-start rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                                    value === item.name && "bg-accent text-accent-foreground"
+                                    value === item.id.toString() && "bg-accent text-accent-foreground"
                                 )}
                                 onClick={() => {
-                                    onChange(item.name)
+                                    onChange(item.id.toString())
+                                    setSelectedSample(item)
                                     setOpen(false)
                                 }}
                             >
                                 <Check
                                     className={cn(
                                         "mr-2 h-4 w-4 mt-0.5",
-                                        value === item.name ? "opacity-100" : "opacity-0"
+                                        value === item.id.toString() ? "opacity-100" : "opacity-0"
                                     )}
                                 />
                                 <div className="flex flex-col gap-1">
-                                    <span className="font-medium">{item.name}</span>
-                                    <div className="flex items-center">
-                                        <span className={cn(
-                                            "text-xs px-2 py-0.5 rounded-full capitalize",
-                                            item.rank === 'species'
-                                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                                        )}>
-                                            {item.rank}
+                                    <span className="font-medium">{item.code}</span>
+                                    {item.siteName && (
+                                        <span className="text-xs text-muted-foreground">
+                                            {item.siteName}
                                         </span>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

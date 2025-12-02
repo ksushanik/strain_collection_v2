@@ -29,6 +29,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 import { TaxonomyAutocomplete } from "./taxonomy-autocomplete"
+import { SampleAutocomplete } from "./sample-autocomplete"
 import { useTranslations } from "next-intl"
 
 const strainSchema = z.object({
@@ -75,9 +76,7 @@ export function StrainForm({
     const router = useRouter()
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
-    const [sampleOptions, setSampleOptions] = React.useState<Array<{ id: number; code: string; siteName?: string; sampleType?: string }>>([])
-    const [sampleSearch, setSampleSearch] = React.useState("")
-    const [loadingSamples, setLoadingSamples] = React.useState(false)
+
     const [loading, setLoading] = React.useState(false)
 
     const form = useForm<StrainFormValues>({
@@ -105,64 +104,7 @@ export function StrainForm({
         },
     })
 
-    const loadSamples = React.useCallback(
-        async (search?: string) => {
-            setLoadingSamples(true)
-            try {
-                const res = await ApiService.getSamples({
-                    limit: 20,
-                    search: search?.trim() || undefined,
-                })
-                const options =
-                    res.data?.map((sample) => ({
-                        id: sample.id,
-                        code: sample.code,
-                        siteName: sample.siteName,
-                        sampleType: sample.sampleType,
-                    })) || []
 
-                const currentId = form.getValues("sampleId")
-                if (currentId) {
-                    const currentNumeric = parseInt(currentId)
-                    const exists = options.some((opt) => opt.id === currentNumeric)
-                    if (!exists) {
-                        const fallback =
-                            initialData?.sample && initialData.sample.id === currentNumeric
-                                ? {
-                                    id: initialData.sample.id,
-                                    code: initialData.sample.code,
-                                    siteName: initialData.sample.siteName || 'Unknown site',
-                                    sampleType: 'UNKNOWN',
-                                }
-                                : undefined
-                        setSampleOptions(() => {
-                            const merged = [...options]
-                            if (fallback) merged.unshift(fallback)
-                            return merged
-                        })
-                        return
-                    }
-                }
-                setSampleOptions(options)
-            } catch (error) {
-                console.error(error)
-            } finally {
-                setLoadingSamples(false)
-            }
-        },
-        [form, initialData?.sample],
-    )
-
-    React.useEffect(() => {
-        loadSamples()
-    }, [loadSamples])
-
-    React.useEffect(() => {
-        const handle = setTimeout(() => {
-            loadSamples(sampleSearch)
-        }, 300)
-        return () => clearTimeout(handle)
-    }, [sampleSearch, loadSamples])
 
     async function onSubmit(data: StrainFormValues) {
         setLoading(true)
@@ -235,42 +177,15 @@ export function StrainForm({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>{t('sourceSample')}</FormLabel>
-                                    <div className="space-y-2">
-                                        <Input
+                                    <FormControl>
+                                        <SampleAutocomplete
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('searchSamplePlaceholder')}
-                                            value={sampleSearch}
-                                            onChange={(e) => setSampleSearch(e.target.value)}
+                                            initialSample={initialData?.sample}
                                         />
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder={loadingSamples ? t('loadingSamples') : t('selectSample')} />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {loadingSamples && (
-                                                    <SelectItem value="loading" disabled>
-                                                        <div className="flex items-center gap-2">
-                                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                                            {tCommon('loading')}
-                                                        </div>
-                                                    </SelectItem>
-                                                )}
-                                                {!loadingSamples && sampleOptions.length === 0 && (
-                                                    <SelectItem value="empty" disabled>
-                                                        {t('noSamplesFound')}
-                                                    </SelectItem>
-                                                )}
-                                                {!loadingSamples &&
-                                                    sampleOptions.map((sample) => (
-                                                        <SelectItem key={sample.id} value={sample.id.toString()}>
-                                                            {sample.code} {sample.siteName ? `(${sample.siteName})` : ""}
-                                                        </SelectItem>
-                                                    ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </div>
+                                    </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />

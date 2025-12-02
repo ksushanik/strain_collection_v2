@@ -45,13 +45,13 @@ export default function DocsPage() {
   }, [query, docs])
 
   return (
-    <div className="p-8">
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground">
-              Markdown из docs/wiki (volume), поиск по тексту.
+              {t('description', { default: 'Markdown из docs/wiki (volume), поиск по тексту.' })}
             </p>
           </div>
           <div className="w-full sm:w-80">
@@ -59,7 +59,7 @@ export default function DocsPage() {
               <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 className="flex-1 bg-transparent text-sm outline-none"
-                placeholder="Поиск по тексту..."
+                placeholder={t('searchPlaceholder', { default: 'Поиск по wiki...' })}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -67,7 +67,7 @@ export default function DocsPage() {
           </div>
         </div>
 
-        {loading && <p className="text-sm text-muted-foreground">Загрузка wiki...</p>}
+        {loading && <p className="text-sm text-muted-foreground">{t('loading', { default: 'Загрузка wiki...' })}</p>}
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         {!loading && !error && (
@@ -75,19 +75,19 @@ export default function DocsPage() {
             {filtered.map((doc) => (
               <Card key={doc.id} id={doc.id}>
                 <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <CardTitle>{doc.title}</CardTitle>
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
+                    <CardTitle className="text-xl break-words">{doc.title}</CardTitle>
                     {doc.headings.length > 0 && (
-                      <div className="text-xs text-muted-foreground space-y-1 max-w-xs">
-                        <div className="font-semibold text-foreground">Содержание</div>
+                      <div className="text-xs text-muted-foreground space-y-1 md:max-w-xs break-words">
+                        <div className="font-semibold text-foreground">{t('toc', { default: 'Содержание' })}</div>
                         <div className="space-y-1">
                           {doc.headings.slice(0, 6).map((h, idx) => (
                             <div
                               key={`${doc.id}-h-${idx}`}
-                              className="truncate"
+                              className="truncate whitespace-normal"
                               style={{ paddingLeft: (h.level - 1) * 8 }}
                             >
-                              • {h.text}
+                              - {h.text}
                             </div>
                           ))}
                         </div>
@@ -95,17 +95,21 @@ export default function DocsPage() {
                     )}
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4 break-words">
                   {doc.content ? (
                     renderMarkdown(doc.content)
                   ) : (
-                    <p className="text-sm text-muted-foreground">Файл не найден: {doc.file}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t('missingFile', { default: 'Файл не найден' })}: {doc.file}
+                    </p>
                   )}
                 </CardContent>
               </Card>
             ))}
             {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">Ничего не найдено по запросу “{query}”</p>
+              <p className="text-sm text-muted-foreground">
+                {t('noResults', { default: 'Ничего не найдено по запросу "{query}"', query })}
+              </p>
             )}
           </div>
         )}
@@ -262,5 +266,5 @@ function renderMarkdown(md: string) {
   flushList()
   flushOrderedList()
 
-  return <div className="prose prose-sm max-w-none">{elements}</div>
+  return <div className="prose prose-sm max-w-none break-words">{elements}</div>
 }
