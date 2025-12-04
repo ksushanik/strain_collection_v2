@@ -10,6 +10,7 @@
 - [Legend](legend.md)
 - [Maps Integration](maps.md)
 - [Audit Log](audit.md)
+- [Admin (AdminJS)](admin.md)
 - [Testing](testing.md)
 - [Playbooks](playbooks.md)
 - [Changelog](changelog.md)

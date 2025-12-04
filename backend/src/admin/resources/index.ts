@@ -4,3 +4,4 @@ export * from './settings.resources';
 export * from './storage.resources';
 export * from './media.resources';
 export * from './audit.resources';
+export * from './database.resources';

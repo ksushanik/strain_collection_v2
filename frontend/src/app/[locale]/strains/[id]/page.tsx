@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Suspense } from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { useTranslations } from "next-intl"
+import { useApiError } from "@/hooks/use-api-error"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
@@ -18,9 +19,11 @@ function StrainDetailContent({ id }: { id: string }) {
     const returnTo = searchParams?.get('returnTo')
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
+    const { handleError } = useApiError()
 
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const [deleting, setDeleting] = React.useState(false)
 
     React.useEffect(() => {
         if (!id) return;
@@ -36,6 +39,21 @@ function StrainDetailContent({ id }: { id: string }) {
         }
         load()
     }, [id])
+
+    const handleDelete = async () => {
+        if (!strain) return
+        const confirmed = window.confirm(t('deleteConfirm'))
+        if (!confirmed) return
+        setDeleting(true)
+        try {
+            await ApiService.deleteStrain(strain.id)
+            router.push(returnTo || '/strains')
+        } catch (err) {
+            handleError(err, t('deleteFailed'))
+        } finally {
+            setDeleting(false)
+        }
+    }
 
 
     if (loading) {
@@ -71,6 +89,19 @@ function StrainDetailContent({ id }: { id: string }) {
                 >
                     <Edit className="h-4 w-4 mr-1" />
                     {t('editStrain')}
+                </Button>
+                <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                >
+                    {deleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                        <Trash2 className="h-4 w-4 mr-1" />
+                    )}
+                    {tCommon('delete')}
                 </Button>
             </div>
 

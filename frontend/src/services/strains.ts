@@ -81,6 +81,13 @@ export async function updateStrain(id: number, data: Partial<Strain>): Promise<S
   return response.json();
 }
 
+export async function deleteStrain(id: number): Promise<void> {
+  const response = await request(`/api/v1/strains/${id}`, {
+    method: 'DELETE',
+  });
+  await assertOk(response, 'Failed to delete strain');
+}
+
 export async function linkMediaToStrain(
   strainId: number,
   payload: { mediaId: number; notes?: string },

@@ -34,9 +34,9 @@ export function SampleList() {
     const [sortBy, setSortBy] = React.useState<'siteName' | 'createdAt' | 'collectedAt' | 'code'>('collectedAt')
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
 
-    React.useEffect(() => {
+    const loadSamples = React.useCallback(() => {
         setLoading(true)
-        ApiService.getSamples({
+        return ApiService.getSamples({
             search,
             site: filters.site || undefined,
             dateFrom: filters.dateFrom || undefined,
@@ -54,7 +54,11 @@ export function SampleList() {
             handleError(err, t('failedToLoadSamples'))
             setLoading(false)
         })
-    }, [search, filters, page, sortBy, sortOrder, t, handleError])
+    }, [filters, handleError, page, search, sortBy, sortOrder, t])
+
+    React.useEffect(() => {
+        loadSamples()
+    }, [loadSamples])
 
     if (loading && !meta) {
         return (

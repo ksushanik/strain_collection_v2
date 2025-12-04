@@ -37,6 +37,10 @@ import { adminSessionOptions } from './admin-session.config';
           'JsonShow',
           './components/json-show',
         );
+        const restoreComponent = componentLoader.add(
+          'RestoreBackup',
+          './components/restore-backup',
+        );
 
         return AdminModule.createAdminAsync({
           imports: [
@@ -76,6 +80,7 @@ import { adminSessionOptions } from './admin-session.config';
               auditLogService,
               null,
               jsonShow,
+              restoreComponent,
             );
 
             return {

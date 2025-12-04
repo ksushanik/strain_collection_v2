@@ -63,9 +63,9 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         iuk: "",
     })
 
-    React.useEffect(() => {
+    const loadStrains = React.useCallback(() => {
         setLoading(true)
-        ApiService.getStrains({
+        return ApiService.getStrains({
             search,
             sampleCode: filters.sampleCode || undefined,
             taxonomy: filters.taxonomy || undefined,
@@ -93,7 +93,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             handleError(err, t('failedToLoadStrains'))
             setLoading(false)
         })
-    }, [search, filters, page, sortBy, sortOrder, handleError, t])
+    }, [filters, handleError, page, search, sortBy, sortOrder, t])
+
+    React.useEffect(() => {
+        loadStrains()
+    }, [loadStrains])
 
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")

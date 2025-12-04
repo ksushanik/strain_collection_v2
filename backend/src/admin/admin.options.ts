@@ -9,6 +9,7 @@ import {
   buildMediaResources,
   buildSettingsResources,
   buildStorageResources,
+  buildDatabaseResources,
 } from './resources';
 
 export const createAdminOptions = (
@@ -18,6 +19,7 @@ export const createAdminOptions = (
   auditLogService: AuditLogService,
   permissionsComponent: any,
   jsonShowComponent: string,
+  restoreComponent: string,
 ) => {
   const resources: ResourceWithOptions[] = [
     ...buildAccessControlResources({
@@ -51,6 +53,12 @@ export const createAdminOptions = (
       prisma,
       getModelByName,
       auditLogService,
+    }),
+    ...buildDatabaseResources({
+      prisma,
+      getModelByName,
+      auditLogService,
+      restoreComponent,
     }),
   ];
 

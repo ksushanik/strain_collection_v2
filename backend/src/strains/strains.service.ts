@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { CellStatus, Prisma } from '@prisma/client';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
@@ -178,10 +178,31 @@ export class StrainsService {
   }
 
   async remove(id: number) {
-    await this.findOne(id); // Check existence
-
-    await this.prisma.strain.delete({
+    const strain = await this.prisma.strain.findUnique({
       where: { id },
+      include: {
+        storage: true,
+      },
+    });
+    if (!strain) {
+      throw new NotFoundException(`Strain with ID ${id} not found`);
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      // Free storage cells and remove allocations
+      for (const allocation of strain.storage) {
+        await tx.storageCell.update({
+          where: { id: allocation.cellId },
+          data: { status: CellStatus.FREE },
+        });
+        await tx.strainStorage.delete({ where: { id: allocation.id } });
+      }
+
+      // Remove links to media
+      await tx.strainMedia.deleteMany({ where: { strainId: id } });
+
+      // Photos are set to cascade via Prisma relation
+      await tx.strain.delete({ where: { id } });
     });
 
     return { message: `Strain with ID ${id} deleted successfully` };

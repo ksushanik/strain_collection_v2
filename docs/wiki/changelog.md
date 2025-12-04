@@ -1,5 +1,17 @@
 # Changelog (кратко)
 
+## 2025-12-05
+- AdminJS: раздел Maintenance → DatabaseMaintenance (Generate backup, Restore с загрузкой файла, Wipe), логирование в AuditLog.
+- AdminJS: bulk delete для Strain/Sample с очисткой storage/media/photos и корректным возвратом на список.
+- StorageView: крупнее/плотнее клетки, фикса ширины селектов в RU, более читаемые подписи.
+- Wiki: добавлен раздел Admin (AdminJS); обновлён changelog.
+- UI: кнопка выбора файла в Restore стилизована под AdminJS.
+
+## 2025-12-04
+- AdminJS: добавлен раздел Maintenance → DatabaseMaintenance с действиями Generate backup (выгрузка JSON), Restore (загрузка/вставка JSON, перезаписывает доменные таблицы) и Wipe (полная очистка доменных данных).
+- AdminJS: массовое удаление Strain/Sample (bulk delete) с корректной чисткой связей (storage/media/photos) и возвратом на список.
+- StorageView: фиксированные селекты rows/cols в RU-локали и более крупные, плотные ячейки для лучшей читаемости.
+
 ## 2025-11-24
 - **Карты образцов**: интегрирована интерактивная карта Leaflet на Sample detail pages с маркерами и попапами (координаты из lat/lng).
 - Зависимости: `leaflet`, `react-leaflet`, `@types/leaflet`.

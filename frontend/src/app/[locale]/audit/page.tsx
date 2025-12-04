@@ -17,6 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
+
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 export default function AuditPage() {
     const t = useTranslations('Audit');
@@ -47,18 +50,18 @@ export default function AuditPage() {
         fetchLogs();
     }, [fetchLogs]);
 
-    const getActionColor = (
+    const getActionStyle = (
         action: string,
-    ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    ): { variant: BadgeVariant; className?: string } => {
         switch (action) {
             case 'CREATE':
-                return 'default'; // usually black/primary
+                return { variant: 'default', className: 'bg-primary/10 text-primary border border-primary/20' };
             case 'UPDATE':
-                return 'secondary'; // usually gray
+                return { variant: 'secondary', className: 'text-foreground' };
             case 'DELETE':
-                return 'destructive'; // red
+                return { variant: 'outline', className: 'border-destructive text-destructive bg-destructive/10' };
             default:
-                return 'outline';
+                return { variant: 'outline', className: 'text-muted-foreground' };
         }
     };
 
@@ -129,7 +132,14 @@ export default function AuditPage() {
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-base flex items-center justify-between gap-2">
                                     <span>{format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}</span>
-                                    <Badge variant={getActionColor(log.action)}>{log.action}</Badge>
+                                    {(() => {
+                                        const { variant, className } = getActionStyle(log.action);
+                                        return (
+                                            <Badge variant={variant} className={cn('px-3 py-1 font-semibold', className)}>
+                                                {log.action}
+                                            </Badge>
+                                        );
+                                    })()}
                                 </CardTitle>
                                 <CardDescription className="space-y-1">
                                     <span className="block font-medium text-foreground break-words">
@@ -204,9 +214,14 @@ export default function AuditPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getActionColor(log.action)}>
-                                            {log.action}
-                                        </Badge>
+                                        {(() => {
+                                            const { variant, className } = getActionStyle(log.action);
+                                            return (
+                                                <Badge variant={variant} className={cn('px-3 py-1 font-semibold', className)}>
+                                                    {log.action}
+                                                </Badge>
+                                            );
+                                        })()}
                                     </TableCell>
                                     <TableCell className="break-words">{log.entity}</TableCell>
                                     <TableCell className="font-mono text-xs break-words">{log.entityId}</TableCell>

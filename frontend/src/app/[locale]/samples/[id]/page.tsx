@@ -4,13 +4,14 @@ import * as React from "react"
 import dynamic from 'next/dynamic'
 import { ApiService, Sample } from "@/services/api"
 
-import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit } from "lucide-react"
+import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter, Link } from "@/i18n/routing"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useTranslations } from "next-intl"
+import { useApiError } from "@/hooks/use-api-error"
 
 // Dynamic import for map to avoid SSR issues
 const SampleMap = dynamic(
@@ -40,9 +41,11 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
     const { id } = React.use(params)
     const t = useTranslations('Samples')
     const tCommon = useTranslations('Common')
+    const { handleError } = useApiError()
     const tStrains = useTranslations('Strains')
     const [sample, setSample] = React.useState<SampleWithStrains | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const [deleting, setDeleting] = React.useState(false)
 
     const loadSample = React.useCallback(() => {
         if (!id) return;
@@ -56,6 +59,21 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                 setLoading(false)
             })
     }, [id])
+
+    const handleDelete = async () => {
+        if (!sample) return
+        const confirmed = window.confirm(t('deleteConfirm'))
+        if (!confirmed) return
+        setDeleting(true)
+        try {
+            await ApiService.deleteSample(sample.id)
+            router.push('/samples')
+        } catch (err) {
+            handleError(err, t('failedToDeleteSample'))
+        } finally {
+            setDeleting(false)
+        }
+    }
 
     React.useEffect(() => {
         loadSample()
@@ -89,6 +107,19 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                 <Button variant="default" size="sm" onClick={() => router.push(`/samples/${sample.id}/edit`)}>
                     <Edit className="h-4 w-4 mr-1" />
                     {t('editSample')}
+                </Button>
+                <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                >
+                    {deleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                    ) : (
+                        <Trash2 className="h-4 w-4 mr-1" />
+                    )}
+                    {tCommon('delete')}
                 </Button>
             </div>
 

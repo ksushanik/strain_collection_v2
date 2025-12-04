@@ -295,7 +295,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               value={boxForm.rows.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, rows: parseInt(val) })}
             >
-              <SelectTrigger><SelectValue placeholder={t('rows')} /></SelectTrigger>
+              <SelectTrigger className="min-w-[130px]"><SelectValue placeholder={t('rows')} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="9">{t('rows9')}</SelectItem>
                 <SelectItem value="10">{t('rows10')}</SelectItem>
@@ -305,7 +305,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               value={boxForm.cols.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, cols: parseInt(val) })}
             >
-              <SelectTrigger><SelectValue placeholder={t('cols')} /></SelectTrigger>
+              <SelectTrigger className="min-w-[130px]"><SelectValue placeholder={t('cols')} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="9">{t('cols9')}</SelectItem>
                 <SelectItem value="10">{t('cols10')}</SelectItem>
@@ -428,9 +428,11 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
             ) : selectedBox ? (
               <>
                 <div
-                  className="grid gap-1 mx-auto w-full max-w-3xl p-2"
+                  className="grid mx-auto w-full max-w-3xl p-2"
                   style={{
-                    gridTemplateColumns: `repeat(${selectedBox.cols}, minmax(28px, 1fr))`
+                    gridTemplateColumns: `repeat(${selectedBox.cols}, 42px)`,
+                    gap: '8px 10px',
+                    justifyContent: 'center'
                   }}
                 >
                   {selectedBox.cells?.map((cell) => {
@@ -441,7 +443,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                       <div
                         key={cell.id}
                         className={cn(
-                          "h-8 w-8 flex items-center justify-center rounded border text-[10px] font-medium cursor-pointer transition-colors hover:ring-2 hover:ring-ring hover:ring-offset-0",
+                          "h-10 w-10 flex items-center justify-center rounded-md border text-[11px] font-semibold cursor-pointer transition-colors hover:ring-2 hover:ring-ring hover:ring-offset-0",
                           isOccupied
                             ? "bg-green-100 border-green-300 text-green-700 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400"
                             : "bg-muted/30 border-muted-foreground/30 text-muted-foreground hover:bg-muted/60",
