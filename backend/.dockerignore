@@ -3,4 +3,3 @@ dist
 coverage
 npm-debug.log
 .env
-.adminjs

@@ -14,6 +14,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { adminSessionOptions } from './admin-session.config';
 import { AdminAssetsController } from './admin.assets.controller';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Module({
   imports: [
@@ -84,10 +86,34 @@ import { AdminAssetsController } from './admin.assets.controller';
               restoreComponent,
             );
 
+            const bundlePath = path.join(process.cwd(), '.adminjs', 'bundle.js');
+            const bundleAliasPath = path.join(
+              process.cwd(),
+              '.adminjs',
+              'components.bundle.js',
+            );
+            // Ensure alias exists for AdminJS asset route
+            try {
+              if (fs.existsSync(bundlePath) && !fs.existsSync(bundleAliasPath)) {
+                fs.copyFileSync(bundlePath, bundleAliasPath);
+              }
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('AdminJS bundle alias copy failed', err);
+            }
+
+            const finalBundlePath = fs.existsSync(bundleAliasPath)
+              ? bundleAliasPath
+              : bundlePath;
+
+            // eslint-disable-next-line no-console
+            console.log('AdminJS bundle path resolved to', finalBundlePath);
+
             return {
               adminJsOptions: {
                 ...adminOptions,
                 componentLoader,
+                bundlePath: finalBundlePath,
                 dashboard: {
                   component: dashboard,
                 },

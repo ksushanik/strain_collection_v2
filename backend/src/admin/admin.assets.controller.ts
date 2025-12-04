@@ -8,25 +8,39 @@ export class AdminAssetsController {
   @Get('components.bundle.js')
   serveComponentsBundle(@Res() res: ExpressResponse) {
     const adminBundleDir = path.join(process.cwd(), '.adminjs');
-    const adminBundlePath = path.join(adminBundleDir, 'bundle.js');
+    const bundlePath = path.join(adminBundleDir, 'bundle.js');
     const aliasPath = path.join(adminBundleDir, 'components.bundle.js');
+    const sourcePath = fs.existsSync(bundlePath)
+      ? bundlePath
+      : fs.existsSync(aliasPath)
+        ? aliasPath
+        : null;
 
-    // Create alias if needed (AdminJS produces bundle.js)
-    if (fs.existsSync(adminBundlePath) && !fs.existsSync(aliasPath)) {
+    if (!sourcePath) {
+      res.status(404).send('components.bundle.js not found');
+      return;
+    }
+
+    // Best-effort alias copy
+    if (sourcePath === bundlePath && !fs.existsSync(aliasPath)) {
       try {
-        fs.copyFileSync(adminBundlePath, aliasPath);
+        fs.copyFileSync(bundlePath, aliasPath);
       } catch (err) {
-        // If copy fails, still attempt to serve the original bundle
         // eslint-disable-next-line no-console
         console.error('AdminJS bundle copy failed', err);
       }
     }
 
-    // Prefer original bundle.js; alias is just for static serving convenience
-    res.sendFile(adminBundlePath, (err) => {
-      if (err) {
-        res.status(404).send('components.bundle.js not found');
-      }
-    });
+    try {
+      const contents = fs.readFileSync(sourcePath);
+      res
+        .setHeader('Content-Type', 'application/javascript')
+        .setHeader('Cache-Control', 'public, max-age=0')
+        .send(contents);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('AdminJS bundle read failed', err);
+      res.status(404).send('components.bundle.js not found');
+    }
   }
 }

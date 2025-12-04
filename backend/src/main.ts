@@ -2,15 +2,77 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import session from 'express-session';
 import { adminSessionOptions } from './admin/admin-session.config';
-import * as express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const adminBundleDir = path.join(process.cwd(), '.adminjs');
+  const adminBundlePath = path.join(adminBundleDir, 'bundle.js');
+  const adminBundleAlias = path.join(adminBundleDir, 'components.bundle.js');
+  const publicAssetsDir = path.join(process.cwd(), 'public');
+  const server = express();
+  // Short-circuit for AdminJS bundle requests before Nest/AdminJS routers
+  server.use((req: Request, res: Response, next: NextFunction) => {
+    if (!req.originalUrl.includes('components.bundle.js')) return next();
+
+    const candidates = [
+      adminBundleAlias,
+      adminBundlePath,
+      path.join(publicAssetsDir, 'components.bundle.js'),
+    ];
+    const sourcePath = candidates.find((p) => fs.existsSync(p));
+
+    if (!sourcePath) {
+      // eslint-disable-next-line no-console
+      console.error('components.bundle.js not found on disk');
+      return res.status(404).send('components.bundle.js not found');
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[pre-router] Serving components.bundle.js from', sourcePath);
+
+    return res
+      .type('application/javascript')
+      .setHeader('Cache-Control', 'public, max-age=0')
+      .sendFile(sourcePath);
+  });
+
+  // Serve AdminJS bundled custom components (components.bundle.js -> .adminjs/bundle.js)
+  server.get(
+    '/admin/frontend/assets/components.bundle.js',
+    (_req: Request, res: Response): void => {
+      const candidates = [
+        adminBundleAlias,
+        adminBundlePath,
+        path.join(publicAssetsDir, 'components.bundle.js'),
+      ];
+      const sourcePath = candidates.find((p) => fs.existsSync(p));
+
+      if (!sourcePath) {
+        // eslint-disable-next-line no-console
+        console.error('components.bundle.js not found on disk');
+        res.status(404).send('components.bundle.js not found');
+        return;
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('Serving components.bundle.js from', sourcePath);
+
+      res
+        .type('application/javascript')
+        .setHeader('Cache-Control', 'public, max-age=0')
+        .sendFile(sourcePath);
+    },
+  );
+  server.use('/admin/frontend/assets', express.static(publicAssetsDir));
+  server.use('/admin/frontend/assets', express.static(adminBundleDir));
+
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  const expressApp = app.getHttpAdapter().getInstance();
 
   // Enable CORS for frontend on port 3000
   app.enableCors({
@@ -26,34 +88,70 @@ async function bootstrap() {
       fallthrough: true,
     }),
   );
-  // Serve AdminJS bundled custom components (components.bundle.js -> .adminjs/bundle.js)
-  const adminBundleDir = path.join(process.cwd(), '.adminjs');
-  const adminBundlePath = path.join(adminBundleDir, 'bundle.js');
-  const ensureBundleAlias = () => {
-    const aliasPath = path.join(adminBundleDir, 'components.bundle.js');
-    if (fs.existsSync(adminBundlePath) && !fs.existsSync(aliasPath)) {
-      try {
-        fs.copyFileSync(adminBundlePath, aliasPath);
-      } catch (err) {
-        console.error('AdminJS bundle copy failed', err);
-      }
+  // Debug log for admin assets requests
+  expressApp.use((req: Request, _res: Response, next: NextFunction) => {
+    if (req.originalUrl.includes('components.bundle.js')) {
+      // eslint-disable-next-line no-console
+      console.log('components.bundle.js request', req.originalUrl);
     }
-  };
-  app.use(
-    '/admin/frontend/assets',
-    (req: Request, res: Response, next: express.NextFunction) => {
-      // On demand alias creation and direct send for components.bundle.js
-      if (req.path === '/components.bundle.js') {
-        ensureBundleAlias();
-        return res.sendFile(adminBundlePath, (err) => {
-          if (err) {
-            return next();
-          }
-        });
+    next();
+  });
+  // Serve AdminJS bundled custom components (components.bundle.js -> .adminjs/bundle.js)
+  expressApp.get(
+    '/admin/frontend/assets/components.bundle.js',
+    (req: Request, res: Response, next: NextFunction): void => {
+      const sourcePath = fs.existsSync(adminBundleAlias)
+        ? adminBundleAlias
+        : fs.existsSync(adminBundlePath)
+          ? adminBundlePath
+          : null;
+      if (!sourcePath) return next();
+
+      try {
+        res
+          .type('application/javascript')
+          .setHeader('Cache-Control', 'public, max-age=0')
+          .send(fs.readFileSync(sourcePath));
+      } catch (err) {
+        console.error('AdminJS bundle read failed', err);
+        return next();
       }
-      next();
     },
-    express.static(adminBundleDir),
+  );
+  expressApp.use('/admin/frontend/assets', express.static(publicAssetsDir));
+  expressApp.use('/admin/frontend/assets', express.static(adminBundleDir));
+  // Error handler to recover from AdminJS static 404 and serve our bundle
+  expressApp.use(
+    '/admin/frontend/assets/components.bundle.js',
+    (
+      err: any,
+      _req: Request,
+      res: Response,
+      next: NextFunction,
+    ): void => {
+      if (!err) return next();
+
+      const fallback =
+        (fs.existsSync(adminBundleAlias) && adminBundleAlias) ||
+        (fs.existsSync(adminBundlePath) && adminBundlePath) ||
+        (fs.existsSync(path.join(publicAssetsDir, 'components.bundle.js')) &&
+          path.join(publicAssetsDir, 'components.bundle.js'));
+
+      if (fallback) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'Recovered components.bundle.js via error handler from',
+          fallback,
+        );
+        res
+          .type('application/javascript')
+          .setHeader('Cache-Control', 'public, max-age=0')
+          .sendFile(fallback);
+        return;
+      }
+
+      return next(err);
+    },
   );
 
   // Validation/transform
