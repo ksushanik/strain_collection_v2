@@ -1,6 +1,6 @@
 # Changelog (кратко)
 
-## 2025-12-05
+## 2025-12-04
 - AdminJS: раздел Maintenance → DatabaseMaintenance (Generate backup, Restore с загрузкой файла, Wipe), логирование в AuditLog.
 - AdminJS: bulk delete для Strain/Sample с очисткой storage/media/photos и корректным возвратом на список.
 - StorageView: крупнее/плотнее клетки, фикса ширины селектов в RU, более читаемые подписи.
