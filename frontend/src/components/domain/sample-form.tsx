@@ -4,7 +4,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { format } from "date-fns"
+import { format, parse, isValid, isSameDay } from "date-fns"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { ApiService, Sample } from "@/services/api"
 import { Button } from "@/components/ui/button"
@@ -181,37 +181,12 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>{t('collectionDate')}</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full pl-3 text-left font-normal",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {field.value ? (
-                                                    format(field.value, "PPP")
-                                                ) : (
-                                                    <span>{t('pickDate')}</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) =>
-                                                date > new Date() || date < new Date("1900-01-01")
-                                            }
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <FormControl>
+                                    <DatePickerInput
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -275,5 +250,111 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                 </div>
             </form>
         </Form>
+    )
+}
+
+function DatePickerInput({ value, onChange }: { value?: Date, onChange: (date?: Date) => void }) {
+    const [inputValue, setInputValue] = React.useState("")
+    const inputValueRef = React.useRef("")
+
+    // Keep ref in sync
+    React.useEffect(() => {
+        inputValueRef.current = inputValue
+    }, [inputValue])
+
+    const parseDate = (val: string): Date | undefined => {
+        if (!val) return undefined
+        const formats = [
+            "dd.MM.yyyy",
+            "d.M.yyyy",
+            "d.M.yy",
+            "dd/MM/yyyy",
+            "d/M/yyyy",
+            "d/M/yy",
+            "yyyy-MM-dd"
+        ]
+
+        for (const fmt of formats) {
+            const parsed = parse(val, fmt, new Date())
+            if (isValid(parsed)) {
+                if (parsed.getFullYear() > 1900 && parsed.getFullYear() < 2100) {
+                    return parsed
+                }
+            }
+        }
+        return undefined
+    }
+
+    React.useEffect(() => {
+        if (value) {
+            // If the current input parses to the same date, don't overwrite it
+            // This prevents the "typing interruption" issue
+            const currentParsed = parseDate(inputValueRef.current)
+            if (currentParsed && isSameDay(currentParsed, value)) {
+                return
+            }
+            setInputValue(format(value, "dd.MM.yyyy"))
+        } else {
+            if (inputValueRef.current !== "") {
+                setInputValue("")
+            }
+        }
+    }, [value])
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value
+        setInputValue(val)
+
+        if (!val) {
+            onChange(undefined)
+            return
+        }
+
+        const parsed = parseDate(val)
+        if (parsed) {
+            onChange(parsed)
+        }
+    }
+
+    const handleBlur = () => {
+        if (value) {
+            setInputValue(format(value, "dd.MM.yyyy"))
+        } else {
+            setInputValue("")
+        }
+    }
+
+    return (
+        <div className="flex gap-2">
+            <Input
+                value={inputValue}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault()
+                    }
+                }}
+                placeholder="DD.MM.YYYY"
+            />
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="shrink-0" type="button">
+                        <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                        mode="single"
+                        selected={value}
+                        onSelect={onChange}
+                        disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                    />
+                </PopoverContent>
+            </Popover>
+        </div>
     )
 }
