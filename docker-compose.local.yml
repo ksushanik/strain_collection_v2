@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: strain-local-backend:latest
+    pull_policy: never
+    ports:
+      - "3002:3000"
+
+  frontend:
+    image: strain-local-frontend:latest
+    pull_policy: never
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:3002"
+    ports:
+      - "3000:3001"

@@ -4,7 +4,7 @@ API_URL       ?= https://culturedb.elcity.ru
 BACKEND_IMAGE := $(REGISTRY)/strain-collection-v2-backend:$(TAG)
 FRONTEND_IMAGE:= $(REGISTRY)/strain-collection-v2-frontend:$(TAG)
 
-.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod
+.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod deploy-local
 
 build-backend:
 	docker build -t $(BACKEND_IMAGE) -f backend/Dockerfile backend
@@ -19,6 +19,10 @@ push-frontend: build-frontend
 	docker push $(FRONTEND_IMAGE)
 
 push-all: push-backend push-frontend
+
+# Local deploy with local images (see docker-compose.local.yml override)
+deploy-local:
+	docker compose -f docker-compose.yml -f docker-compose.local.yml up -d postgres redis backend frontend
 
 # Простой деплой на прод (сервер alias ssh 4feb, путь /home/user/bio_collection).
 # Обновляет образы и перезапускает стек.

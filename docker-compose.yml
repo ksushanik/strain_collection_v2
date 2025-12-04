@@ -17,7 +17,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: strain_collection_redis
-    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    command: [ "redis-server", "--save", "60", "1", "--loglevel", "warning" ]
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -47,8 +47,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost
     restart: unless-stopped

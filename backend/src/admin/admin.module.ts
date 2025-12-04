@@ -13,6 +13,7 @@ import { AdminSsoController } from './admin.sso.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { adminSessionOptions } from './admin-session.config';
+import { AdminAssetsController } from './admin.assets.controller';
 
 @Module({
   imports: [
@@ -132,6 +133,6 @@ import { adminSessionOptions } from './admin-session.config';
       inject: [ConfigService],
     }),
   ],
-  controllers: [AdminSsoController],
+  controllers: [AdminSsoController, AdminAssetsController],
 })
 export class AdminModule {}
