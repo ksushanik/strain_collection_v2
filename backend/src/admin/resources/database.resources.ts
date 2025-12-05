@@ -8,6 +8,7 @@ export interface DatabaseResourcesDeps {
   getModelByName: (modelName: string) => any;
   auditLogService: AuditLogService;
   restoreComponent: string;
+  backupComponent: string;
 }
 
 type BackupPayload = {
@@ -142,6 +143,7 @@ export const buildDatabaseResources = ({
   getModelByName,
   auditLogService,
   restoreComponent,
+  backupComponent,
 }: DatabaseResourcesDeps): ResourceWithOptions[] => [
   {
     resource: { model: getModelByName('SampleTypeDictionary'), client: prisma },
@@ -169,9 +171,9 @@ export const buildDatabaseResources = ({
           actionType: 'resource',
           icon: 'Archive',
           guard: 'Create backup of the database?',
-          isVisible: false,
-          component: false,
-          showInDrawer: false,
+          isVisible: true,
+          component: backupComponent,
+          showInDrawer: true,
           handler: async () => {
             const backup = await buildBackup(prisma);
             const json = JSON.stringify(backup, null, 2);

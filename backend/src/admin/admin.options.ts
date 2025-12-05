@@ -20,6 +20,7 @@ export const createAdminOptions = (
   permissionsComponent: any,
   jsonShowComponent: string,
   restoreComponent: string,
+  backupComponent: string,
 ) => {
   const resources: ResourceWithOptions[] = [
     ...buildAccessControlResources({
@@ -59,6 +60,7 @@ export const createAdminOptions = (
       getModelByName,
       auditLogService,
       restoreComponent,
+      backupComponent,
     }),
   ];
 

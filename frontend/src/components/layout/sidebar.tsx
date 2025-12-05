@@ -125,13 +125,39 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                         <Microscope className="h-4 w-4" />
                         {!isCollapsed && <span>{t('strains')}</span>}
                     </Link>
+
+                    <Link
+                        href="/samples"
+                        onClick={handleNavigate}
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/samples" || pathname.startsWith("/samples/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <Leaf className="h-4 w-4" />
+                        {!isCollapsed && <span>{t('samples')}</span>}
+                    </Link>
+
+                    <Link
+                        href="/storage"
+                        onClick={handleNavigate}
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/storage" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <Box className="h-4 w-4" />
+                        {!isCollapsed && <span>{t('storage')}</span>}
+                    </Link>
                     {loading ? (
                         <div className="flex justify-center py-4">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
                         bindings
-                            .filter(item => item.translationKey !== 'myCollection' && item.routeSlug !== 'my-collection')
+                            .filter(item => item.translationKey !== 'myCollection' && item.routeSlug !== 'my-collection' && item.profileKey !== 'SAMPLE' && item.profileKey !== 'STORAGE')
                             .map((item, index) => {
                                 const Icon = IconMap[item.icon] || Box
                                 const href = `/dynamic/${item.routeSlug}`

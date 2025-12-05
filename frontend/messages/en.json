@@ -12,12 +12,10 @@
         "dashboard": "Dashboard",
         "media": "Media",
         "legend": "Legend",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "storage": "Storage"
     },
     "Common": {
-        "loading": "Loading...",
-        "error": "Error",
-        "save": "Save",
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",

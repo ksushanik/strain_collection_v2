@@ -44,6 +44,10 @@ import * as fs from 'fs';
           'RestoreBackup',
           './components/restore-backup',
         );
+        const backupComponent = componentLoader.add(
+          'BackupDatabase',
+          './components/backup-database',
+        );
 
         return AdminModule.createAdminAsync({
           imports: [
@@ -84,6 +88,7 @@ import * as fs from 'fs';
               null,
               jsonShow,
               restoreComponent,
+              backupComponent,
             );
 
             const bundlePath = path.join(process.cwd(), '.adminjs', 'bundle.js');
@@ -94,7 +99,7 @@ import * as fs from 'fs';
             );
             // Ensure alias exists for AdminJS asset route
             try {
-              if (fs.existsSync(bundlePath) && !fs.existsSync(bundleAliasPath)) {
+              if (fs.existsSync(bundlePath)) {
                 fs.copyFileSync(bundlePath, bundleAliasPath);
               }
             } catch (err) {
@@ -161,4 +166,4 @@ import * as fs from 'fs';
   ],
   controllers: [AdminSsoController, AdminAssetsController],
 })
-export class AdminModule {}
+export class AdminModule { }
