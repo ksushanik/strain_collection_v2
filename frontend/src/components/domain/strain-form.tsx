@@ -24,7 +24,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
@@ -260,9 +260,10 @@ export function StrainForm({
                             <FormItem>
                                 <FormLabel>{t('otherIdentificationMethods')}</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <RichTextEditor
+                                        value={field.value}
+                                        onChange={field.onChange}
                                         placeholder={t('otherTaxonomyPlaceholder')}
-                                        {...field}
                                     />
                                 </FormControl>
                                 <FormDescription>{t('nonDnaMethods')}</FormDescription>
@@ -322,10 +323,10 @@ export function StrainForm({
                                 <FormItem>
                                     <FormLabel>{t('antibioticActivity')}</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('antibioticActivityPlaceholder')}
-                                            className="resize-none min-h-[96px]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -418,10 +419,10 @@ export function StrainForm({
                                 <FormItem>
                                     <FormLabel>{t('genome')}</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('genomePlaceholder')}
-                                            className="resize-none min-h-[80px]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -435,10 +436,10 @@ export function StrainForm({
                                 <FormItem>
                                     <FormLabel>{t('biochemistry')}</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('biochemistryPlaceholder')}
-                                            className="resize-none min-h-[80px]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -461,10 +462,10 @@ export function StrainForm({
                                 <FormItem>
                                     <FormLabel>{t('features')}</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('featuresPlaceholder')}
-                                            className="resize-none min-h-[80px]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -478,10 +479,10 @@ export function StrainForm({
                                 <FormItem>
                                     <FormLabel>{t('comments')}</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder={t('commentsPlaceholder')}
-                                            className="resize-none min-h-[80px]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />

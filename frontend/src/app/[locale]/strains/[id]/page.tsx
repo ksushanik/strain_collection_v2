@@ -12,6 +12,7 @@ import { useRouter } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
@@ -143,7 +144,7 @@ function StrainDetailContent({ id }: { id: string }) {
                                 <span className="text-xs font-medium text-muted-foreground block mb-1">
                                     {t('otherIdentificationMethods')}:
                                 </span>
-                                <p className="text-sm">{strain.otherTaxonomy}</p>
+                                <RichTextDisplay content={strain.otherTaxonomy} className="text-sm" />
                             </div>
                         )}
                     </CardContent>
@@ -171,7 +172,7 @@ function StrainDetailContent({ id }: { id: string }) {
                         {strain.antibioticActivity && (
                             <div className="mt-4 text-sm">
                                 <span className="font-medium">{t('antibioticActivityDetails')}:</span>
-                                <p className="text-muted-foreground mt-1">{strain.antibioticActivity}</p>
+                                <RichTextDisplay content={strain.antibioticActivity} className="text-muted-foreground mt-1" />
                             </div>
                         )}
                         {strain.iuk && (
@@ -206,9 +207,7 @@ function StrainDetailContent({ id }: { id: string }) {
                         {strain.genome && (
                             <div>
                                 <span className="text-sm font-medium block mb-1">{t('genome')}:</span>
-                                <p className="text-sm text-muted-foreground font-mono bg-muted p-2 rounded">
-                                    {strain.genome}
-                                </p>
+                                <RichTextDisplay content={strain.genome} className="text-sm text-muted-foreground bg-muted p-2 rounded" />
                             </div>
                         )}
                     </CardContent>
@@ -225,19 +224,19 @@ function StrainDetailContent({ id }: { id: string }) {
                         {strain.features && (
                             <div>
                                 <span className="font-medium block mb-1">{t('features')}:</span>
-                                <p className="text-muted-foreground">{strain.features}</p>
+                                <RichTextDisplay content={strain.features} className="text-muted-foreground" />
                             </div>
                         )}
                         {strain.biochemistry && (
                             <div>
                                 <span className="font-medium block mb-1">{t('biochemistry')}:</span>
-                                <p className="text-muted-foreground whitespace-pre-line">{strain.biochemistry}</p>
+                                <RichTextDisplay content={strain.biochemistry} className="text-muted-foreground" />
                             </div>
                         )}
                         {strain.comments && (
                             <div>
                                 <span className="font-medium block mb-1">{t('comments')}:</span>
-                                <p className="text-muted-foreground">{strain.comments}</p>
+                                <RichTextDisplay content={strain.comments} className="text-muted-foreground" />
                             </div>
                         )}
                         <div className="grid grid-cols-2 gap-2 pt-4 border-t mt-4">

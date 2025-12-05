@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, Box as BoxIcon, Plus, X, Check, Edit2, Trash2, Save } from "lucide-react"
+import { Loader2, Box as BoxIcon, X, Check, Edit2, Trash2, Save } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -258,22 +258,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     )
   }
 
-  if (boxes.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('noBoxes')}</CardTitle>
-          <CardDescription>{t('createFirstBox')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('createBox')}
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
+
 
   return (
     <div className="space-y-6">
@@ -327,37 +312,44 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       </Card>
 
       {/* Box Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-        {boxes.map(box => (
-          <Button
-            key={box.id}
-            variant={selectedBoxId === box.id ? "default" : "outline"}
-            onClick={() => setSelectedBoxId(box.id)}
-            className="group h-24 w-full flex flex-col items-start justify-between p-4"
-          >
-            <div className="flex items-center w-full">
-              <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
-              <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
-            </div>
-            {box._count && (
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "w-full justify-center mt-2 transition-colors",
-                  selectedBoxId === box.id
-                    ? "bg-white text-foreground border border-border shadow-sm"
-                    : "bg-muted text-muted-foreground",
-                  "group-hover:bg-white group-hover:text-foreground"
-                )}
-              >
-                {box.occupiedCells !== undefined
-                  ? `${box.occupiedCells}/${box._count.cells}`
-                  : `${box._count.cells}`} {tCommon('cells')}
-              </Badge>
-            )}
-          </Button>
-        ))}
-      </div>
+      {boxes.length === 0 ? (
+        <div className="text-center p-8 text-muted-foreground border rounded-lg border-dashed">
+          {t('noBoxes')}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+          {boxes.map(box => (
+            <Button
+              key={box.id}
+              variant={selectedBoxId === box.id ? "default" : "outline"}
+              onClick={() => setSelectedBoxId(box.id)}
+            >
+              <div className="flex items-center w-full">
+                <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
+                <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
+              </div>
+              {
+                box._count && (
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "w-full justify-center mt-2 transition-colors",
+                      selectedBoxId === box.id
+                        ? "bg-white text-foreground border border-border shadow-sm"
+                        : "bg-muted text-muted-foreground",
+                      "group-hover:bg-white group-hover:text-foreground"
+                    )}
+                  >
+                    {box.occupiedCells !== undefined
+                      ? `${box.occupiedCells}/${box._count.cells}`
+                      : `${box._count.cells}`} {tCommon('cells')}
+                  </Badge>
+                )
+              }
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Box Details Modal */}
       <Dialog open={!!selectedBoxId} onOpenChange={(open) => !open && setSelectedBoxId(null)}>
@@ -580,6 +572,6 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   )
 }

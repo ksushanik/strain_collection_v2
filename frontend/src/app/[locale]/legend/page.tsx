@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ApiService } from "@/services/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Button } from "@/components/ui/button"
 import { Loader2, Save } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -68,10 +68,9 @@ export default function LegendPage() {
           <CardTitle>{t('content')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Textarea
+          <RichTextEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[320px] sm:min-h-[500px] font-mono"
+            onChange={(value) => setContent(value)}
             placeholder={t('placeholder')}
           />
         </CardContent>

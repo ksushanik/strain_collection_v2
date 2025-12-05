@@ -12,6 +12,7 @@ import { useRouter, Link } from "@/i18n/routing"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 
 // Dynamic import for map to avoid SSR issues
 const SampleMap = dynamic(
@@ -160,7 +161,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                             {sample.description && (
                                 <div className="pt-4 border-t">
                                     <span className="text-sm font-medium block mb-1">{tCommon('description')}:</span>
-                                    <p className="text-muted-foreground">{sample.description}</p>
+                                    <RichTextDisplay content={sample.description} className="text-muted-foreground" />
                                 </div>
                             )}
 

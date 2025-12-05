@@ -17,7 +17,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Calendar } from "@/components/ui/calendar"
 import {
     Popover,
@@ -31,7 +31,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -228,10 +227,10 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         <FormItem>
                             <FormLabel>{t('description')}</FormLabel>
                             <FormControl>
-                                <Textarea
+                                <RichTextEditor
+                                    value={field.value}
+                                    onChange={field.onChange}
                                     placeholder={t('descriptionPlaceholder')}
-                                    className="resize-none min-h-[120px]"
-                                    {...field}
                                 />
                             </FormControl>
                             <FormMessage />
