@@ -26,16 +26,14 @@ deploy-local:
 
 # Простой деплой на прод (сервер alias ssh 4feb, путь /home/user/bio_collection).
 # Обновляет образы и перезапускает стек.
-# После деплоя синхронизирует AdminJS bundle для nginx.
+# AdminJS bundle теперь отдаётся через бэкенд (nginx проксирует /admin/*).
 deploy-prod:
 	ssh 4feb "cd /home/user/bio_collection && docker compose pull && docker compose up -d"
-	ssh 4feb "docker cp strain_v2_backend:/app/.adminjs/components.bundle.js /home/user/bio_collection/backend/.adminjs/components.bundle.js"
 
 # Для PowerShell/Windows, где GNU make запускает cmd.exe и ssh не находится,
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 deploy-prod-win:
 	powershell -Command "ssh 4feb \"cd /home/user/bio_collection && docker compose pull && docker compose up -d\""
-	powershell -Command "ssh 4feb \"docker cp strain_v2_backend:/app/.adminjs/components.bundle.js /home/user/bio_collection/backend/.adminjs/components.bundle.js\""
 
 # Очистка неиспользуемых Docker ресурсов на production
 clean-prod:
