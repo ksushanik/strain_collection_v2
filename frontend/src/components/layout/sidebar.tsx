@@ -42,6 +42,7 @@ const IconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProps) {
     const t = useTranslations('Navigation')
     const tDynamic = useTranslations('DynamicPages')
+    const tCommon = useTranslations('Common')
     const pathname = usePathname()
     const router = useRouter()
     const { user, logout } = useAuth()
@@ -50,6 +51,12 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
     const [loading, setLoading] = React.useState(true)
 
     React.useEffect(() => {
+        if (!user) {
+            setBindings([])
+            setLoading(false)
+            return
+        }
+
         ApiService.getUiBindings().then(data => {
             setBindings(data)
             setLoading(false)
@@ -57,7 +64,7 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             console.error('Failed to load UI bindings:', err)
             setLoading(false)
         })
-    }, [])
+    }, [user])
 
     React.useEffect(() => {
         if (isMobile && isCollapsed) {
@@ -238,50 +245,65 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             </div>
 
             <div className="border-t">
-                <Link
-                    href="/settings"
-                    onClick={handleNavigate}
-                    className={cn(
-                        "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
-                        isCollapsed && "justify-center px-2"
-                    )}
-                >
-                    <Settings className="h-4 w-4" />
-                    {!isCollapsed && <span>{t('settings')}</span>}
-                </Link>
-
-                <Separator />
-
-                {user && (
-                    <div className="p-4 space-y-3">
-                        {!isCollapsed && (
-                            <div className="flex items-start gap-3">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                                    <User className="h-4 w-4 text-primary" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{user.name}</p>
-                                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                                            {user.role}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        <Button
-                            variant="outline"
-                            size={isCollapsed ? "icon" : "sm"}
-                            onClick={handleLogout}
-                            className={cn("w-full", isCollapsed && "h-8 w-8")}
+                {user ? (
+                    <>
+                        <Link
+                            href="/settings"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
                         >
-                            <LogOut className="h-4 w-4" />
-                            {!isCollapsed && <span className="ml-2">{t('logout')}</span>}
-                        </Button>
-                    </div>
+                            <Settings className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('settings')}</span>}
+                        </Link>
+
+                        <Separator />
+
+                        <div className="p-4 space-y-3">
+                            {!isCollapsed && (
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                        <User className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">{user.name}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                                {user.role}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <Button
+                                variant="outline"
+                                size={isCollapsed ? "icon" : "sm"}
+                                onClick={handleLogout}
+                                className={cn("w-full", isCollapsed && "h-8 w-8")}
+                            >
+                                <LogOut className="h-4 w-4" />
+                                {!isCollapsed && <span className="ml-2">{t('logout')}</span>}
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <Link
+                        href="/login"
+                        onClick={handleNavigate}
+                        className={cn(
+                            "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/login" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                            isCollapsed && "justify-center px-2"
+                        )}
+                    >
+                        <LogOut className="h-4 w-4 rotate-180" />
+                        {!isCollapsed && <span>{tCommon('login') ?? 'Авторизоваться'}</span>}
+                    </Link>
                 )}
             </div>
         </div>

@@ -102,7 +102,7 @@ export default function MediaPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+        {(user) && (
           <Button onClick={handleCreate} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             {t('addMedia')}
@@ -145,16 +145,18 @@ export default function MediaPage() {
                 <CardDescription>{item.composition || '-'}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
-                {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                {user && (
                   <>
                     <Button variant="outline" size="sm" onClick={() => handleEdit(item)} className="flex-1 min-w-[120px]">
                       <Pencil className="mr-2 h-4 w-4" />
                       {tCommon('edit')}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="flex-1 min-w-[120px]">
-                      <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                      {tCommon('delete')}
-                    </Button>
+                    {(user.role === 'ADMIN' || user.role === 'MANAGER') && (
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="flex-1 min-w-[120px]">
+                        <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                        {tCommon('delete')}
+                      </Button>
+                    )}
                   </>
                 )}
               </CardContent>
@@ -169,7 +171,7 @@ export default function MediaPage() {
             <TableRow>
               <TableHead>{tCommon('name')}</TableHead>
               <TableHead>{tCommon('description')}</TableHead>
-              <TableHead className="w-[100px]">{tCommon('actions')}</TableHead>
+              {user && <TableHead className="w-[100px]">{tCommon('actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -190,18 +192,20 @@ export default function MediaPage() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.composition || '-'}</TableCell>
-                  <TableCell>
-                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                  {user && (
+                    <TableCell>
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        {(user.role === 'ADMIN' || user.role === 'MANAGER') && (
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
-                    )}
-                  </TableCell>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

@@ -1,3 +1,4 @@
+import { Public } from '../decorators/public.decorator';
 import {
   Controller,
   Get,
@@ -27,12 +28,14 @@ export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Get()
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Media'))
   findAll(@Query() query: MediaQueryDto) {
     return this.mediaService.findAll(query);
   }
 
   @Get(':id')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Media'))
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.mediaService.findOne(id);

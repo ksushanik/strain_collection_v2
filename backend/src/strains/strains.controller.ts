@@ -1,3 +1,4 @@
+import { Public } from '../decorators/public.decorator';
 import {
   Controller,
   Get,
@@ -34,6 +35,7 @@ export class StrainsController {
   constructor(private readonly strainsService: StrainsService) {}
 
   @Get()
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))
   findAll(
     @Query(new ValidationPipe({ transform: true })) query: StrainQueryDto,
@@ -42,6 +44,7 @@ export class StrainsController {
   }
 
   @Get(':id')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.strainsService.findOne(id);

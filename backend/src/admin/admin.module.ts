@@ -16,6 +16,7 @@ import { adminSessionOptions } from './admin-session.config';
 import { AdminAssetsController } from './admin.assets.controller';
 import * as path from 'path';
 import * as fs from 'fs';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import * as fs from 'fs';
             SettingsModule,
             AuditModule,
             ConfigModule,
+            CaslModule,
             JwtModule.registerAsync({
               imports: [ConfigModule],
               useFactory: (config: ConfigService) => ({
@@ -159,6 +161,8 @@ import * as fs from 'fs';
       },
     ),
     ConfigModule,
+    AuthModule,
+    CaslModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({

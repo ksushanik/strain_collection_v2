@@ -46,7 +46,7 @@ const VALID_SUBJECTS: Subjects[] = [
 
 type RoleKey = 'ADMIN' | 'MANAGER' | 'USER';
 
-const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey, PermissionMap> = {
+const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
   ADMIN: { all: ['manage'] },
   MANAGER: {
     Strain: ['read', 'create', 'update', 'delete'],
@@ -61,6 +61,17 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey, PermissionMap> = {
     Group: ['read'],
   },
   USER: {
+    Strain: ['read', 'create', 'update'],
+    Sample: ['read', 'create', 'update'],
+    Photo: ['read', 'create', 'update'],
+    Storage: ['read', 'create', 'update'],
+    Media: ['read', 'create', 'update'],
+    Analytics: ['read'],
+    Legend: ['read'],
+    Settings: ['read'],
+  },
+  // Explicit GUEST role definition (read-only)
+  GUEST: {
     Strain: ['read'],
     Sample: ['read'],
     Photo: ['read'],
@@ -123,7 +134,8 @@ export class CaslAbilityFactory {
       ? normalizedGroupPermissions
       : useRolePermissions
         ? normalizedRolePermissions
-        : DEFAULT_ROLE_PERMISSIONS[(roleKey as RoleKey) ?? 'USER'] || {};
+        : DEFAULT_ROLE_PERMISSIONS[(roleKey as RoleKey) ?? 'GUEST'] ||
+          DEFAULT_ROLE_PERMISSIONS.GUEST;
 
     this.applyPermissions(can, permissions);
 

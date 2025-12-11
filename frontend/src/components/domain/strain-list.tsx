@@ -1,9 +1,8 @@
-
 "use client"
 
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, Search, Filter } from "lucide-react"
+import { Loader2, Search, Filter, Plus } from "lucide-react"
 import {
     Table,
     TableBody,
@@ -154,10 +153,13 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
-                        <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
-                            {t('create')}
-                        </Button>
+                    {user && (
+                        <div className="flex justify-end mb-4">
+                            <Button onClick={() => router.push('/strains/new')}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                {t('createStrain')}
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>

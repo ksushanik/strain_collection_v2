@@ -111,7 +111,7 @@ export function SampleList() {
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                    {user && (
                         <Button size="sm" onClick={() => router.push('/samples/new')}>{t('createSample')}</Button>
                     )}
                 </div>

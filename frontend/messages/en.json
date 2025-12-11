@@ -18,6 +18,7 @@
     "Common": {
         "cancel": "Cancel",
         "delete": "Delete",
+        "login": "Login",
         "edit": "Edit",
         "create": "Create",
         "search": "Search",
@@ -286,7 +287,9 @@
         "isolatedStrains": "Isolated Strains",
         "noStrainsIsolated": "No strains isolated yet",
         "noCoordinates": "No coordinates available",
-        "addCoordinates": "Add coordinates to see map"
+        "addCoordinates": "Add coordinates to see map",
+        "sampleDetails": "Sample Details",
+        "editSampleSubtitle": "Update sample details."
     },
     "Media": {
         "title": "Media Catalog",

@@ -9,13 +9,15 @@ import { Loader2 } from "lucide-react"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 
-export default function EditSamplePage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditSamplePage({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const { id } = React.use(params)
     const [sample, setSample] = React.useState<Sample | null>(null)
     const [loading, setLoading] = React.useState(true)
     const { user, isLoading: authLoading } = useAuth()
     const router = useRouter()
+    const t = useTranslations('Samples')
 
     React.useEffect(() => {
         if (!authLoading && user && user.role !== 'ADMIN' && user.role !== 'MANAGER') {
@@ -41,7 +43,7 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
     if (!sample) {
         return (
             <div className="p-8 text-center text-muted-foreground">
-                Sample not found
+                {t('sampleNotFound')}
             </div>
         )
     }
@@ -49,15 +51,15 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
     return (
         <div className="p-8 max-w-5xl mx-auto space-y-6">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Edit Sample</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('editSample')}</h1>
                 <p className="text-muted-foreground">
-                    Update sample details.
+                    {t('editSampleSubtitle')}
                 </p>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Sample Details</CardTitle>
+                    <CardTitle>{t('sampleDetails')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <SampleForm initialData={sample} isEdit />
@@ -66,7 +68,7 @@ export default function EditSamplePage({ params }: { params: Promise<{ id: strin
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Sample Photos</CardTitle>
+                    <CardTitle>{t('samplePhotos')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <PhotoUpload

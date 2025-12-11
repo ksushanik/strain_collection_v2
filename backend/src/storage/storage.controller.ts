@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('api/v1/storage')
 @ApiTags('Storage')
@@ -32,12 +33,14 @@ export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
   @Get('boxes')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Storage'))
   findAllBoxes() {
     return this.storageService.findAllBoxes();
   }
 
   @Get('boxes/:id')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Storage'))
   findBox(@Param('id', ParseIntPipe) id: number) {
     return this.storageService.findBox(id);

@@ -68,7 +68,7 @@ const PermissionsGrid = (props: BasePropertyProps) => {
     React.createElement(
       Text,
       { key: 'title', mb: 'sm', fontWeight: 'bold' },
-      'Права доступа',
+      'Permissions Matrix',
     ),
     React.createElement(
       Box,
@@ -121,7 +121,7 @@ const PermissionsGrid = (props: BasePropertyProps) => {
     React.createElement(
       Text,
       { key: 'hint', mt: 'md', fontSize: 12, color: 'grey60' },
-      'Подсказка: используйте «all» + «manage» для полного доступа. При пустой карте будут использованы права роли/группы по умолчанию.',
+      'Tip: checking all + manage grants full access for a subject. Use the checkboxes to toggle allowed actions.',
     ),
   ]);
 };

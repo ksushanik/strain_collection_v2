@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Reflector } from '@nestjs/core';
 import { CaslAbilityFactory, AppAbility } from './casl-ability.factory';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { CHECK_POLICIES_KEY, PolicyHandler } from './check-policies.decorator';
 
 @Injectable()
@@ -12,6 +13,14 @@ export class PoliciesGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+
     const policyHandlers =
       this.reflector.get<PolicyHandler[]>(
         CHECK_POLICIES_KEY,
@@ -28,11 +37,9 @@ export class PoliciesGuard implements CanActivate {
       .getRequest<{ user?: Partial<User> & { role?: { key?: string } } }>();
     const user = request.user;
 
-    if (!user) {
-      return false;
-    }
-
-    const ability = this.caslAbilityFactory.createForUser(user);
+    const ability = this.caslAbilityFactory.createForUser(
+      user ?? { role: 'GUEST' },
+    );
 
     return policyHandlers.every((handler) =>
       this.execPolicyHandler(handler, ability),

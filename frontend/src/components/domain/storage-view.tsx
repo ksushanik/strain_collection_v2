@@ -15,6 +15,7 @@ import { useSearchParams } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
 type BoxSummary = {
   id: number;
   displayName: string;
@@ -49,6 +50,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const { handleError } = useApiError()
   const t = useTranslations('Storage')
   const tCommon = useTranslations('Common')
+  const { user, isLoading: authLoading } = useAuth()
   const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
@@ -108,6 +110,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
 
   // Fetch Boxes on mount
   React.useEffect(() => {
+    if (authLoading) return
     ApiService.getStorageBoxes().then(data => {
       setBoxes(data)
       setLoading(false)
@@ -118,7 +121,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     ApiService.getStrains({ limit: 500 })
       .then(res => setStrains(res.data))
       .catch(err => handleError(err, t('failedToLoadStrains')))
-  }, [handleError, t])
+  }, [authLoading, user, handleError, t])
 
   // Fetch Box details when selection changes
   React.useEffect(() => {

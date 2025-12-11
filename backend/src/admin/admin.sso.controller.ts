@@ -5,36 +5,35 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Request, Response } from 'express';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PoliciesGuard } from '../casl/policies.guard';
+import { CheckPolicies } from '../casl/check-policies.decorator';
+import { User } from '@prisma/client';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('api/v1/admin-sso')
+@UseGuards(JwtAuthGuard, PoliciesGuard)
 export class AdminSsoController {
   private static nonces = new Map<
     string,
     { email: string; role: string; exp: number }
   >();
-  constructor(
-    private jwt: JwtService,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   @Post('sso')
+  @CheckPolicies((ability) => ability.can('manage', 'all'))
   async sso(@Req() req: Request, @Res() res: Response) {
-    const auth = req.headers['authorization'] || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-    if (!token) throw new UnauthorizedException('Missing bearer token');
-    let payload: any;
-    try {
-      payload = this.jwt.verify(token);
-    } catch {
-      throw new UnauthorizedException('Invalid token');
-    }
-    if (payload?.role !== 'ADMIN') throw new UnauthorizedException('Not admin');
+    const authUser = req.user as Partial<User> & { role?: { key?: string } | string };
+    const roleKey =
+      (typeof authUser.role === 'object' && authUser.role?.key) ||
+      (typeof authUser.role === 'string' ? authUser.role : null);
+    if (roleKey !== 'ADMIN') throw new UnauthorizedException('Not admin');
     const user = await this.prisma.user.findUnique({
-      where: { email: payload?.email },
+      where: { email: authUser.email },
       include: { role: true },
     });
     if (!user) throw new UnauthorizedException('User not found');
@@ -49,27 +48,25 @@ export class AdminSsoController {
   }
 
   @Post('sso/start')
+  @CheckPolicies((ability) => ability.can('manage', 'all'))
   ssoStart(@Req() req: Request, @Res() res: Response) {
-    const auth = req.headers['authorization'] || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-    if (!token) throw new UnauthorizedException('Missing bearer token');
-    let payload: any;
-    try {
-      payload = this.jwt.verify(token);
-    } catch {
-      throw new UnauthorizedException('Invalid token');
-    }
-    if (payload?.role !== 'ADMIN') throw new UnauthorizedException('Not admin');
+    const user = req.user as Partial<User> & { role?: { key?: string } | string };
+    const roleKey =
+      (typeof user.role === 'object' && user.role?.key) ||
+      (typeof user.role === 'string' ? user.role : null);
+    if (roleKey !== 'ADMIN') throw new UnauthorizedException('Not admin');
     const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
     AdminSsoController.nonces.set(nonce, {
-      email: payload.email,
-      role: payload.role,
+      email: user.email || '',
+      role: roleKey,
       exp: Date.now() + 60 * 1000,
     });
     res.status(200).json({ nonce });
   }
 
   @Get('sso/complete')
+  @CheckPolicies((ability) => ability.can('manage', 'all'))
+  @Public()
   async ssoComplete(@Req() req: Request, @Res() res: Response) {
     const nonce = (req.query['nonce'] as string) || '';
     const record = AdminSsoController.nonces.get(nonce);

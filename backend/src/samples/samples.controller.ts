@@ -1,3 +1,4 @@
+import { Public } from '../decorators/public.decorator';
 import {
   Controller,
   Get,
@@ -34,12 +35,14 @@ export class SamplesController {
   constructor(private readonly samplesService: SamplesService) {}
 
   @Get('types')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Sample'))
   getSampleTypes() {
     return this.samplesService.getSampleTypes();
   }
 
   @Get()
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Sample'))
   findAll(
     @Query(new ValidationPipe({ transform: true })) query: SampleQueryDto,
@@ -48,6 +51,7 @@ export class SamplesController {
   }
 
   @Get(':id')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Sample'))
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.samplesService.findOne(id);

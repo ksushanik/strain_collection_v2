@@ -5,27 +5,37 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { routing } from '@/i18n/routing';
 
+const PUBLIC_PATHS = ['/', '/strains', '/samples', '/media', '/legend', '/docs', '/storage', '/dynamic/storage'];
+
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
-    const pathname = usePathname();
-    const isLoginPage = pathname?.endsWith('/login');
-    const localeMatch = pathname?.match(/^\/(ru|en)(\/|$)/);
+    const pathname = usePathname() || '/';
+    const localeMatch = pathname.match(/^\/(ru|en)(\/|$)/);
     const locale = (localeMatch?.[1] as (typeof routing.locales)[number]) || routing.defaultLocale;
+    const pathWithoutLocale = pathname.replace(/^\/(ru|en)/, '') || '/';
+    const isLoginPage = pathWithoutLocale === '/login' || pathname.endsWith('/login');
+
+    const isPublic = PUBLIC_PATHS.some((p) =>
+        pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`),
+    );
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated && !isLoginPage) {
-            const target = `/${locale}/login?from=${encodeURIComponent(pathname || '/')}`;
+        if (!isLoading && isAuthenticated && isLoginPage) {
+            router.replace(`/${locale}`);
+        }
+        if (!isLoading && !isAuthenticated && !isLoginPage && !isPublic) {
+            const target = `/${locale}/login?from=${encodeURIComponent(pathname)}`;
             router.push(target);
         }
-    }, [isLoading, isAuthenticated, router, pathname, isLoginPage, locale]);
+    }, [isLoading, isAuthenticated, isLoginPage, isPublic, locale, pathname, router]);
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
     }
 
-    if (!isAuthenticated && !isLoginPage) {
-        return null; // Or a loading spinner while redirecting
+    if (!isAuthenticated && !isPublic && !isLoginPage) {
+        return null; // ожидаем редирект
     }
 
     return <>{children}</>;

@@ -4,6 +4,7 @@ import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('api/v1/settings')
 @ApiTags('Settings')
@@ -36,6 +37,7 @@ export class SettingsController {
   }
 
   @Get('legend')
+  @Public()
   @CheckPolicies((ability) => ability.can('read', 'Legend'))
   async getLegend() {
     return this.settingsService.getLegend();

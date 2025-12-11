@@ -38,7 +38,7 @@ interface SampleWithStrains extends Sample {
     photos: import('@/services/api').SamplePhoto[];
 }
 
-export default function SampleDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function SampleDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const router = useRouter()
     const { user } = useAuth()
     const { id } = React.use(params)

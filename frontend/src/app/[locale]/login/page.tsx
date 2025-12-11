@@ -17,7 +17,7 @@ function LoginForm() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, logout } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -87,9 +87,28 @@ function LoginForm() {
                         />
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col gap-2">
                     <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? 'Signing in...' : 'Sign In'}
+                    </Button>
+                    <div className="relative w-full">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                        </div>
+                    </div>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                            logout();
+                            router.push('/');
+                        }}
+                    >
+                        Continue as Guest
                     </Button>
                 </CardFooter>
             </form>

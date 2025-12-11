@@ -6,10 +6,12 @@ import { ApiService } from "@/services/api"
 import { Loader2, Microscope, Beaker, Archive, Boxes } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function Home() {
   const t = useTranslations('Dashboard')
   const tCommon = useTranslations('Common')
+  const { user } = useAuth()
 
   const [stats, setStats] = React.useState({
     totalStrains: 0,
@@ -109,7 +111,7 @@ export default function Home() {
         </Card>
       </div>
 
-      {!stats.loading && stats.recent.length > 0 && (
+      {!stats.loading && stats.recent.length > 0 && user && (
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-3">{t('recentStrains')}</h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
