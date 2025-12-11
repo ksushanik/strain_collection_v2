@@ -7,11 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Sample } from "@/services/api"
 import { Loader2 } from "lucide-react"
 import { PhotoUpload } from "@/components/domain/photo-upload"
+import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "@/i18n/routing"
 
 export default function EditSamplePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params)
     const [sample, setSample] = React.useState<Sample | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const { user, isLoading: authLoading } = useAuth()
+    const router = useRouter()
+
+    React.useEffect(() => {
+        if (!authLoading && user && user.role !== 'ADMIN' && user.role !== 'MANAGER') {
+            router.push('/samples') // Redirect unauthorized users
+        }
+    }, [user, authLoading, router])
 
     React.useEffect(() => {
         ApiService.getSample(parseInt(id))

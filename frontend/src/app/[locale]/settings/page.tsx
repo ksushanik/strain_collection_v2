@@ -100,10 +100,12 @@ export default function SettingsPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground">{t('uiBindingsDescription')}</p>
           </div>
-          <Button variant="outline" onClick={handleAdd} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            {t('addSection')}
-          </Button>
+          {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+            <Button variant="outline" onClick={handleAdd} className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('addSection')}
+            </Button>
+          )}
         </div>
 
         {user?.role === 'ADMIN' && (
@@ -193,14 +195,16 @@ export default function SettingsPage() {
                         >
                           <ArrowDown className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setBindings((prev) => prev.filter((_, i) => i !== index))}
-                          title={t('removeSection')}
-                        >
-                          ✕
-                        </Button>
+                        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setBindings((prev) => prev.filter((_, i) => i !== index))}
+                            title={t('removeSection')}
+                          >
+                            ✕
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -238,10 +242,12 @@ export default function SettingsPage() {
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-muted-foreground">{message}</div>
-              <Button onClick={handleSave} disabled={saving || loading} className="w-full sm:w-auto">
-                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Save order and labels
-              </Button>
+              {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                <Button onClick={handleSave} disabled={saving || loading} className="w-full sm:w-auto">
+                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  Save order and labels
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

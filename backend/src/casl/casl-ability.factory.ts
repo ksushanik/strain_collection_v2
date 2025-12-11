@@ -61,9 +61,9 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey, PermissionMap> = {
     Group: ['read'],
   },
   USER: {
-    Strain: ['read', 'create', 'update'],
-    Sample: ['read', 'create', 'update'],
-    Photo: ['read', 'create', 'update'],
+    Strain: ['read'],
+    Sample: ['read'],
+    Photo: ['read'],
     Storage: ['read'],
     Media: ['read'],
     Analytics: ['read'],

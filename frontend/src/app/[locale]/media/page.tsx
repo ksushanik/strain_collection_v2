@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Plus, Search, Pencil, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const PAGE_SIZE = 10
@@ -17,6 +18,7 @@ const PAGE_SIZE = 10
 export default function MediaPage() {
   const t = useTranslations('Media')
   const tCommon = useTranslations('Common')
+  const { user } = useAuth()
   const [data, setData] = React.useState<PaginatedResponse<Media> | null>(null)
   const [search, setSearch] = React.useState("")
   const [page] = React.useState(1)
@@ -100,10 +102,12 @@ export default function MediaPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button onClick={handleCreate} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          {t('addMedia')}
-        </Button>
+        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+          <Button onClick={handleCreate} className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            {t('addMedia')}
+          </Button>
+        )}
       </div>
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -141,14 +145,18 @@ export default function MediaPage() {
                 <CardDescription>{item.composition || '-'}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleEdit(item)} className="flex-1 min-w-[120px]">
-                  <Pencil className="mr-2 h-4 w-4" />
-                  {tCommon('edit')}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="flex-1 min-w-[120px]">
-                  <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                  {tCommon('delete')}
-                </Button>
+                {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)} className="flex-1 min-w-[120px]">
+                      <Pencil className="mr-2 h-4 w-4" />
+                      {tCommon('edit')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)} className="flex-1 min-w-[120px]">
+                      <Trash2 className="mr-2 h-4 w-4 text-destructive" />
+                      {tCommon('delete')}
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           ))
@@ -183,14 +191,16 @@ export default function MediaPage() {
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>{item.composition || '-'}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

@@ -26,7 +26,6 @@ export class AdminAssetsController {
       try {
         fs.copyFileSync(bundlePath, aliasPath);
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error('AdminJS bundle copy failed', err);
       }
     }
@@ -38,7 +37,6 @@ export class AdminAssetsController {
         .setHeader('Cache-Control', 'public, max-age=0')
         .send(contents);
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('AdminJS bundle read failed', err);
       res.status(404).send('components.bundle.js not found');
     }

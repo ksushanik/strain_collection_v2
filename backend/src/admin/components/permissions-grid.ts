@@ -27,8 +27,30 @@ const ensureArray = (value: unknown): string[] =>
 const PermissionsGrid = (props: BasePropertyProps) => {
   const { onChange, property, record } = props;
 
-  const value: PermissionsMap =
-    (record?.params?.[property.path] as PermissionsMap | undefined) ?? {};
+  const value: PermissionsMap = React.useMemo(() => {
+    const params = record?.params ?? {};
+    // If AdminJS passes it as an object (rare but possible)
+    if (params[property.path] && typeof params[property.path] === 'object') {
+      return params[property.path];
+    }
+
+    // Unflatten logic for permissions.{Subject}.{Index}
+    const result: PermissionsMap = {};
+    Object.keys(params).forEach((key) => {
+      if (key.startsWith(`${property.path}.`)) {
+        const parts = key.slice(property.path.length + 1).split('.');
+        const subject = parts[0] as (typeof SUBJECTS)[number];
+        if (SUBJECTS.includes(subject)) {
+          if (!result[subject]) {
+            result[subject] = [];
+          }
+          // The value is at this key
+          result[subject]?.push(params[key]);
+        }
+      }
+    });
+    return result;
+  }, [record, property.path]);
 
   const toggle = (subject: (typeof SUBJECTS)[number], action: string) => {
     if (!onChange) return;

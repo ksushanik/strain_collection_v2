@@ -13,6 +13,7 @@ import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
+import { useAuth } from "@/contexts/AuthContext"
 
 // Dynamic import for map to avoid SSR issues
 const SampleMap = dynamic(
@@ -39,6 +40,7 @@ interface SampleWithStrains extends Sample {
 
 export default function SampleDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter()
+    const { user } = useAuth()
     const { id } = React.use(params)
     const t = useTranslations('Samples')
     const tCommon = useTranslations('Common')
@@ -97,6 +99,8 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
         )
     }
 
+    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+
     return (
         <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto">
             {/* Header */}
@@ -105,23 +109,27 @@ export default function SampleDetailPage({ params }: { params: Promise<{ id: str
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
                 </Button>
-                <Button variant="default" size="sm" onClick={() => router.push(`/samples/${sample.id}/edit`)}>
-                    <Edit className="h-4 w-4 mr-1" />
-                    {t('editSample')}
-                </Button>
-                <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                >
-                    {deleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                    ) : (
-                        <Trash2 className="h-4 w-4 mr-1" />
-                    )}
-                    {tCommon('delete')}
-                </Button>
+                {canEdit && (
+                    <>
+                        <Button variant="default" size="sm" onClick={() => router.push(`/samples/${sample.id}/edit`)}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            {t('editSample')}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDelete}
+                            disabled={deleting}
+                        >
+                            {deleting ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : (
+                                <Trash2 className="h-4 w-4 mr-1" />
+                            )}
+                            {tCommon('delete')}
+                        </Button>
+                    </>
+                )}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

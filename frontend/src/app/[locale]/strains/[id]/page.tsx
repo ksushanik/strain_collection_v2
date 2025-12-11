@@ -13,6 +13,7 @@ import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
+import { useAuth } from "@/contexts/AuthContext"
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
@@ -21,6 +22,7 @@ function StrainDetailContent({ id }: { id: string }) {
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
     const { handleError } = useApiError()
+    const { user } = useAuth()
 
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -74,6 +76,8 @@ function StrainDetailContent({ id }: { id: string }) {
         )
     }
 
+    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+
     return (
         <div className="p-8 space-y-6">
             <div className="flex items-center gap-4 mb-6">
@@ -81,29 +85,33 @@ function StrainDetailContent({ id }: { id: string }) {
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
                 </Button>
-                <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() =>
-                        router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
-                    }
-                >
-                    <Edit className="h-4 w-4 mr-1" />
-                    {t('editStrain')}
-                </Button>
-                <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                >
-                    {deleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                    ) : (
-                        <Trash2 className="h-4 w-4 mr-1" />
-                    )}
-                    {tCommon('delete')}
-                </Button>
+                {canEdit && (
+                    <>
+                        <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() =>
+                                router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
+                            }
+                        >
+                            <Edit className="h-4 w-4 mr-1" />
+                            {t('editStrain')}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDelete}
+                            disabled={deleting}
+                        >
+                            {deleting ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                            ) : (
+                                <Trash2 className="h-4 w-4 mr-1" />
+                            )}
+                            {tCommon('delete')}
+                        </Button>
+                    </>
+                )}
             </div>
 
             <div className="flex items-center gap-4">

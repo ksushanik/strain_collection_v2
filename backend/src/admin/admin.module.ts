@@ -48,6 +48,10 @@ import * as fs from 'fs';
           'BackupDatabase',
           './components/backup-database',
         );
+        const permissionsComponent = componentLoader.add(
+          'PermissionsGrid',
+          './components/permissions-grid',
+        );
 
         return AdminModule.createAdminAsync({
           imports: [
@@ -85,13 +89,17 @@ import * as fs from 'fs';
               (name: string) => getModelByName(name),
               settingsService,
               auditLogService,
-              null,
+              permissionsComponent,
               jsonShow,
               restoreComponent,
               backupComponent,
             );
 
-            const bundlePath = path.join(process.cwd(), '.adminjs', 'bundle.js');
+            const bundlePath = path.join(
+              process.cwd(),
+              '.adminjs',
+              'bundle.js',
+            );
             const bundleAliasPath = path.join(
               process.cwd(),
               '.adminjs',
@@ -103,7 +111,6 @@ import * as fs from 'fs';
                 fs.copyFileSync(bundlePath, bundleAliasPath);
               }
             } catch (err) {
-              // eslint-disable-next-line no-console
               console.error('AdminJS bundle alias copy failed', err);
             }
 
@@ -111,7 +118,6 @@ import * as fs from 'fs';
               ? bundleAliasPath
               : bundlePath;
 
-            // eslint-disable-next-line no-console
             console.log('AdminJS bundle path resolved to', finalBundlePath);
 
             return {
@@ -166,4 +172,4 @@ import * as fs from 'fs';
   ],
   controllers: [AdminSsoController, AdminAssetsController],
 })
-export class AdminModule { }
+export class AdminModule {}

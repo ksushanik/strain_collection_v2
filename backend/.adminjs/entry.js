@@ -7,3 +7,5 @@ import RestoreBackup from '../src/admin/components/restore-backup'
 AdminJS.UserComponents.RestoreBackup = RestoreBackup
 import BackupDatabase from '../src/admin/components/backup-database'
 AdminJS.UserComponents.BackupDatabase = BackupDatabase
+import PermissionsGrid from '../src/admin/components/permissions-grid'
+AdminJS.UserComponents.PermissionsGrid = PermissionsGrid

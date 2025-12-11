@@ -21,7 +21,11 @@ export class UsersService {
     });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
+  async create(
+    data: Omit<Prisma.UserCreateInput, 'role'> & {
+      role?: Prisma.RoleCreateNestedOneWithoutUsersInput;
+    },
+  ): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     // Ensure default USER role exists; connect if no role provided.
     await this.prisma.role.upsert({

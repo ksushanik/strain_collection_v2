@@ -7,9 +7,11 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Button } from "@/components/ui/button"
 import { Loader2, Save } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function LegendPage() {
   const t = useTranslations('Legend')
+  const { user } = useAuth()
   const [content, setContent] = React.useState("")
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
@@ -51,10 +53,12 @@ export default function LegendPage() {
     <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
-          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-          {t('saveChanges')}
-        </Button>
+        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+          <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            {t('saveChanges')}
+          </Button>
+        )}
       </div>
 
       {message && (

@@ -27,6 +27,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useApiError } from "@/hooks/use-api-error"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -37,6 +38,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
     const router = useRouter()
+    const { user } = useAuth()
     const { handleError } = useApiError()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
@@ -152,9 +154,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
-                        {t('create')}
-                    </Button>
+                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                        <Button size="sm" onClick={() => router.push(`/strains/new?returnTo=${encodeURIComponent(returnPath)}`)}>
+                            {t('create')}
+                        </Button>
+                    )}
                 </div>
             </div>
 

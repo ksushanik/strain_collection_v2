@@ -50,10 +50,7 @@ async function bootstrap() {
     return candidates.find((p) => fs.existsSync(p));
   };
 
-  const serveComponentsBundle = (
-    res: Response,
-    next?: NextFunction,
-  ): void => {
+  const serveComponentsBundle = (res: Response, next?: NextFunction): void => {
     const sourcePath = resolveComponentsBundle();
     if (!sourcePath) {
       console.error('components.bundle.js not found on disk');
@@ -87,7 +84,6 @@ async function bootstrap() {
       fs.copyFileSync(adminBundleAlias, publicBundle);
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('AdminJS bundle copy failed', err);
   }
   // Short-circuit for AdminJS bundle requests before Nest/AdminJS routers
@@ -113,7 +109,7 @@ async function bootstrap() {
         .setHeader('Cache-Control', 'public, max-age=0')
         .sendFile(filePath, (err) => {
           if (err) return next(err);
-          // eslint-disable-next-line no-console
+
           console.log(`[admin assets] served ${name} from ${filePath}`);
         });
     };
@@ -160,7 +156,6 @@ async function bootstrap() {
   // Debug log for admin assets requests
   expressApp.use((req: Request, _res: Response, next: NextFunction) => {
     if (req.originalUrl.includes('components.bundle.js')) {
-      // eslint-disable-next-line no-console
       console.log('components.bundle.js request', req.originalUrl);
     }
     next();

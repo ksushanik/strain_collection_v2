@@ -13,11 +13,13 @@ import { Link } from "@/i18n/routing"
 import { Input } from "@/components/ui/input"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function SampleList() {
     const t = useTranslations('Samples')
     const tCommon = useTranslations('Common')
     const router = useRouter()
+    const { user } = useAuth()
     const { handleError } = useApiError()
     const [samples, setSamples] = React.useState<Sample[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
@@ -109,7 +111,9 @@ export function SampleList() {
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    <Button size="sm" onClick={() => router.push('/samples/new')}>{t('createSample')}</Button>
+                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                        <Button size="sm" onClick={() => router.push('/samples/new')}>{t('createSample')}</Button>
+                    )}
                 </div>
             </div>
 
