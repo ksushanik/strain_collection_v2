@@ -39,7 +39,7 @@ async function bootstrap() {
     adminjsAssetsRoot,
     isProd ? 'app-bundle.production.js' : 'app-bundle.development.js',
   );
-  const server = express();
+  const server: express.Express = express();
 
   const resolveComponentsBundle = (): string | undefined => {
     const candidates = [
@@ -50,12 +50,13 @@ async function bootstrap() {
     return candidates.find((p) => fs.existsSync(p));
   };
 
-  const serveComponentsBundle = (res: Response, next?: NextFunction): void => {
+  const serveComponentsBundle = (res: Response): boolean => {
     const sourcePath = resolveComponentsBundle();
     if (!sourcePath) {
-      console.error('components.bundle.js not found on disk');
-      res.status(404).send('components.bundle.js not found');
-      return;
+      console.error(
+        'components.bundle.js not found on disk, letting other handlers try',
+      );
+      return false;
     }
 
     try {
@@ -64,13 +65,11 @@ async function bootstrap() {
         .type('application/javascript')
         .setHeader('Cache-Control', 'public, max-age=0')
         .send(fileBuffer);
+      return true;
     } catch (err) {
       console.error('Failed to read components.bundle.js', err);
-      if (next) {
-        next(err);
-      } else {
-        res.status(500).send('components.bundle.js read error');
-      }
+      res.status(500).send('components.bundle.js read error');
+      return true;
     }
   };
 
@@ -89,14 +88,16 @@ async function bootstrap() {
   // Short-circuit for AdminJS bundle requests before Nest/AdminJS routers
   server.use((req: Request, res: Response, next: NextFunction) => {
     if (!req.originalUrl.includes('components.bundle.js')) return next();
-    serveComponentsBundle(res, next);
+    if (serveComponentsBundle(res)) return;
+    next();
   });
 
   // Serve AdminJS bundled custom components (components.bundle.js -> .adminjs/bundle.js)
   server.get(
     '/admin/frontend/assets/components.bundle.js',
     (_req: Request, res: Response, next: NextFunction): void => {
-      serveComponentsBundle(res, next);
+      if (serveComponentsBundle(res)) return;
+      next();
     },
   );
   // Serve AdminJS core bundles explicitly (fixes local/dev path resolution)
@@ -137,7 +138,7 @@ async function bootstrap() {
   );
 
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-  const expressApp = app.getHttpAdapter().getInstance();
+  const expressApp = server;
 
   // Enable CORS for frontend on port 3000
   app.enableCors({
@@ -164,7 +165,8 @@ async function bootstrap() {
   expressApp.get(
     '/admin/frontend/assets/components.bundle.js',
     (_req: Request, res: Response, next: NextFunction): void => {
-      serveComponentsBundle(res, next);
+      if (serveComponentsBundle(res)) return;
+      next();
     },
   );
 

@@ -27,7 +27,9 @@ export class AdminSsoController {
   @Post('sso')
   @CheckPolicies((ability) => ability.can('manage', 'all'))
   async sso(@Req() req: Request, @Res() res: Response) {
-    const authUser = req.user as Partial<User> & { role?: { key?: string } | string };
+    const authUser = req.user as Partial<User> & {
+      role?: { key?: string } | string;
+    };
     const roleKey =
       (typeof authUser.role === 'object' && authUser.role?.key) ||
       (typeof authUser.role === 'string' ? authUser.role : null);
@@ -50,7 +52,9 @@ export class AdminSsoController {
   @Post('sso/start')
   @CheckPolicies((ability) => ability.can('manage', 'all'))
   ssoStart(@Req() req: Request, @Res() res: Response) {
-    const user = req.user as Partial<User> & { role?: { key?: string } | string };
+    const user = req.user as Partial<User> & {
+      role?: { key?: string } | string;
+    };
     const roleKey =
       (typeof user.role === 'object' && user.role?.key) ||
       (typeof user.role === 'string' ? user.role : null);

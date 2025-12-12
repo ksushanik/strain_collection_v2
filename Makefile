@@ -26,14 +26,16 @@ deploy-local:
 
 # Простой деплой на прод (сервер alias ssh 4feb, путь /home/user/bio_collection).
 # Обновляет образы и перезапускает стек.
-# AdminJS bundle теперь отдаётся через бэкенд (nginx проксирует /admin/*).
+# После старта пытается синхронизировать AdminJS components.bundle.js
+# из контейнера на хост (best-effort), чтобы внешний nginx alias
+# при необходимости всегда видел актуальный файл.
 deploy-prod:
-	ssh 4feb "cd /home/user/bio_collection && docker compose pull && docker compose up -d"
+	ssh 4feb "bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=$$(docker compose ps -q backend) && if [ -n \"$$cid\" ]; then docker exec $$cid sh -lc \"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\"$$src\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\"$$src\\\" ]; then cat \\\"$$src\\\"; fi\" > backend/.adminjs/components.bundle.js || true; fi'"
 
 # Для PowerShell/Windows, где GNU make запускает cmd.exe и ssh не находится,
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 deploy-prod-win:
-	powershell -Command "ssh 4feb \"cd /home/user/bio_collection && docker compose pull && docker compose up -d\""
+	powershell -Command "ssh 4feb \"bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=\$(docker compose ps -q backend) && if [ -n \\\"\\\$cid\\\" ]; then docker exec \\\$cid sh -lc \\\"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\\\\\"\\\$src\\\\\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\\\\\"\\\$src\\\\\\\" ]; then cat \\\\\\\"\\\$src\\\\\\\"; fi\\\" > backend/.adminjs/components.bundle.js || true; fi'\""
 
 # Очистка неиспользуемых Docker ресурсов на production
 clean-prod:
@@ -77,4 +79,3 @@ seed-prod:
 # Для Windows
 seed-prod-win:
 	powershell -Command "ssh 4feb \"cd /home/user/bio_collection \&\& docker compose exec -T backend node dist/prisma/seed.js\""
-

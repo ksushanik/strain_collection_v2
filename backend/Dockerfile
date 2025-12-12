@@ -18,9 +18,8 @@ RUN npx prisma generate
 FROM deps AS build
 COPY tsconfig*.json nest-cli.json ./
 COPY src ./src
-COPY .adminjs ./.adminjs
-RUN cp .adminjs/bundle.js .adminjs/components.bundle.js
-RUN mkdir -p public && cp .adminjs/components.bundle.js public/components.bundle.js
+# AdminJS bundle shall be built at runtime; avoid shipping stale bundle
+RUN rm -rf .adminjs && mkdir -p public
 RUN npm run build
 # Compile seed script for production use
 RUN npx tsc prisma/seed.ts --outDir dist/prisma --module commonjs --esModuleInterop --skipLibCheck
@@ -33,9 +32,9 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/public ./public
-COPY --from=build /app/.adminjs ./.adminjs
+# empty AdminJS bundle dir to force fresh build in container
+RUN mkdir -p .adminjs
 COPY --from=prod-deps /app/prisma ./prisma
 ENV PORT=3000
 EXPOSE 3000
 CMD ["node", "dist/src/main.js"]
-

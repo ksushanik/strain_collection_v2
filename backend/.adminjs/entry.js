@@ -1,11 +1,11 @@
 AdminJS.UserComponents = {}
-import Dashboard from '../src/admin/components/dashboard'
+import Dashboard from '../dist/src/admin/components/dashboard'
 AdminJS.UserComponents.Dashboard = Dashboard
-import JsonShow from '../src/admin/components/json-show'
+import JsonShow from '../dist/src/admin/components/json-show'
 AdminJS.UserComponents.JsonShow = JsonShow
-import RestoreBackup from '../src/admin/components/restore-backup'
+import RestoreBackup from '../dist/src/admin/components/restore-backup'
 AdminJS.UserComponents.RestoreBackup = RestoreBackup
-import BackupDatabase from '../src/admin/components/backup-database'
+import BackupDatabase from '../dist/src/admin/components/backup-database'
 AdminJS.UserComponents.BackupDatabase = BackupDatabase
-import PermissionsGrid from '../src/admin/components/permissions-grid'
+import PermissionsGrid from '../dist/src/admin/components/permissions-grid'
 AdminJS.UserComponents.PermissionsGrid = PermissionsGrid

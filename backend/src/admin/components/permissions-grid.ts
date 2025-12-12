@@ -45,7 +45,10 @@ const PermissionsGrid = (props: BasePropertyProps) => {
             result[subject] = [];
           }
           // The value is at this key
-          result[subject]?.push(params[key]);
+          const paramValue = params[key];
+          if (typeof paramValue === 'string') {
+            result[subject]?.push(paramValue);
+          }
         }
       }
     });

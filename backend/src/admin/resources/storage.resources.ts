@@ -244,7 +244,7 @@ export const buildStorageResources = ({
 
             for (const id of ids) {
               try {
-                const deletedBox = await deleteBoxWithCells(prisma, id);
+                await deleteBoxWithCells(prisma, id);
 
                 await logAudit({
                   context,

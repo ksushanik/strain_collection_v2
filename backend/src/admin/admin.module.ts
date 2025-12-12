@@ -32,26 +32,52 @@ import { CaslModule } from '../casl/casl.module';
       ]) => {
         AdminJS.registerAdapter({ Database, Resource });
 
+        const compiledComponentsDir = path.join(
+          process.cwd(),
+          'dist',
+          'src',
+          'admin',
+          'components',
+        );
+        const componentsDir = fs.existsSync(compiledComponentsDir)
+          ? compiledComponentsDir
+          : path.join(__dirname, 'components');
+
+        // Ensure AdminJS bundle is rebuilt on start (avoid stale bundle without custom components)
+        const adminBundleDir = path.join(process.cwd(), '.adminjs');
+        try {
+          const bundlePath = path.join(adminBundleDir, 'bundle.js');
+          const bundleAliasPath = path.join(
+            adminBundleDir,
+            'components.bundle.js',
+          );
+          if (fs.existsSync(bundlePath)) fs.rmSync(bundlePath, { force: true });
+          if (fs.existsSync(bundleAliasPath))
+            fs.rmSync(bundleAliasPath, { force: true });
+        } catch (err) {
+          console.error('AdminJS bundle cleanup failed', err);
+        }
+
         const componentLoader = new ComponentLoader();
         const dashboard = componentLoader.add(
           'Dashboard',
-          './components/dashboard',
+          path.join(componentsDir, 'dashboard'),
         );
         const jsonShow = componentLoader.add(
           'JsonShow',
-          './components/json-show',
+          path.join(componentsDir, 'json-show'),
         );
         const restoreComponent = componentLoader.add(
           'RestoreBackup',
-          './components/restore-backup',
+          path.join(componentsDir, 'restore-backup'),
         );
         const backupComponent = componentLoader.add(
           'BackupDatabase',
-          './components/backup-database',
+          path.join(componentsDir, 'backup-database'),
         );
         const permissionsComponent = componentLoader.add(
           'PermissionsGrid',
-          './components/permissions-grid',
+          path.join(componentsDir, 'permissions-grid'),
         );
 
         return AdminModule.createAdminAsync({
