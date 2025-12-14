@@ -44,6 +44,36 @@ type BoxDetail = {
   }[];
 }
 
+const STORAGE_SORT_BY_VALUES = ["displayName", "createdAt"] as const
+type StorageSortBy = (typeof STORAGE_SORT_BY_VALUES)[number]
+type SortOrder = "asc" | "desc"
+
+function isStorageSortBy(value: unknown): value is StorageSortBy {
+  return typeof value === "string" && (STORAGE_SORT_BY_VALUES as readonly string[]).includes(value)
+}
+
+function isSortOrder(value: unknown): value is SortOrder {
+  return value === "asc" || value === "desc"
+}
+
+function readSortPreference(key: string): { sortBy: StorageSortBy; sortOrder: SortOrder } | null {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== "object") return null
+
+    const sortBy = (parsed as { sortBy?: unknown }).sortBy
+    const sortOrder = (parsed as { sortOrder?: unknown }).sortOrder
+
+    if (!isStorageSortBy(sortBy) || !isSortOrder(sortOrder)) return null
+    return { sortBy, sortOrder }
+  } catch {
+    return null
+  }
+}
+
 export function StorageView({ legendText }: { legendText?: string | null }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -64,8 +94,9 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const [loadingBox, setLoadingBox] = React.useState(false)
   const [creating, setCreating] = React.useState(false)
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
-  const [sortBy, setSortBy] = React.useState<'displayName' | 'createdAt'>('createdAt')
-  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const sortStorageKey = "storageView.boxSort"
+  const [sortBy, setSortBy] = React.useState<StorageSortBy>(() => readSortPreference(sortStorageKey)?.sortBy ?? "createdAt")
+  const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => readSortPreference(sortStorageKey)?.sortOrder ?? "desc")
   const [search, setSearch] = React.useState("")
   const [filtersOpen, setFiltersOpen] = React.useState(false)
   const [onlyWithFreeCells, setOnlyWithFreeCells] = React.useState(false)
@@ -78,6 +109,11 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const [editingBox, setEditingBox] = React.useState(false)
   const [editForm, setEditForm] = React.useState<{ displayName: string; description: string }>({ displayName: '', description: '' })
   const [updatingBox, setUpdatingBox] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    window.localStorage.setItem(sortStorageKey, JSON.stringify({ sortBy, sortOrder }))
+  }, [sortBy, sortOrder, sortStorageKey])
 
   React.useEffect(() => {
     if (selectedBox) {
@@ -318,7 +354,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
             <select
               className="h-9 rounded-md border border-input bg-background px-2 text-sm"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'displayName' | 'createdAt')}
+              onChange={(e) => setSortBy(e.target.value as StorageSortBy)}
             >
               <option value="displayName">{t('byName')}</option>
               <option value="createdAt">{t('byCreatedDate')}</option>

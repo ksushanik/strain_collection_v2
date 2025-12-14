@@ -17,6 +17,36 @@ import { useAuth } from "@/contexts/AuthContext"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 
+const SAMPLE_SORT_BY_VALUES = ["siteName", "createdAt", "collectedAt", "code"] as const
+type SampleSortBy = (typeof SAMPLE_SORT_BY_VALUES)[number]
+type SortOrder = "asc" | "desc"
+
+function isSampleSortBy(value: unknown): value is SampleSortBy {
+    return typeof value === "string" && (SAMPLE_SORT_BY_VALUES as readonly string[]).includes(value)
+}
+
+function isSortOrder(value: unknown): value is SortOrder {
+    return value === "asc" || value === "desc"
+}
+
+function readSortPreference(key: string): { sortBy: SampleSortBy; sortOrder: SortOrder } | null {
+    if (typeof window === "undefined") return null
+    try {
+        const raw = window.localStorage.getItem(key)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as unknown
+        if (!parsed || typeof parsed !== "object") return null
+
+        const sortBy = (parsed as { sortBy?: unknown }).sortBy
+        const sortOrder = (parsed as { sortOrder?: unknown }).sortOrder
+
+        if (!isSampleSortBy(sortBy) || !isSortOrder(sortOrder)) return null
+        return { sortBy, sortOrder }
+    } catch {
+        return null
+    }
+}
+
 export function SampleList() {
     const t = useTranslations('Samples')
     const tCommon = useTranslations('Common')
@@ -35,8 +65,9 @@ export function SampleList() {
         dateTo: "",
         sampleType: "",
     })
-    const [sortBy, setSortBy] = React.useState<'siteName' | 'createdAt' | 'collectedAt' | 'code'>('collectedAt')
-    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+    const sortStorageKey = "sampleList.sort"
+    const [sortBy, setSortBy] = React.useState<SampleSortBy>(() => readSortPreference(sortStorageKey)?.sortBy ?? "collectedAt")
+    const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => readSortPreference(sortStorageKey)?.sortOrder ?? "desc")
 
     const loadSamples = React.useCallback(() => {
         setLoading(true)
@@ -59,6 +90,11 @@ export function SampleList() {
             setLoading(false)
         })
     }, [filters, handleError, page, search, sortBy, sortOrder, t])
+
+    React.useEffect(() => {
+        if (typeof window === "undefined") return
+        window.localStorage.setItem(sortStorageKey, JSON.stringify({ sortBy, sortOrder }))
+    }, [sortBy, sortOrder, sortStorageKey])
 
     React.useEffect(() => {
         loadSamples()
@@ -94,7 +130,7 @@ export function SampleList() {
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
-                            onChange={(e) => { setSortBy(e.target.value as 'siteName' | 'createdAt' | 'collectedAt' | 'code'); setPage(1); }}
+                            onChange={(e) => { setSortBy(e.target.value as SampleSortBy); setPage(1); }}
                         >
                             <option value="collectedAt">{t('byCollectionDate')}</option>
                             <option value="createdAt">{t('byCreatedDate')}</option>

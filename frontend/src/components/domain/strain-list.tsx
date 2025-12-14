@@ -33,6 +33,36 @@ interface StrainListProps {
     returnPath?: string
 }
 
+const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonomy16s"] as const
+type StrainSortBy = (typeof STRAIN_SORT_BY_VALUES)[number]
+type SortOrder = "asc" | "desc"
+
+function isStrainSortBy(value: unknown): value is StrainSortBy {
+    return typeof value === "string" && (STRAIN_SORT_BY_VALUES as readonly string[]).includes(value)
+}
+
+function isSortOrder(value: unknown): value is SortOrder {
+    return value === "asc" || value === "desc"
+}
+
+function readSortPreference(key: string): { sortBy: StrainSortBy; sortOrder: SortOrder } | null {
+    if (typeof window === "undefined") return null
+    try {
+        const raw = window.localStorage.getItem(key)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as unknown
+        if (!parsed || typeof parsed !== "object") return null
+
+        const sortBy = (parsed as { sortBy?: unknown }).sortBy
+        const sortOrder = (parsed as { sortOrder?: unknown }).sortOrder
+
+        if (!isStrainSortBy(sortBy) || !isSortOrder(sortOrder)) return null
+        return { sortBy, sortOrder }
+    } catch {
+        return null
+    }
+}
+
 function getStorageSummary(storage: Strain['storage']) {
     const items = (storage ?? [])
         .map((s) => ({
@@ -62,8 +92,9 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
     const [page, setPage] = React.useState(1)
-    const [sortBy, setSortBy] = React.useState<'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s'>('createdAt')
-    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+    const sortStorageKey = `strainList.sort:${returnPath}`
+    const [sortBy, setSortBy] = React.useState<StrainSortBy>(() => readSortPreference(sortStorageKey)?.sortBy ?? "createdAt")
+    const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => readSortPreference(sortStorageKey)?.sortOrder ?? "desc")
     const [filtersOpen, setFiltersOpen] = React.useState(false)
     const [filters, setFilters] = React.useState({
         sampleCode: "",
@@ -115,6 +146,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     }, [filters, handleError, page, search, sortBy, sortOrder, t])
 
     React.useEffect(() => {
+        if (typeof window === "undefined") return
+        window.localStorage.setItem(sortStorageKey, JSON.stringify({ sortBy, sortOrder }))
+    }, [sortBy, sortOrder, sortStorageKey])
+
+    React.useEffect(() => {
         loadStrains()
     }, [loadStrains])
 
@@ -152,7 +188,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <select
                             className="h-9 rounded-md border border-input bg-background px-2 text-sm"
                             value={sortBy}
-                            onChange={(e) => { setSortBy(e.target.value as 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s'); setPage(1); }}
+                            onChange={(e) => { setSortBy(e.target.value as StrainSortBy); setPage(1); }}
                         >
                             <option value="createdAt">{t('created')}</option>
                             <option value="identifier">{t('identifier')}</option>

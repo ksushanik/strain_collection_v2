@@ -15,6 +15,12 @@ import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
 
+function formatBinaryEnum(value: string) {
+    if (value === "POSITIVE") return "+"
+    if (value === "NEGATIVE") return "-"
+    return value
+}
+
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -170,7 +176,7 @@ function StrainDetailContent({ id }: { id: string }) {
                             {strain.phosphates && <Badge variant="outline">{t('phosphates')} +</Badge>}
                             {strain.siderophores && <Badge variant="outline">{t('siderophores')} +</Badge>}
                             {strain.pigmentSecretion && <Badge variant="outline">{t('pigmentSecretion')} +</Badge>}
-                            {strain.amylase && <Badge variant="outline">{t('amylase')} {strain.amylase}</Badge>}
+                            {strain.amylase && <Badge variant="outline">{t('amylase')} {formatBinaryEnum(strain.amylase)}</Badge>}
                             {strain.antibioticActivity && (
                                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
                                     {t('antibioticActivity')}
