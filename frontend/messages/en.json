@@ -118,6 +118,7 @@
         "taxonomy16s": "Taxonomy (16S)",
         "gramStain": "Gram Stain",
         "characteristics": "Characteristics",
+        "storage": "Storage",
         "reset": "Reset",
         "basics": "Basics",
         "basicsDesc": "Core identifiers & origin",

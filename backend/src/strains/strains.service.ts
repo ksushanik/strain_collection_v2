@@ -103,6 +103,25 @@ export class StrainsService {
           sample: {
             select: { id: true, code: true, siteName: true },
           },
+          storage: {
+            orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+            select: {
+              id: true,
+              isPrimary: true,
+              cell: {
+                select: {
+                  id: true,
+                  cellCode: true,
+                  box: {
+                    select: {
+                      id: true,
+                      displayName: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         skip: (page - 1) * limit,
         take: limit,

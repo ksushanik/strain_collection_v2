@@ -33,6 +33,24 @@ interface StrainListProps {
     returnPath?: string
 }
 
+function getStorageSummary(storage: Strain['storage']) {
+    const items = (storage ?? [])
+        .map((s) => ({
+            isPrimary: s.isPrimary,
+            label: `${s.cell.box.displayName}: ${s.cell.cellCode}`,
+        }))
+        .sort((a, b) => {
+            if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1
+            return a.label.localeCompare(b.label)
+        })
+
+    const labels = items.map((i) => i.label)
+    const first = labels[0]
+    const extraCount = Math.max(0, labels.length - 1)
+
+    return { first, extraCount, labels }
+}
+
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
@@ -321,90 +339,125 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 <TableRow>
                                     <TableHead className="w-[150px]">{t('identifier')}</TableHead>
                                     <TableHead>{t('sampleSource')}</TableHead>
+                                    <TableHead className="w-[220px]">{t('storage')}</TableHead>
                                     {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
                                     {showGrowth && <TableHead>{t('gramStain')}</TableHead>}
                                     {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {strains.map((strain) => (
-                                    <TableRow
-                                        key={strain.id}
-                                        className="cursor-pointer hover:bg-muted/50"
-                                        onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
-                                    >
-                                        <TableCell className="font-medium">
-                                            {strain.identifier}
-                                            {strain.seq && (
-                                                <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{strain.sample?.code || '-'}</TableCell>
+                                {strains.map((strain) => {
+                                    const storageSummary = getStorageSummary(strain.storage)
 
-                                        {showTaxonomy && (
+                                    return (
+                                        <TableRow
+                                            key={strain.id}
+                                            className="cursor-pointer hover:bg-muted/50"
+                                            onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
+                                        >
+                                            <TableCell className="font-medium">
+                                                {strain.identifier}
+                                                {strain.seq && (
+                                                    <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{strain.sample?.code || '-'}</TableCell>
                                             <TableCell>
-                                                {strain.taxonomy16s ? (
-                                                    <span className="italic">{strain.taxonomy16s}</span>
+                                                {storageSummary.first ? (
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className="truncate" title={storageSummary.labels.join('\n')}>
+                                                            {storageSummary.first}
+                                                        </span>
+                                                        {storageSummary.extraCount > 0 && (
+                                                            <Badge variant="secondary" className="text-[10px] shrink-0">
+                                                                +{storageSummary.extraCount}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span className="text-muted-foreground">-</span>
                                                 )}
                                             </TableCell>
-                                        )}
 
-                                        {showGrowth && (
-                                            <TableCell>
-                                                {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">{t('gramPosBadge')}</Badge>}
-                                                {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">{t('gramNegBadge')}</Badge>}
-                                            </TableCell>
-                                        )}
+                                            {showTaxonomy && (
+                                                <TableCell>
+                                                    {strain.taxonomy16s ? (
+                                                        <span className="italic">{strain.taxonomy16s}</span>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">-</span>
+                                                    )}
+                                                </TableCell>
+                                            )}
 
-                                        {showGrowth && (
-                                            <TableCell>
-                                                <div className="flex gap-1 flex-wrap">
-                                                    {strain.phosphates && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                                    {strain.siderophores && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                                    {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
-                                                </div>
-                                            </TableCell>
-                                        )}
-                                    </TableRow>
-                                ))}
+                                            {showGrowth && (
+                                                <TableCell>
+                                                    {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">{t('gramPosBadge')}</Badge>}
+                                                    {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">{t('gramNegBadge')}</Badge>}
+                                                </TableCell>
+                                            )}
+
+                                            {showGrowth && (
+                                                <TableCell>
+                                                    <div className="flex gap-1 flex-wrap">
+                                                        {strain.phosphates && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
+                                                        {strain.siderophores && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
+                                                        {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                                    </div>
+                                                </TableCell>
+                                            )}
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     </div>
 
                     <div className="md:hidden space-y-2 p-4">
-                        {strains.map((strain) => (
-                            <div
-                                key={strain.id}
-                                className="rounded-lg border p-3 shadow-xs hover:bg-muted/50 transition-colors cursor-pointer"
-                                onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
-                            >
-                                <div className="flex items-center justify-between gap-2">
-                                    <div className="font-semibold">{strain.identifier}</div>
-                                    <div className="flex items-center gap-1">
-                                        {strain.seq && <Badge variant="secondary" className="text-[10px]">{t('seqBadge')}</Badge>}
-                                        {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="text-[10px]">{t('gramPosBadge')}</Badge>}
-                                        {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="text-[10px]">{t('gramNegBadge')}</Badge>}
+                        {strains.map((strain) => {
+                            const storageSummary = getStorageSummary(strain.storage)
+
+                            return (
+                                <div
+                                    key={strain.id}
+                                    className="rounded-lg border p-3 shadow-xs hover:bg-muted/50 transition-colors cursor-pointer"
+                                    onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
+                                >
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="font-semibold">{strain.identifier}</div>
+                                        <div className="flex items-center gap-1">
+                                            {strain.seq && <Badge variant="secondary" className="text-[10px]">{t('seqBadge')}</Badge>}
+                                            {strain.gramStain === 'POSITIVE' && <Badge variant="outline" className="text-[10px]">{t('gramPosBadge')}</Badge>}
+                                            {strain.gramStain === 'NEGATIVE' && <Badge variant="outline" className="text-[10px]">{t('gramNegBadge')}</Badge>}
+                                        </div>
                                     </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {t('sample')}: {strain.sample?.code || '-'}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {t('storage')}: {storageSummary.first ? (
+                                            <span title={storageSummary.labels.join('\n')}>
+                                                {storageSummary.first}
+                                                {storageSummary.extraCount > 0 ? ` +${storageSummary.extraCount}` : ''}
+                                            </span>
+                                        ) : (
+                                            '-'
+                                        )}
+                                    </div>
+                                    {showTaxonomy && (
+                                        <div className="text-sm">
+                                            {strain.taxonomy16s ? <span className="italic">{strain.taxonomy16s}</span> : <span className="text-muted-foreground">-</span>}
+                                        </div>
+                                    )}
+                                    {showGrowth && (
+                                        <div className="flex flex-wrap gap-1 pt-2">
+                                            {strain.phosphates && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
+                                            {strain.siderophores && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
+                                            {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
-                                    {t('sample')}: {strain.sample?.code || '-'}
-                                </div>
-                                {showTaxonomy && (
-                                    <div className="text-sm">
-                                        {strain.taxonomy16s ? <span className="italic">{strain.taxonomy16s}</span> : <span className="text-muted-foreground">-</span>}
-                                    </div>
-                                )}
-                                {showGrowth && (
-                                    <div className="flex flex-wrap gap-1 pt-2">
-                                        {strain.phosphates && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                        {strain.siderophores && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                        {strain.pigmentSecretion && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </CardContent>
             </Card>
