@@ -1,5 +1,10 @@
 # Changelog (кратко)
 
+## 2025-12-14
+- **Methods**: добавлен модуль `methods` (Backend: module/controller/service, Frontend: CRUD страницы).
+- **Localization**: внедрена поддержка i18n, маршруты перенесены в `[locale]/`.
+- **Docs**: обновлена карта проекта и wiki (добавлен раздел Methods).
+
 ## 2025-12-11
 - **AdminJS Access Control**: ужесточена защита AdminJS (assets только через guard, SSO-start требует JWT admin, nonce на complete публичный).
 - **Public Read Policy**: публичными остаются только GET (strains/samples/media/storage/legend/analytics); запись/удаление требуют JWT и прав.

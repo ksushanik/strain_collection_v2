@@ -16,6 +16,8 @@ const DOCS: DocMeta[] = [
   { id: "api", title: "API & Auth", file: "api.md" },
   { id: "storage", title: "Storage", file: "storage.md" },
   { id: "media", title: "Media", file: "media.md" },
+  { id: "methods", title: "Methods", file: "methods.md" },
+  { id: "maps", title: "Maps Integration", file: "maps.md" },
   { id: "legend", title: "Legend", file: "legend.md" },
   { id: "admin", title: "Admin (AdminJS)", file: "admin.md" },
   { id: "testing", title: "Testing", file: "testing.md" },

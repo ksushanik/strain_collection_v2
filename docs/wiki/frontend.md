@@ -6,6 +6,7 @@ Located at `/audit`, this page allows Admins and Managers to view system logs. I
 
 ## State Management
 
+- **Локализация**: используется `next-intl` (или аналогичный подход) с маршрутами `src/app/[locale]/`.
 - **Старт**: `cd frontend && npm install && npm run dev -- -p 3001`.
 - **Навигация**: App Router, MainLayout центрирует контент (max-w-6xl), Sidebar строится по ui-bindings + статические ссылки (Media, Legend, Settings).
 - **Страницы**:
@@ -14,6 +15,7 @@ Located at `/audit`, this page allows Admins and Managers to view system logs. I
   - `/strains/[id]` — карточка штамма, блоки taxonomy/growth/genetics/info/storage/media.
   - `/strains/new`, `/strains/[id]/edit` — формы (returnTo для навигации).
   - `/samples` — список/карточки проб.
+  - `/methods` — список и CRUD методов.
   - `/dynamic/storage` — StorageView: выбор бокса, сетка ячеек, allocate/unallocate, подсветка по query `boxId`/`cell`.
   - `/media` — CRUD справочника питательных сред (поиск/пагинация, add/edit/delete).
   - `/legend` — просмотр/редактирование текстовой легенды.

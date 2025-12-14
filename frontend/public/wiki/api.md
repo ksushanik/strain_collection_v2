@@ -8,6 +8,7 @@
   - Samples: CRUD + `POST /samples/:id/photos`, `DELETE /samples/photos/:photoId`.
   - Storage: `GET /storage/boxes`, `GET /storage/boxes/:id`, `POST /storage/boxes`, allocate/unallocate/bulk via `/storage/boxes/:boxId/cells/:cellCode/allocate|unallocate`.
   - Media: `GET /media` (search/paginate), `GET /media/:id`, `POST /media`, `PUT /media/:id`, `DELETE /media/:id`.
+  - Methods: `GET /methods` (list), `GET /methods/:id`, `POST /methods`, `PUT /methods/:id`, `DELETE /methods/:id`.
   - Settings: `GET/PUT /settings/ui-bindings`, `GET/PUT /settings/legend`.
   - Analytics: `GET /analytics/overview`.
 - **Права (CASL)**:

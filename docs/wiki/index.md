@@ -7,6 +7,7 @@
 - [API и аутентификация](api.md)
 - [Storage](storage.md)
 - [Media](media.md)
+- [Methods](methods.md)
 - [Legend](legend.md)
 - [Maps Integration](maps.md)
 - [Audit Log](audit.md)

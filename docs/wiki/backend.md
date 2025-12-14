@@ -6,6 +6,7 @@
   - `samples`: CRUD, фото (upload/delete).
   - `storage`: boxes/cells, allocate/unallocate/bulk-allocate по адресу ячейки; уникальность (boxId, cellCode).
   - `media`: CRUD, поиск/пагинация.
+  - `methods`: CRUD методов исследования/хранения.
   - `settings`: ui-bindings (динамические разделы), legend (текстовая справка).
   - `analytics`: `/api/v1/analytics/overview` (totals, occupied/free, recent additions).
   - `audit`: перехват действий (CREATE/UPDATE/DELETE/ALLOCATE/UNALLOCATE/BULK_ALLOCATE/CONFIG).
