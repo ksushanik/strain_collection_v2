@@ -6,6 +6,8 @@ export interface StorageBox {
   rows: number;
   cols: number;
   description?: string;
+  createdAt?: string;
+  updatedAt?: string;
   _count?: { cells: number };
   occupiedCells?: number;
   freeCells?: number;

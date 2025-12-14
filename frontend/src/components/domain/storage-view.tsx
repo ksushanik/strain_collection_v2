@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, Box as BoxIcon, X, Check, Edit2, Trash2, Save } from "lucide-react"
+import { Loader2, Box as BoxIcon, X, Check, Edit2, Trash2, Save, Search, Filter, Plus } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -62,6 +62,12 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const [loading, setLoading] = React.useState(true)
   const [loadingBox, setLoadingBox] = React.useState(false)
   const [creating, setCreating] = React.useState(false)
+  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
+  const [sortBy, setSortBy] = React.useState<'displayName' | 'createdAt'>('createdAt')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [search, setSearch] = React.useState("")
+  const [filtersOpen, setFiltersOpen] = React.useState(false)
+  const [onlyWithFreeCells, setOnlyWithFreeCells] = React.useState(false)
   const [boxForm, setBoxForm] = React.useState<{ displayName: string; rows: number; cols: number; description?: string }>({
     displayName: "",
     rows: 9,
@@ -90,6 +96,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
       setSelectedBox(updated)
       setEditingBox(false)
       setBoxes(prev => prev.map(b => b.id === selectedBoxId ? { ...b, displayName: updated.displayName, description: updated.description } : b))
+      await loadBoxes()
     } catch (err) {
       handleError(err, t('failedToUpdateBox'))
     } finally {
@@ -108,16 +115,28 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     }
   }
 
-  // Fetch Boxes on mount
+  const loadBoxes = React.useCallback(() => {
+    setLoading(true)
+    return ApiService.getStorageBoxes({ sortBy, sortOrder })
+      .then((data) => {
+        setBoxes(data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        handleError(err, t('failedToLoadBoxes'))
+        setLoading(false)
+      })
+  }, [handleError, sortBy, sortOrder, t])
+
+  // Fetch Boxes
   React.useEffect(() => {
     if (authLoading) return
-    ApiService.getStorageBoxes().then(data => {
-      setBoxes(data)
-      setLoading(false)
-    }).catch(err => {
-      handleError(err, t('failedToLoadBoxes'))
-      setLoading(false)
-    })
+    loadBoxes()
+  }, [authLoading, user, loadBoxes])
+
+  // Fetch strains for allocation
+  React.useEffect(() => {
+    if (authLoading) return
     ApiService.getStrains({ limit: 500 })
       .then(res => setStrains(res.data))
       .catch(err => handleError(err, t('failedToLoadStrains')))
@@ -138,6 +157,18 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   }, [selectedBoxId, handleError, t])
 
   const selectedCell = selectedBox?.cells.find(c => c.cellCode === selectedCellCode) || null
+
+  const visibleBoxes = React.useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return boxes.filter((b) => {
+      if (onlyWithFreeCells && typeof b.freeCells === 'number' && b.freeCells <= 0) {
+        return false
+      }
+      if (!q) return true
+      const hay = `${b.displayName} ${b.description ?? ''}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }, [boxes, onlyWithFreeCells, search])
 
   // Apply highlight from query params (?boxId=&cell=) when data is ready
   React.useEffect(() => {
@@ -205,16 +236,16 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     if (!boxForm.displayName.trim()) return
     setCreating(true)
     try {
-      await ApiService.createStorageBox({
+      const created = await ApiService.createStorageBox({
         displayName: boxForm.displayName,
         rows: boxForm.rows,
         cols: boxForm.cols,
         description: boxForm.description,
       })
-      const refreshed = await ApiService.getStorageBoxes()
-      setBoxes(refreshed)
-      if (refreshed.length > 0) setSelectedBoxId(refreshed[0].id)
+      await loadBoxes()
+      setSelectedBoxId(created.id)
       setBoxForm({ displayName: "", rows: 9, cols: 9, description: "" })
+      setCreateDialogOpen(false)
     } catch (err) {
       handleError(err, t('failedToCreateBox'))
     } finally {
@@ -253,7 +284,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     }))
   }
 
-  if (loading) {
+  if (loading && boxes.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -265,25 +296,87 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{t('createBox')}</CardTitle>
-          <CardDescription>{t('rowsColsRule')}</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="md:col-span-2">
-            <Input
-              placeholder={t('displayNamePlaceholder')}
-              value={boxForm.displayName}
-              onChange={(e) => setBoxForm({ ...boxForm, displayName: e.target.value })}
-            />
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="relative flex-1 min-w-[220px] sm:max-w-sm">
+          {loading ? (
+            <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
+          ) : (
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          )}
+          <Input
+            placeholder={t('searchPlaceholder')}
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span>{t('sort')}</span>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'displayName' | 'createdAt')}
+            >
+              <option value="displayName">{t('byName')}</option>
+              <option value="createdAt">{t('byCreatedDate')}</option>
+            </select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+            >
+              {sortOrder === 'asc' ? t('ascSort') : t('descSort')}
+            </Button>
           </div>
-          <div className="flex gap-2">
+
+          <Button
+            variant={filtersOpen ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFiltersOpen((v) => !v)}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            {t('filters')}
+          </Button>
+
+          {user && (
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('createBox')}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Dialog
+        open={createDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && !creating) {
+            setBoxForm({ displayName: "", rows: 9, cols: 9, description: "" })
+          }
+          setCreateDialogOpen(open)
+        }}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{t('createBox')}</DialogTitle>
+            <DialogDescription>{t('rowsColsRule')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Input
+                placeholder={t('displayNamePlaceholder')}
+                value={boxForm.displayName}
+                onChange={(e) => setBoxForm({ ...boxForm, displayName: e.target.value })}
+              />
+            </div>
             <Select
               value={boxForm.rows.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, rows: parseInt(val) })}
             >
-              <SelectTrigger className="min-w-[130px]"><SelectValue placeholder={t('rows')} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('rows')} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="9">{t('rows9')}</SelectItem>
                 <SelectItem value="10">{t('rows10')}</SelectItem>
@@ -293,26 +386,60 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
               value={boxForm.cols.toString()}
               onValueChange={(val) => setBoxForm({ ...boxForm, cols: parseInt(val) })}
             >
-              <SelectTrigger className="min-w-[130px]"><SelectValue placeholder={t('cols')} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('cols')} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="9">{t('cols9')}</SelectItem>
                 <SelectItem value="10">{t('cols10')}</SelectItem>
               </SelectContent>
             </Select>
+            <div className="sm:col-span-2">
+              <Input
+                placeholder={t('descriptionPlaceholder')}
+                value={boxForm.description}
+                onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })}
+              />
+            </div>
           </div>
-          <div className="md:col-span-4 flex gap-2">
-            <Input
-              placeholder={t('descriptionPlaceholder')}
-              value={boxForm.description}
-              onChange={(e) => setBoxForm({ ...boxForm, description: e.target.value })}
-            />
+
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCreateDialogOpen(false)}
+              disabled={creating}
+            >
+              {tCommon('cancel')}
+            </Button>
             <Button onClick={handleCreateBox} disabled={creating || !boxForm.displayName.trim()}>
               {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              {t('create')}
+              {tCommon('create')}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {filtersOpen && (
+        <Card className="p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="onlyWithFreeCells"
+              checked={onlyWithFreeCells}
+              onCheckedChange={(checked) => setOnlyWithFreeCells(checked === true)}
+            />
+            <label htmlFor="onlyWithFreeCells" className="text-sm">
+              {t('onlyWithFreeCells')}
+            </label>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setOnlyWithFreeCells(false)}
+            >
+              {tCommon('reset')}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Box Selection */}
       {boxes.length === 0 ? (
@@ -320,37 +447,45 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
           {t('noBoxes')}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-          {boxes.map(box => (
-            <Button
-              key={box.id}
-              variant={selectedBoxId === box.id ? "default" : "outline"}
-              onClick={() => setSelectedBoxId(box.id)}
-            >
-              <div className="flex items-center w-full">
-                <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
-                <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
-              </div>
-              {
-                box._count && (
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      "w-full justify-center mt-2 transition-colors",
-                      selectedBoxId === box.id
-                        ? "bg-white text-foreground border border-border shadow-sm"
-                        : "bg-muted text-muted-foreground",
-                      "group-hover:bg-white group-hover:text-foreground"
-                    )}
-                  >
-                    {box.occupiedCells !== undefined
-                      ? `${box.occupiedCells}/${box._count.cells}`
-                      : `${box._count.cells}`} {tCommon('cells')}
-                  </Badge>
+        <div>
+          {visibleBoxes.length === 0 ? (
+            <div className="text-center p-8 text-muted-foreground border rounded-lg border-dashed">
+              {t('noResults')}
+            </div>
+          ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+            {visibleBoxes.map(box => (
+              <Button
+                key={box.id}
+                variant={selectedBoxId === box.id ? "default" : "outline"}
+                onClick={() => setSelectedBoxId(box.id)}
+              >
+                <div className="flex items-center w-full">
+                  <BoxIcon className="mr-2 h-5 w-5 shrink-0" />
+                  <span className="font-semibold truncate" title={box.displayName}>{box.displayName}</span>
+                </div>
+                {
+                  box._count && (
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "w-full justify-center mt-2 transition-colors",
+                        selectedBoxId === box.id
+                          ? "bg-white text-foreground border border-border shadow-sm"
+                          : "bg-muted text-muted-foreground",
+                        "group-hover:bg-white group-hover:text-foreground"
+                      )}
+                    >
+                      {box.occupiedCells !== undefined
+                        ? `${box.occupiedCells}/${box._count.cells}`
+                        : `${box._count.cells}`} {tCommon('cells')}
+                    </Badge>
                 )
               }
             </Button>
           ))}
+          </div>
+          )}
         </div>
       )}
 

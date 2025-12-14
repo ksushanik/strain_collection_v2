@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
+  ValidationPipe,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { StorageService } from './storage.service';
 import { CreateStorageBoxDto } from './dto/create-storage-box.dto';
 import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
+import { StorageBoxQueryDto } from './dto/storage-box-query.dto';
 import {
   AllocateStrainDto,
   BulkAllocateStrainDto,
@@ -35,8 +38,10 @@ export class StorageController {
   @Get('boxes')
   @Public()
   @CheckPolicies((ability) => ability.can('read', 'Storage'))
-  findAllBoxes() {
-    return this.storageService.findAllBoxes();
+  findAllBoxes(
+    @Query(new ValidationPipe({ transform: true })) query: StorageBoxQueryDto,
+  ) {
+    return this.storageService.findAllBoxes(query);
   }
 
   @Get('boxes/:id')

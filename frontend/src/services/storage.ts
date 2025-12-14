@@ -1,8 +1,15 @@
 import { assertOk, request } from './http';
 import { StorageBox, StorageBoxWithCells } from '../types/api';
 
-export async function getStorageBoxes(): Promise<StorageBox[]> {
-  const response = await request(`/api/v1/storage/boxes`);
+export async function getStorageBoxes(params?: {
+  sortBy?: 'createdAt' | 'displayName';
+  sortOrder?: 'asc' | 'desc';
+}): Promise<StorageBox[]> {
+  const query = new URLSearchParams();
+  if (params?.sortBy) query.set('sortBy', params.sortBy);
+  if (params?.sortOrder) query.set('sortOrder', params.sortOrder);
+  const qs = query.toString();
+  const response = await request(`/api/v1/storage/boxes${qs ? `?${qs}` : ''}`);
   await assertOk(response, 'Failed to fetch storage boxes');
   return response.json();
 }

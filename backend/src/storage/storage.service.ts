@@ -10,12 +10,14 @@ import {
   BulkAllocateStrainDto,
 } from './dto/allocate-strain.dto';
 import { UpdateStorageBoxDto } from './dto/update-storage-box.dto';
+import { StorageBoxQueryDto } from './dto/storage-box-query.dto';
 
 @Injectable()
 export class StorageService {
   constructor(private prisma: PrismaService) {}
 
-  async findAllBoxes() {
+  async findAllBoxes(query: StorageBoxQueryDto = {}) {
+    const { sortBy = 'createdAt', sortOrder = 'desc' } = query;
     return this.prisma.storageBox
       .findMany({
         include: {
@@ -26,7 +28,10 @@ export class StorageService {
             select: { status: true },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy:
+          sortBy === 'displayName'
+            ? { displayName: sortOrder }
+            : { createdAt: sortOrder },
       })
       .then((boxes) =>
         boxes.map((box) => {
