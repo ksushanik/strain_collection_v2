@@ -6,6 +6,7 @@ import {
     Microscope,
     Leaf,
     FlaskConical,
+    Wrench,
     Box,
     Settings,
     BookOpen,
@@ -188,17 +189,30 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             })
                     )}
 
+    <Link
+        href="/media"
+        onClick={handleNavigate}
+        className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+            isCollapsed && "justify-center px-2"
+        )}
+    >
+        <FlaskConical className="h-4 w-4" />
+        {!isCollapsed && <span>{t('media')}</span>}
+    </Link>
+
                     <Link
-                        href="/media"
+                        href="/methods"
                         onClick={handleNavigate}
                         className={cn(
                             "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            pathname === "/methods" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
                             isCollapsed && "justify-center px-2"
                         )}
                     >
-                        <FlaskConical className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('media')}</span>}
+                        <Wrench className="h-4 w-4" />
+                        {!isCollapsed && <span>{t('methods')}</span>}
                     </Link>
 
                     <Link

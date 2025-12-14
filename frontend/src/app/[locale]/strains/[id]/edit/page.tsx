@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 
@@ -259,9 +260,7 @@ function EditStrainContent({ id }: { id: string }) {
                                     <div>
                                         <div className="font-medium">{m.media.name}</div>
                                         {m.media.composition && (
-                                            <div className="text-muted-foreground text-xs mt-1 whitespace-pre-line">
-                                                {m.media.composition}
-                                            </div>
+                                            <RichTextDisplay content={m.media.composition} className="text-muted-foreground text-xs mt-1" />
                                         )}
                                         {m.notes && <div className="text-muted-foreground text-xs mt-1">{t('mediaNotes')}: {m.notes}</div>}
                                     </div>

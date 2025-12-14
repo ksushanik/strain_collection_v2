@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { routing } from '@/i18n/routing';
 
-const PUBLIC_PATHS = ['/', '/strains', '/samples', '/media', '/legend', '/docs', '/storage', '/dynamic/storage'];
+const PUBLIC_PATHS = ['/', '/strains', '/samples', '/media', '/methods', '/legend', '/docs', '/storage', '/dynamic/storage'];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();

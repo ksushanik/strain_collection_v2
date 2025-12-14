@@ -275,9 +275,7 @@ function StrainDetailContent({ id }: { id: string }) {
                                         <div>
                                             <div className="font-medium">{m.media.name}</div>
                                             {m.media.composition && (
-                                                <div className="text-muted-foreground text-xs mt-1 whitespace-pre-line">
-                                                    {m.media.composition}
-                                                </div>
+                                                <RichTextDisplay content={m.media.composition} className="text-muted-foreground text-xs mt-1" />
                                             )}
                                             {m.notes && <div className="text-muted-foreground text-xs mt-1">{t('notes')}: {m.notes}</div>}
                                         </div>

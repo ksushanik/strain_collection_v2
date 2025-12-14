@@ -161,7 +161,16 @@ export function RichTextEditor({
                 className
             )}
         >
-            {editor && isFocused && <CompactToolbar editor={editor} />}
+            {editor && (
+                <div
+                    className={cn(
+                        "h-8",
+                        isFocused ? "" : "pointer-events-none opacity-0"
+                    )}
+                >
+                    <CompactToolbar editor={editor} />
+                </div>
+            )}
             <EditorContent
                 editor={editor}
                 placeholder={placeholder}

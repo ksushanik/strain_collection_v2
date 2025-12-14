@@ -122,6 +122,15 @@ model Media {
   @@map("media")
 }
 
+model Method {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("methods")
+}
+
 model StrainMedia {
   strainId Int     @map("strain_id")
   mediaId  Int     @map("media_id")

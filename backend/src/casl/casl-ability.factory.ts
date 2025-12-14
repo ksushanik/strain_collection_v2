@@ -9,6 +9,7 @@ export type Subjects =
   | 'Sample'
   | 'Storage'
   | 'Media'
+  | 'Method'
   | 'Settings'
   | 'Legend'
   | 'Analytics'
@@ -34,6 +35,7 @@ const VALID_SUBJECTS: Subjects[] = [
   'Sample',
   'Storage',
   'Media',
+  'Method',
   'Settings',
   'Legend',
   'Analytics',
@@ -54,6 +56,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Storage: ['read', 'create', 'update', 'delete'],
     Photo: ['read', 'create', 'update', 'delete'],
     Media: ['read', 'create', 'update', 'delete'],
+    Method: ['read', 'create', 'update', 'delete'],
     Settings: ['read'],
     Legend: ['read'],
     Analytics: ['read'],
@@ -66,6 +69,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Photo: ['read', 'create', 'update'],
     Storage: ['read', 'create', 'update'],
     Media: ['read', 'create', 'update'],
+    Method: ['read', 'create', 'update'],
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],
@@ -77,6 +81,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Photo: ['read'],
     Storage: ['read'],
     Media: ['read'],
+    Method: ['read'],
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],

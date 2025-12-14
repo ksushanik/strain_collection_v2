@@ -1,6 +1,7 @@
 import * as analytics from './analytics';
 import * as auth from './auth';
 import * as media from './media';
+import * as methods from './methods';
 import * as samples from './samples';
 import * as settings from './settings';
 import * as storage from './storage';
@@ -13,6 +14,7 @@ import type { ApiError } from './http';
 import type {
   AnalyticsOverview,
   Media,
+  Method,
   PaginatedResponse,
   LegendContent,
   Sample,
@@ -32,6 +34,7 @@ export const ApiService = {
   ...strains,
   ...storage,
   ...media,
+  ...methods,
   ...taxonomy,
   ...analytics,
   ...uploads,
@@ -47,6 +50,7 @@ export {
 export type {
   AnalyticsOverview,
   Media,
+  Method,
   PaginatedResponse,
   LegendContent,
   Sample,
