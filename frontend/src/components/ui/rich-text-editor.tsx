@@ -40,6 +40,8 @@ function ToolbarButton({
             size="sm"
             pressed={isActive}
             onPressedChange={onClick}
+            onMouseDown={(e) => e.preventDefault()}
+            onTouchStart={(e) => e.preventDefault()}
             aria-label={ariaLabel}
             className="h-6 w-6 p-0"
         >

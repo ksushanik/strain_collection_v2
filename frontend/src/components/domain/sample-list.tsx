@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 
 export function SampleList() {
     const t = useTranslations('Samples')
@@ -179,7 +181,7 @@ export function SampleList() {
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <CardTitle className="text-lg">{sample.code}</CardTitle>
+                                        <CardTitle className="text-lg">{formatSampleCodeForDisplay(sample.code)}</CardTitle>
                                         <CardDescription className="flex items-center gap-1 mt-1">
                                             <MapPin className="h-3 w-3" />
                                             {sample.siteName}
@@ -191,7 +193,10 @@ export function SampleList() {
                             <CardContent>
                                 <div className="space-y-2 text-sm">
                                     {sample.description && (
-                                        <p className="text-muted-foreground line-clamp-2">{sample.description}</p>
+                                        <RichTextDisplay
+                                            content={sample.description}
+                                            className="text-muted-foreground line-clamp-2"
+                                        />
                                     )}
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                         <Calendar className="h-3 w-3" />

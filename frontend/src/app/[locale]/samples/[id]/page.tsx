@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 // Dynamic import for map to avoid SSR issues
 const SampleMap = dynamic(
@@ -134,7 +135,7 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{sample.code}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{formatSampleCodeForDisplay(sample.code)}</h1>
                     <div className="flex items-center gap-2 text-muted-foreground mt-1">
                         <Badge variant="outline">{t(sample.sampleType.toLowerCase())}</Badge>
                         <span>•</span>

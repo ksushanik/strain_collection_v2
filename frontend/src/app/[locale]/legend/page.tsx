@@ -11,7 +11,6 @@ import { useAuth } from "@/contexts/AuthContext"
 
 export default function LegendPage() {
   const t = useTranslations('Legend')
-  const tCommon = useTranslations('Common')
   const { user } = useAuth()
   const [content, setContent] = React.useState("")
   const [loading, setLoading] = React.useState(true)

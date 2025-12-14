@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { ApiService } from "@/services/api"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Sample } from "@/types/api"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 interface SampleAutocompleteProps {
     value?: string
@@ -127,7 +128,7 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
                                     )}
                                 />
                                 <div className="flex flex-col gap-1">
-                                    <span className="font-medium">{item.code}</span>
+                                    <span className="font-medium">{formatSampleCodeForDisplay(item.code)}</span>
                                     {item.siteName && (
                                         <span className="text-xs text-muted-foreground">
                                             {item.siteName}

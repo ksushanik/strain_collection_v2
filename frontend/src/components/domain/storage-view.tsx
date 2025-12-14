@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ApiService, Strain } from "@/services/api"
 import { Loader2, Box as BoxIcon, X, Check, Edit2, Trash2, Save, Search, Filter, Plus } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 type BoxSummary = {
   id: number;
   displayName: string;
@@ -632,7 +633,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                           <SelectContent>
                             {strains.map((s) => (
                               <SelectItem key={s.id} value={s.id.toString()}>
-                                {s.identifier} {s.sample?.code ? `(${s.sample.code})` : ""}
+                                {s.identifier} {s.sample?.code ? `(${formatSampleCodeForDisplay(s.sample.code)})` : ""}
                               </SelectItem>
                             ))}
                           </SelectContent>
