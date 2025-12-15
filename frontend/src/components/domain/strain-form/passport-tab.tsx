@@ -9,6 +9,7 @@ import { SampleAutocomplete } from "../sample-autocomplete"
 import { TaxonomyAutocomplete } from "../taxonomy-autocomplete"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 
 export function StrainPassportTab() {
   const t = useTranslations('Strains')
@@ -199,33 +200,43 @@ export function StrainPassportTab() {
                 )}
             />
 
-            <FormField
-                control={control}
-                name="features"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>{t('features')}</FormLabel>
-                        <FormControl>
-                            <Input placeholder={t('featuresPlaceholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                    control={control}
+                    name="features"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('features')}</FormLabel>
+                            <FormControl>
+                                <RichTextEditor
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder={t('featuresPlaceholder')}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
-            <FormField
-                control={control}
-                name="comments"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>{t('comments')}</FormLabel>
-                        <FormControl>
-                            <Input placeholder={t('commentsPlaceholder')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
+                <FormField
+                    control={control}
+                    name="comments"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>{t('comments')}</FormLabel>
+                            <FormControl>
+                                <RichTextEditor
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder={t('commentsPlaceholder')}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
 
              {/* Hidden field for ID */}
             <FormField

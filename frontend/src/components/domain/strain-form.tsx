@@ -33,6 +33,15 @@ const strainSchema = z.object({
     stockType: z.enum(["MASTER", "WORKING", "DISTRIBUTION"]).optional(),
     passageNumber: z.number().optional(),
 
+    // Legacy Fields (kept for compatibility)
+    features: z.string().optional(),
+    comments: z.string().optional(),
+    taxonomy16s: z.string().optional(),
+    indexerInitials: z.string().optional(),
+    collectionRcam: z.string().optional(),
+    otherTaxonomy: z.string().optional(),
+    isolationRegion: z.enum(["RHIZOSPHERE", "ENDOSPHERE", "PHYLLOSPHERE", "SOIL", "OTHER"]).optional(),
+
     // Dynamic Traits
     phenotypes: z.array(z.object({
         traitDefinitionId: z.number().optional().nullable(),
@@ -91,6 +100,15 @@ export function StrainForm({
             stockType: (initialData?.stockType as any) || undefined,
             passageNumber: initialData?.passageNumber || undefined,
             
+            // Legacy defaults
+            features: initialData?.features || "",
+            comments: initialData?.comments || "",
+            taxonomy16s: initialData?.taxonomy16s || "",
+            indexerInitials: initialData?.indexerInitials || "",
+            collectionRcam: initialData?.collectionRcam || "",
+            otherTaxonomy: initialData?.otherTaxonomy || "",
+            isolationRegion: (initialData?.isolationRegion as any) || undefined,
+
             phenotypes: initialData?.phenotypes || [],
             genetics: initialData?.genetics || { wgsStatus: "NONE" },
         },

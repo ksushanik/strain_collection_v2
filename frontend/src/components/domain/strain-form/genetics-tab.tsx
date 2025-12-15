@@ -6,6 +6,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 
 export function StrainGeneticsTab() {
   const t = useTranslations('Strains')
@@ -80,11 +81,10 @@ export function StrainGeneticsTab() {
                     <FormItem>
                         <FormLabel>{t('marker16sSequence')}</FormLabel>
                         <FormControl>
-                            <Textarea 
+                            <RichTextEditor 
                                 placeholder={t('marker16sSequencePlaceholder')} 
-                                className="font-mono text-xs min-h-[150px]" 
-                                {...field} 
                                 value={field.value ?? ''}
+                                onChange={field.onChange}
                             />
                         </FormControl>
                         <FormMessage />
