@@ -21,6 +21,7 @@ import { StrainsService } from './strains.service';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
+import { CreateStrainPhenotypeDto } from './dto/create-strain-phenotype.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
@@ -69,6 +70,22 @@ export class StrainsController {
   @CheckPolicies((ability) => ability.can('delete', 'Strain'))
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.strainsService.remove(id);
+  }
+
+  @Get(':id/traits')
+  @Public()
+  @CheckPolicies((ability) => ability.can('read', 'Strain'))
+  getTraits(@Param('id', ParseIntPipe) id: number) {
+    return this.strainsService.getPhenotypes(id);
+  }
+
+  @Post(':id/traits')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  addTrait(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateStrainPhenotypeDto,
+  ) {
+    return this.strainsService.addPhenotype(id, dto);
   }
 
   @Post(':id/media')

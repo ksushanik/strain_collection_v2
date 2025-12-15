@@ -22,10 +22,14 @@ import type {
   SampleTypeOption,
   Strain,
   StrainPhoto,
+  CreateStrainInput,
   UiBinding,
   StorageBox,
   StorageBoxWithCells,
+  TraitDefinition,
 } from '../types/api';
+
+import { TraitDataType } from '../types/api';
 
 export const ApiService = {
   ...auth,
@@ -45,6 +49,7 @@ export {
   assertOk,
   request,
   toApiError,
+  TraitDataType,
 };
 
 export type {
@@ -58,7 +63,9 @@ export type {
   SampleTypeOption,
   Strain,
   StrainPhoto,
+  CreateStrainInput,
   UiBinding,
   StorageBox,
   StorageBoxWithCells,
+  TraitDefinition,
 };

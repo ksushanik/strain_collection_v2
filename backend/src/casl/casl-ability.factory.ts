@@ -17,6 +17,7 @@ export type Subjects =
   | 'Group'
   | 'AuditLog'
   | 'Photo'
+  | 'TraitDefinition'
   | 'all';
 
 export type AppAbility = Ability<[Actions, Subjects]>;
@@ -36,6 +37,7 @@ const VALID_SUBJECTS: Subjects[] = [
   'Storage',
   'Media',
   'Method',
+  'TraitDefinition',
   'Settings',
   'Legend',
   'Analytics',
@@ -57,6 +59,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Photo: ['read', 'create', 'update', 'delete'],
     Media: ['read', 'create', 'update', 'delete'],
     Method: ['read', 'create', 'update', 'delete'],
+    TraitDefinition: ['read', 'create', 'update', 'delete'],
     Settings: ['read'],
     Legend: ['read'],
     Analytics: ['read'],
@@ -70,6 +73,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Storage: ['read', 'create', 'update'],
     Media: ['read', 'create', 'update'],
     Method: ['read', 'create', 'update'],
+    TraitDefinition: ['read', 'create', 'update'],
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],
@@ -82,6 +86,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Storage: ['read'],
     Media: ['read'],
     Method: ['read'],
+    TraitDefinition: ['read'],
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],

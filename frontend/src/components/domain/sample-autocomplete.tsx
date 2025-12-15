@@ -53,19 +53,29 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
 
     // Update selected sample display if value changes externally or initially
     React.useEffect(() => {
-        if (value && !selectedSample) {
-            // If we have a value (ID) but no sample object, we might want to fetch it
-            // For now, we rely on initialSample or the user selecting from the list
-            // If initialSample matches the ID, use it
-            if (initialSample && initialSample.id.toString() === value) {
-                setSelectedSample(initialSample)
+        if (value) {
+            if (!selectedSample || selectedSample.id.toString() !== value) {
+                if (initialSample && initialSample.id.toString() === value) {
+                    setSelectedSample(initialSample)
+                } else {
+                    // Fetch the sample details
+                    ApiService.getSample(parseInt(value))
+                        .then((sample) => {
+                            setSelectedSample(sample)
+                        })
+                        .catch((err) => {
+                            console.error("Failed to fetch sample details", err)
+                        })
+                }
             }
+        } else if (selectedSample) {
+            setSelectedSample(undefined)
         }
     }, [value, initialSample, selectedSample])
 
 
     const displayValue = selectedSample
-        ? `${selectedSample.code} ${selectedSample.siteName ? `(${selectedSample.siteName})` : ""}`
+        ? `${formatSampleCodeForDisplay(selectedSample.code)} ${selectedSample.siteName ? `(${selectedSample.siteName})` : ""}`
         : value
             ? "Loading..." // Or some other placeholder if we have ID but no details yet
             : placeholder

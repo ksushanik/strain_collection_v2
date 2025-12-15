@@ -21,34 +21,6 @@ export class StrainQueryDto {
   sampleId?: number;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(toOptionalBool)
-  seq?: boolean;
-
-  @IsOptional()
-  @IsEnum(['POSITIVE', 'NEGATIVE', 'VARIABLE'])
-  gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
-
-  @IsOptional()
-  @IsBoolean()
-  @Transform(toOptionalBool)
-  phosphates?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  @Transform(toOptionalBool)
-  siderophores?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  @Transform(toOptionalBool)
-  pigmentSecretion?: boolean;
-
-  @IsOptional()
-  @IsEnum(['POSITIVE', 'NEGATIVE'])
-  amylase?: 'POSITIVE' | 'NEGATIVE';
-
-  @IsOptional()
   @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
   isolationRegion?:
     | 'RHIZOSPHERE'
@@ -59,23 +31,7 @@ export class StrainQueryDto {
 
   @IsOptional()
   @IsString()
-  biochemistry?: string;
-
-  @IsOptional()
-  @IsString()
-  iuk?: string;
-
-  @IsOptional()
-  @IsString()
   sampleCode?: string;
-
-  @IsOptional()
-  @IsString()
-  antibioticActivity?: string;
-
-  @IsOptional()
-  @IsString()
-  genome?: string;
 
   @IsOptional()
   @IsBoolean()

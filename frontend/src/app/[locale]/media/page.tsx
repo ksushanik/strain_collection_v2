@@ -87,14 +87,16 @@ export default function MediaPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm(t('deleteConfirm'))) return
+    if (!confirm(t('deleteConfirm'))) return false
     setSaving(true)
     try {
       await ApiService.deleteMedia(id)
       loadData()
+      return true
     } catch (err) {
       console.error("Failed to delete media", err)
       setError(t('failedToDelete'))
+      return false
     } finally {
       setSaving(false)
     }
@@ -157,22 +159,6 @@ export default function MediaPage() {
                   {item.composition ? <RichTextDisplay content={item.composition} className="text-sm" /> : '-'}
                 </div>
               </CardHeader>
-              {canDelete && (
-                <CardContent className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDelete(item.id)
-                    }}
-                    className="flex-1 min-w-[120px]"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                    {tCommon('delete')}
-                  </Button>
-                </CardContent>
-              )}
             </Card>
           ))
         )}
@@ -184,19 +170,18 @@ export default function MediaPage() {
             <TableRow>
               <TableHead>{tCommon('name')}</TableHead>
               <TableHead>{tCommon('description')}</TableHead>
-              {canDelete && <TableHead className="w-[70px]">{tCommon('actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={canDelete ? 3 : 2} className="h-24 text-center">
+                <TableCell colSpan={2} className="h-24 text-center">
                   <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                 </TableCell>
               </TableRow>
             ) : filteredMedia.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canDelete ? 3 : 2} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={2} className="h-24 text-center text-muted-foreground">
                   {t('empty')}
                 </TableCell>
               </TableRow>
@@ -211,13 +196,6 @@ export default function MediaPage() {
                   <TableCell>
                     {item.composition ? <RichTextDisplay content={item.composition} className="text-sm" /> : '-'}
                   </TableCell>
-                  {canDelete && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} aria-label={tCommon('delete')}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  )}
                 </TableRow>
               ))
             )}
@@ -254,14 +232,31 @@ export default function MediaPage() {
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {tCommon('cancel')}
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('save')}
-              </Button>
+            <DialogFooter className="flex justify-between sm:justify-between">
+              {editingId && canDelete && (
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={async () => {
+                    if (await handleDelete(editingId)) {
+                      setIsDialogOpen(false)
+                    }
+                  }}
+                  disabled={saving}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {tCommon("delete")}
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {tCommon('cancel')}
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('save')}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

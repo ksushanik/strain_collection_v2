@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ApiService, Method, PaginatedResponse } from "@/services/api"
+import { ApiService, TraitDefinition, TraitDataType } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,215 +10,235 @@ import { Label } from "@/components/ui/label"
 import { Loader2, Plus, Search, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { RichTextDisplay } from "@/components/ui/rich-text-display"
-import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { slugify } from "@/lib/utils"
 
-const PAGE_SIZE = 10
+const initialFormData = {
+  name: "",
+  code: "",
+  dataType: TraitDataType.BOOLEAN,
+  options: [] as string[],
+  units: "",
+  description: "",
+}
 
 export default function MethodsPage() {
   const t = useTranslations("Methods")
   const tCommon = useTranslations("Common")
   const { user } = useAuth()
-  const nameInputRef = React.useRef<HTMLInputElement>(null)
-  const [data, setData] = React.useState<PaginatedResponse<Method> | null>(null)
+  
+  const [data, setData] = React.useState<TraitDefinition[]>([])
   const [search, setSearch] = React.useState("")
-  const [page] = React.useState(1)
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
-  const [formData, setFormData] = React.useState<{ name: string; description?: string }>({ name: "", description: "" })
-  const [editingId, setEditingId] = React.useState<number | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const [editingId, setEditingId] = React.useState<number | null>(null)
+  const [formData, setFormData] = React.useState(initialFormData)
+  const [error, setError] = React.useState<string | null>(null)
 
-  const canDelete = user && (user.role === "ADMIN" || user.role === "MANAGER")
+  // Options management for CATEGORICAL type
+  const [optionInput, setOptionInput] = React.useState("")
+
+  const canEdit = user && (user.role === "ADMIN" || user.role === "MANAGER")
 
   const loadData = React.useCallback(() => {
     setLoading(true)
-    ApiService.getMethods({ search, page, limit: PAGE_SIZE })
+    ApiService.getTraits(search)
       .then((res) => {
         setData(res)
         setError(null)
       })
       .catch((err) => {
-        const message = typeof (err as { message?: unknown })?.message === "string"
-          ? (err as { message: string }).message
-          : t("failedToLoad")
-        console.error("Failed to fetch methods", err)
-        setError(message)
+        console.error("Failed to fetch traits", err)
+        setError(t("failedToLoad"))
       })
       .finally(() => setLoading(false))
-  }, [page, search, t])
+  }, [search, t])
 
   React.useEffect(() => {
     loadData()
   }, [loadData])
 
   const handleCreate = () => {
-    setFormData({ name: "", description: "" })
+    setFormData(initialFormData)
     setEditingId(null)
     setIsDialogOpen(true)
   }
 
-  const handleEdit = (method: Method) => {
-    setFormData({ name: method.name, description: method.description || "" })
-    setEditingId(method.id)
+  const handleEdit = (trait: TraitDefinition) => {
+    setFormData({
+      name: trait.name,
+      code: trait.code,
+      dataType: trait.dataType,
+      options: trait.options || [],
+      units: trait.units || "",
+      description: trait.description || "",
+    })
+    setEditingId(trait.id)
     setIsDialogOpen(true)
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm(t("deleteConfirm"))) return false
+    setSaving(true)
+    try {
+      await ApiService.deleteTrait(id)
+      loadData()
+      return true
+    } catch (err) {
+      console.error("Failed to delete trait", err)
+      setError(t("failedToDelete"))
+      return false
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const currentName = nameInputRef.current?.value ?? formData.name
-    if (!currentName.trim()) return
+    if (!formData.name.trim() || !formData.code.trim()) return
+
+    const codeRegex = /^[a-z0-9_]+$/
+    if (!codeRegex.test(formData.code)) {
+      setError(t("invalidCodeFormat"))
+      return
+    }
+
     setSaving(true)
     try {
-      const payload = { ...formData, name: currentName }
+      const payload = {
+        ...formData,
+        options: formData.dataType === TraitDataType.CATEGORICAL ? formData.options : undefined,
+        units: formData.dataType === TraitDataType.NUMERIC ? formData.units : undefined,
+      }
+
       if (editingId) {
-        await ApiService.updateMethod(editingId, payload)
+        await ApiService.updateTrait(editingId, payload)
       } else {
-        await ApiService.createMethod(payload)
+        await ApiService.createTrait(payload)
       }
       setIsDialogOpen(false)
       loadData()
     } catch (err) {
-      console.error("Failed to save method", err)
+      console.error("Failed to save trait", err)
       setError(t("failedToSave"))
     } finally {
       setSaving(false)
     }
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm(t("deleteConfirm"))) return
-    setSaving(true)
-    try {
-      await ApiService.deleteMethod(id)
-      loadData()
-    } catch (err) {
-      console.error("Failed to delete method", err)
-      setError(t("failedToDelete"))
-    } finally {
-      setSaving(false)
+  const addOption = () => {
+    if (!optionInput.trim()) return
+    if (formData.options.includes(optionInput.trim())) return
+    setFormData(prev => ({ ...prev, options: [...prev.options, optionInput.trim()] }))
+    setOptionInput("")
+  }
+
+  const removeOption = (opt: string) => {
+    setFormData(prev => ({ ...prev, options: prev.options.filter(o => o !== opt) }))
+  }
+
+  // Auto-generate code slug from name if creating new
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value
+    if (!editingId) {
+      setFormData(prev => {
+        const currentSlug = slugify(prev.name)
+        const isCodeAutoGenerated = prev.code === currentSlug || prev.code === ""
+        
+        return {
+          ...prev,
+          name,
+          code: isCodeAutoGenerated ? slugify(name) : prev.code
+        }
+      })
+    } else {
+      setFormData(prev => ({ ...prev, name }))
     }
   }
 
-  const methods = data?.data || []
-
   return (
-    <div className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
-        {user && (
-          <Button onClick={handleCreate} className="w-full sm:w-auto">
+        {canEdit && (
+          <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
-            {t("addMethod")}
+            {t("create")}
           </Button>
         )}
       </div>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-        <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8"
-          />
+      <div className="flex items-center space-x-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t("searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
+      {error && (
+        <div className="bg-destructive/15 text-destructive px-4 py-2 rounded-md">
+          {error}
         </div>
-      </div>
+      )}
 
-      {error && <div className="mb-4 text-sm text-destructive">{error}</div>}
-
-      <div className="grid gap-4 md:hidden">
-        {loading ? (
-          <Card>
-            <CardContent className="py-6 text-center">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-            </CardContent>
-          </Card>
-        ) : methods.length === 0 ? (
-          <Card>
-            <CardContent className="py-6 text-center text-muted-foreground">{t("empty")}</CardContent>
-          </Card>
-        ) : (
-          methods.map((item) => (
-            <Card
-              key={item.id}
-              onClick={user ? () => handleEdit(item) : undefined}
-              className={cn(user && "cursor-pointer hover:bg-muted/30")}
-            >
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">{item.name}</CardTitle>
-                <div className="text-sm text-muted-foreground">
-                  {item.description ? <RichTextDisplay content={item.description} className="text-sm" /> : "-"}
-                </div>
-              </CardHeader>
-              {canDelete && (
-                <CardContent className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDelete(item.id)
-                    }}
-                    className="flex-1 min-w-[120px]"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4 text-destructive" />
-                    {tCommon("delete")}
-                  </Button>
-                </CardContent>
-              )}
-            </Card>
-          ))
-        )}
-      </div>
-
-      <div className="hidden rounded-md border bg-white md:block">
+      <div className="border rounded-md">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{tCommon("name")}</TableHead>
-              <TableHead>{tCommon("description")}</TableHead>
-              {canDelete && <TableHead className="w-[70px]">{tCommon("actions")}</TableHead>}
+              <TableHead>{t("columns.name")}</TableHead>
+              <TableHead>{t("columns.code")}</TableHead>
+              <TableHead>{t("columns.type")}</TableHead>
+              <TableHead>{t("columns.options")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={canDelete ? 3 : 2} className="h-24 text-center">
-                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                <TableCell colSpan={4} className="text-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : methods.length === 0 ? (
+            ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canDelete ? 3 : 2} className="h-24 text-center text-muted-foreground">
-                  {t("empty")}
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  {t("noData")}
                 </TableCell>
               </TableRow>
             ) : (
-              methods.map((item) => (
-                <TableRow
-                  key={item.id}
-                  onClick={user ? () => handleEdit(item) : undefined}
-                  className={cn(user && "cursor-pointer hover:bg-muted/30")}
+              data.map((trait) => (
+                <TableRow 
+                  key={trait.id} 
+                  onClick={() => canEdit && handleEdit(trait)}
+                  className={canEdit ? "cursor-pointer hover:bg-muted/50" : ""}
                 >
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>
-                    {item.description ? <RichTextDisplay content={item.description} className="text-sm" /> : "-"}
+                  <TableCell className="font-medium">
+                    {trait.name}
+                    {trait.description && (
+                      <div className="text-xs text-muted-foreground mt-0.5">{trait.description}</div>
+                    )}
                   </TableCell>
-                  {canDelete && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} aria-label={tCommon("delete")}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  )}
+                  <TableCell className="font-mono text-xs">{trait.code}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{trait.dataType}</Badge>
+                    {trait.units && <span className="ml-2 text-xs text-muted-foreground">({trait.units})</span>}
+                  </TableCell>
+                  <TableCell>
+                    {trait.dataType === TraitDataType.CATEGORICAL && trait.options && (
+                      <div className="flex flex-wrap gap-1">
+                        {trait.options.map((opt: string) => (
+                          <Badge key={opt} variant="secondary" className="text-xs">{opt}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -227,40 +247,135 @@ export default function MethodsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{editingId ? t("editTitle") : t("addTitle")}</DialogTitle>
-            <DialogDescription>{editingId ? t("editSubtitle") : t("addSubtitle")}</DialogDescription>
+            <DialogTitle>{editingId ? t("editTitle") : t("createTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("dialogDescription")}
+            </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">{tCommon("name")}</Label>
+          
+          <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">{t("fields.name")}</Label>
                 <Input
                   id="name"
-                  ref={nameInputRef}
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={handleNameChange}
+                  placeholder="e.g. Gram Stain"
                   required
                 />
               </div>
-              <div className="grid gap-2">
-                <Label>{tCommon("description")}</Label>
-                <RichTextEditor
-                  value={formData.description || ""}
-                  onChange={(value) => setFormData({ ...formData, description: value })}
-                  placeholder={t("descriptionPlaceholder")}
+              <div className="space-y-2">
+                <Label htmlFor="code">{t("fields.code")}</Label>
+                <Input
+                  id="code"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                  placeholder="e.g. gram_stain"
+                  required
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                {tCommon("cancel")}
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("save")}
-              </Button>
+
+            <div className="space-y-2">
+              <Label htmlFor="type">{t("fields.type")}</Label>
+              <Select
+                value={formData.dataType}
+                onValueChange={(val) => setFormData({ ...formData, dataType: val as TraitDataType })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={TraitDataType.BOOLEAN}>Boolean (Yes/No)</SelectItem>
+                  <SelectItem value={TraitDataType.CATEGORICAL}>Categorical (Select)</SelectItem>
+                  <SelectItem value={TraitDataType.NUMERIC}>Numeric</SelectItem>
+                  <SelectItem value={TraitDataType.TEXT}>Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.dataType === TraitDataType.CATEGORICAL && (
+              <div className="space-y-2">
+                <Label>{t("fields.options")}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={optionInput}
+                    onChange={(e) => setOptionInput(e.target.value)}
+                    placeholder="Add option..."
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
+                  />
+                  <Button type="button" onClick={addOption} variant="secondary">Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2 p-2 border rounded-md bg-muted/50 min-h-[40px]">
+                  {formData.options.length === 0 && (
+                    <span className="text-xs text-muted-foreground italic p-1">No options added</span>
+                  )}
+                  {formData.options.map((opt) => (
+                    <Badge key={opt} variant="secondary" className="pl-2 pr-1 py-1 flex items-center gap-1">
+                      {opt}
+                      <button
+                        type="button"
+                        onClick={() => removeOption(opt)}
+                        className="hover:bg-destructive/20 rounded-full p-0.5"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.dataType === TraitDataType.NUMERIC && (
+              <div className="space-y-2">
+                <Label htmlFor="units">{t("fields.units")}</Label>
+                <Input
+                  id="units"
+                  value={formData.units}
+                  onChange={(e) => setFormData({ ...formData, units: e.target.value })}
+                  placeholder="e.g. °C, mm, mg/L"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="description">{t("fields.description")}</Label>
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Instructions for lab technician..."
+              />
+            </div>
+
+            <DialogFooter className="flex justify-between sm:justify-between">
+              {editingId && (
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={async () => {
+                    if (await handleDelete(editingId)) {
+                      setIsDialogOpen(false)
+                    }
+                  }}
+                  disabled={saving}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {tCommon("delete")}
+                </Button>
+              )}
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t("cancel")}
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t("save")}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

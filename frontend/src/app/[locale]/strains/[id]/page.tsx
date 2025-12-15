@@ -3,10 +3,9 @@
 import * as React from "react"
 import { Suspense } from "react"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, FileText, Edit, Archive, Beaker, Trash2 } from "lucide-react"
+import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, Edit, Archive, Trash2, Camera, Info, Beaker } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
@@ -19,6 +18,31 @@ function formatBinaryEnum(value: string) {
     if (value === "POSITIVE") return "+"
     if (value === "NEGATIVE") return "-"
     return value
+}
+
+// Standard Card-like Section Block
+function SectionBlock({ 
+    title, 
+    icon: Icon, 
+    children, 
+    className = "" 
+}: { 
+    title: string
+    icon?: React.ElementType
+    children: React.ReactNode
+    className?: string 
+}) {
+    return (
+        <div className={`rounded-xl border bg-card text-card-foreground shadow-sm ${className}`}>
+            <div className="flex items-center gap-2 p-6 pb-3">
+                {Icon && <Icon className="h-5 w-5" />}
+                <h3 className="font-semibold leading-none tracking-tight">{title}</h3>
+            </div>
+            <div className="p-6 pt-0">
+                {children}
+            </div>
+        </div>
+    )
 }
 
 function StrainDetailContent({ id }: { id: string }) {
@@ -85,258 +109,279 @@ function StrainDetailContent({ id }: { id: string }) {
     const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
     return (
-        <div className="p-8 space-y-6">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
+        <div className="p-8 space-y-6 max-w-7xl mx-auto">
+            {/* Header Navigation & Actions */}
+            <div className="flex items-center gap-4 mb-2">
+                <Button variant="ghost" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
                 </Button>
-                {canEdit && (
-                    <>
-                        <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() =>
-                                router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
-                            }
-                        >
-                            <Edit className="h-4 w-4 mr-1" />
-                            {t('editStrain')}
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleDelete}
-                            disabled={deleting}
-                        >
-                            {deleting ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                            ) : (
-                                <Trash2 className="h-4 w-4 mr-1" />
-                            )}
-                            {tCommon('delete')}
-                        </Button>
-                    </>
-                )}
+                <div className="ml-auto flex gap-2">
+                    {canEdit && (
+                        <>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                    router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
+                                }
+                            >
+                                <Edit className="h-4 w-4 mr-1" />
+                                {t('editStrain')}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleDelete}
+                                disabled={deleting}
+                            >
+                                {deleting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                ) : (
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                )}
+                                {tCommon('delete')}
+                            </Button>
+                        </>
+                    )}
+                </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Title & Badges */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{strain.identifier}</h1>
-                    <p className="text-muted-foreground">
-                        {t('sample')}: {strain.sample?.code || t('unknown')}   ID: {strain.id}
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground">{strain.identifier}</h1>
+                    <p className="text-muted-foreground mt-1 flex items-center gap-2">
+                        <span>{t('sample')}: <span className="font-medium text-foreground">{strain.sample?.code || t('unknown')}</span></span>
+                        <span className="text-border">|</span>
+                        <span className="text-xs">ID: {strain.id}</span>
                     </p>
                 </div>
-                <div className="ml-auto flex gap-2">
-                    {strain.seq && <Badge>{t('sequenced')}</Badge>}
-                    {strain.gramStain && (
-                        <Badge variant={strain.gramStain === 'POSITIVE' ? 'default' : 'secondary'}>
-                            {t('gramStain')} {strain.gramStain === 'POSITIVE' ? '+' : '-'}
+                <div className="flex flex-wrap gap-2">
+                    {strain.biosafetyLevel && (
+                        <Badge variant={strain.biosafetyLevel === 'BSL_1' ? 'secondary' : 'destructive'} className="text-sm px-3 py-1">
+                            {t(strain.biosafetyLevel.toLowerCase().replace('_', ''))}
                         </Badge>
                     )}
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Microscope className="h-5 w-5" />
-                            {t('taxonomy')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {strain.taxonomy16s ? (
-                            <div className="text-sm">
-                                <span className="font-medium italic">{strain.taxonomy16s}</span>
-                            </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">{t('noTaxonomyInfo')}</p>
-                        )}
-                        {strain.otherTaxonomy && (
-                            <div className="pt-4 border-t">
-                                <span className="text-xs font-medium text-muted-foreground block mb-1">
-                                    {t('otherIdentificationMethods')}:
-                                </span>
-                                <RichTextDisplay content={strain.otherTaxonomy} className="text-sm" />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <FlaskConical className="h-5 w-5" />
-                            {t('growthAndTraits')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                            {strain.phosphates && <Badge variant="outline">{t('phosphates')} +</Badge>}
-                            {strain.siderophores && <Badge variant="outline">{t('siderophores')} +</Badge>}
-                            {strain.pigmentSecretion && <Badge variant="outline">{t('pigmentSecretion')} +</Badge>}
-                            {strain.amylase && <Badge variant="outline">{t('amylase')} {formatBinaryEnum(strain.amylase)}</Badge>}
-                            {strain.antibioticActivity && (
-                                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
-                                    {t('antibioticActivity')}
-                                </Badge>
+            {/* Content Blocks */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* COLUMN 1 */}
+                <div className="space-y-6">
+                    {/* TAXONOMY */}
+                    <SectionBlock title={t('taxonomy')} icon={Microscope}>
+                        <div className="space-y-4">
+                            {strain.ncbiScientificName && (
+                                <div className="text-sm">
+                                    <span className="font-medium block mb-1 text-muted-foreground">{t('ncbiScientificName')}</span>
+                                    <span className="text-lg italic font-medium">{strain.ncbiScientificName}</span>
+                                    {strain.ncbiTaxonomyId && (
+                                        <span className="text-xs text-muted-foreground ml-2 bg-muted px-1.5 py-0.5 rounded">(TaxID: {strain.ncbiTaxonomyId})</span>
+                                    )}
+                                </div>
+                            )}
+                            {strain.taxonomy16s && (
+                                <div className="text-sm">
+                                    <span className="font-medium block mb-1 text-muted-foreground">{t('taxonomy16s')}</span>
+                                    <span className="italic">{strain.taxonomy16s}</span>
+                                </div>
+                            )}
+                            {!strain.ncbiScientificName && !strain.taxonomy16s && (
+                                <p className="text-sm text-muted-foreground italic">{t('noTaxonomyInfo')}</p>
+                            )}
+                            {strain.otherTaxonomy && (
+                                <div className="pt-3 border-t border-dashed">
+                                    <span className="text-xs font-medium text-muted-foreground block mb-1">
+                                        {t('otherIdentificationMethods')}
+                                    </span>
+                                    <RichTextDisplay content={strain.otherTaxonomy} className="text-sm" />
+                                </div>
                             )}
                         </div>
-                        {strain.antibioticActivity && (
-                            <div className="mt-4 text-sm">
-                                <span className="font-medium">{t('antibioticActivityDetails')}:</span>
-                                <RichTextDisplay content={strain.antibioticActivity} className="text-muted-foreground mt-1" />
-                            </div>
-                        )}
-                        {strain.iuk && (
-                            <div className="mt-3 text-sm">
-                                <span className="font-medium">{t('iukIaa')}:</span>
-                                <p className="text-muted-foreground mt-1">{strain.iuk}</p>
-                            </div>
-                        )}
-                        {strain.isolationRegion && (
-                            <div className="mt-3 text-sm">
-                                <span className="font-medium">{t('isolationRegion')}:</span>
-                                <p className="text-muted-foreground mt-1">{strain.isolationRegion}</p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                    </SectionBlock>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Dna className="h-5 w-5" />
-                            {t('genetics')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{t('sequenced')}:</span>
-                            <Badge variant={strain.seq ? "default" : "secondary"}>
-                                {strain.seq ? t('yes') : t('no')}
-                            </Badge>
+                    {/* GENETICS */}
+                    <SectionBlock title={t('genetics')} icon={Dna}>
+                         <div className="space-y-4">
+                            {strain.genetics && (
+                                <>
+                                    <div className="flex items-center justify-between p-3 border rounded-md bg-muted/10">
+                                        <span className="text-sm font-medium">{t('wgsStatus')}</span>
+                                        <Badge variant={strain.genetics.wgsStatus === 'NONE' ? 'secondary' : 'default'}>
+                                            {t(strain.genetics.wgsStatus === 'NONE' ? 'wgsStatusNone' : 
+                                               strain.genetics.wgsStatus === 'PLANNED' ? 'wgsStatusPlanned' :
+                                               strain.genetics.wgsStatus === 'SEQUENCED' ? 'wgsStatusSequenced' :
+                                               strain.genetics.wgsStatus === 'ASSEMBLED' ? 'wgsStatusAssembled' :
+                                               'wgsStatusPublished')}
+                                        </Badge>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {strain.genetics.assemblyAccession && (
+                                            <div className="p-2.5 border rounded-md">
+                                                 <span className="text-xs font-medium block text-muted-foreground mb-0.5">{t('assemblyAccession')}</span>
+                                                 <span className="font-mono text-sm">{strain.genetics.assemblyAccession}</span>
+                                            </div>
+                                        )}
+                                        {strain.genetics.marker16sAccession && (
+                                            <div className="p-2.5 border rounded-md">
+                                                 <span className="text-xs font-medium block text-muted-foreground mb-0.5">{t('marker16sAccession')}</span>
+                                                 <span className="font-mono text-sm">{strain.genetics.marker16sAccession}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {strain.genetics.marker16sSequence && (
+                                        <div className="space-y-1.5">
+                                             <span className="text-xs font-medium block text-muted-foreground">{t('marker16sSequence')}</span>
+                                             <div className="bg-muted p-3 rounded-md text-[10px] font-mono break-all max-h-[150px] overflow-y-auto border">
+                                                {strain.genetics.marker16sSequence}
+                                             </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
-                        {strain.genome && (
-                            <div>
-                                <span className="text-sm font-medium block mb-1">{t('genome')}:</span>
-                                <RichTextDisplay content={strain.genome} className="text-sm text-muted-foreground bg-muted p-2 rounded" />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                    </SectionBlock>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <FileText className="h-5 w-5" />
-                            {t('additionalInfo')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
-                        {strain.features && (
-                            <div>
-                                <span className="font-medium block mb-1">{t('features')}:</span>
-                                <RichTextDisplay content={strain.features} className="text-muted-foreground" />
-                            </div>
-                        )}
-                        {strain.biochemistry && (
-                            <div>
-                                <span className="font-medium block mb-1">{t('biochemistry')}:</span>
-                                <RichTextDisplay content={strain.biochemistry} className="text-muted-foreground" />
-                            </div>
-                        )}
-                        {strain.comments && (
-                            <div>
-                                <span className="font-medium block mb-1">{t('comments')}:</span>
-                                <RichTextDisplay content={strain.comments} className="text-muted-foreground" />
-                            </div>
-                        )}
-                        <div className="grid grid-cols-2 gap-2 pt-4 border-t mt-4">
-                            <span className="font-medium">{t('indexer')}:</span>
-                            <span>{strain.indexerInitials || '-'}</span>
-                            <span className="font-medium">{t('rcam')}:</span>
-                            <span>{strain.collectionRcam || '-'}</span>
-                            <span className="font-medium">{t('isolationRegion')}:</span>
-                            <span>{strain.isolationRegion || '-'}</span>
-                            <span className="font-medium">{t('iukIaa')}:</span>
-                            <span>{strain.iuk || '-'}</span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Beaker className="h-5 w-5" />
-                            {t('media')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
+                    {/* MEDIA */}
+                    <SectionBlock title={t('media')} icon={Beaker}>
                         {strain.media && strain.media.length > 0 ? (
                             <div className="space-y-2">
                                 {strain.media.map((m) => (
-                                    <div key={m.mediaId} className="flex items-start justify-between rounded border p-2">
-                                        <div>
-                                            <div className="font-medium">{m.media.name}</div>
-                                            {m.media.composition && (
-                                                <RichTextDisplay content={m.media.composition} className="text-muted-foreground text-xs mt-1" />
-                                            )}
-                                            {m.notes && <div className="text-muted-foreground text-xs mt-1">{t('notes')}: {m.notes}</div>}
-                                        </div>
+                                    <div key={m.mediaId} className="flex flex-col rounded-md border p-3 bg-card">
+                                        <div className="font-medium text-sm mb-1">{m.media.name}</div>
+                                        {m.media.composition && (
+                                            <RichTextDisplay content={m.media.composition} className="text-muted-foreground text-xs mb-2 bg-muted/30 p-2 rounded" />
+                                        )}
+                                        {m.notes && (
+                                            <div className="text-xs text-muted-foreground border-t pt-2 mt-1">
+                                                <span className="font-semibold">{t('notes')}:</span> {m.notes}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-muted-foreground">{t('noMediaLinked')}</p>
+                            <div className="text-muted-foreground text-sm italic p-3 border rounded-md border-dashed text-center bg-muted/10">
+                                {t('noMediaLinked')}
+                            </div>
                         )}
-                    </CardContent>
-                </Card>
+                    </SectionBlock>
+                </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Archive className="h-5 w-5" />
-                            {t('storageLocations')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        {strain.storage && strain.storage.length > 0 ? (
-                            strain.storage.map((s) => (
-                                <button
-                                    key={s.id}
-                                    className="w-full text-left flex items-center justify-between rounded border p-2 hover:bg-muted/60"
-                                    onClick={() =>
-                                        window.location.href = `/dynamic/storage?boxId=${s.cell.box.id}&cell=${s.cell.cellCode}`
-                                    }
-                                >
-                                    <div>
-                                        <div className="font-medium">{s.cell.box.displayName}</div>
-                                        <div className="text-muted-foreground text-xs">{t('cell')}: {s.cell.cellCode}</div>
+                {/* COLUMN 2 */}
+                <div className="space-y-6">
+                    {/* PHENOTYPES */}
+                    <SectionBlock title={t('growthAndTraits')} icon={FlaskConical}>
+                        {strain.phenotypes && strain.phenotypes.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                {strain.phenotypes.map((p, idx) => (
+                                    <div key={idx} className="flex flex-col p-2.5 rounded-md border bg-muted/30">
+                                        <span className="font-medium text-xs text-muted-foreground">{p.traitName}</span>
+                                        <span className="text-sm font-semibold mt-0.5">{p.result}</span>
+                                        {p.method && <span className="text-muted-foreground text-[10px] mt-0.5 italic">{p.method}</span>}
                                     </div>
-                                    {s.isPrimary && <Badge variant="secondary" className="text-[10px]">{t('primary')}</Badge>}
-                                </button>
-                            ))
+                                ))}
+                            </div>
                         ) : (
-                            <p className="text-muted-foreground">{t('notAllocated')}</p>
+                             <p className="text-sm text-muted-foreground italic mb-4">{t('noTraitsAdded')}</p>
                         )}
-                    </CardContent>
-                </Card>
-            </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('strainPhotos')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <StrainPhotoUpload
-                        strainId={strain.id}
-                        existingPhotos={strain.photos || []}
-                        readOnly
-                    />
-                </CardContent>
-            </Card>
+                        <div className="space-y-3 text-sm">
+                            {strain.features && (
+                                <div className="p-3 rounded-md border bg-muted/10">
+                                    <span className="font-medium block mb-1 text-xs uppercase tracking-wide text-muted-foreground">{t('features')}</span>
+                                    <RichTextDisplay content={strain.features} className="text-sm" />
+                                </div>
+                            )}
+                        </div>
+                    </SectionBlock>
+
+                    {/* ADDITIONAL INFO */}
+                    <SectionBlock title={t('additionalInfo')} icon={Info}>
+                         <div className="space-y-4 text-sm">
+                            <div className="grid grid-cols-2 gap-3 pb-3 border-b">
+                                <div>
+                                    <span className="text-xs font-medium text-muted-foreground block">{t('indexer')}</span>
+                                    <span>{strain.indexerInitials || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs font-medium text-muted-foreground block">{t('rcam')}</span>
+                                    <span>{strain.collectionRcam || '-'}</span>
+                                </div>
+                                <div>
+                                    <span className="text-xs font-medium text-muted-foreground block">{t('isolationRegion')}</span>
+                                    <span>{strain.isolationRegion || '-'}</span>
+                                </div>
+                            </div>
+                            {strain.comments && (
+                                <div>
+                                    <span className="font-medium block mb-1 text-muted-foreground">{t('comments')}</span>
+                                    <RichTextDisplay content={strain.comments} className="text-sm bg-muted/10 p-2 rounded" />
+                                </div>
+                            )}
+                        </div>
+                    </SectionBlock>
+
+                    {/* STORAGE */}
+                    <SectionBlock title={t('storageLocations')} icon={Archive}>
+                        <div className="space-y-4">
+                            {strain.storage && strain.storage.length > 0 ? (
+                                <div className="grid gap-2">
+                                    {strain.storage.map((s) => (
+                                        <a
+                                            key={s.id}
+                                            href={`/dynamic/storage?boxId=${s.cell.box.id}&cell=${s.cell.cellCode}`}
+                                            className="block w-full text-left rounded-md border p-3 hover:bg-muted/50 transition-colors bg-card"
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-medium text-sm">{s.cell.box.displayName}</div>
+                                                    <div className="text-muted-foreground text-xs">{t('cell')}: <span className="font-mono text-foreground">{s.cell.cellCode}</span></div>
+                                                </div>
+                                                {s.isPrimary && <Badge variant="secondary" className="text-[10px] h-5">{t('primary')}</Badge>}
+                                            </div>
+                                            
+                                            {s.stockType && (
+                                                <div className="mt-2 pt-2 border-t flex items-center gap-2">
+                                                    <Badge variant="outline" className="text-[10px] h-5 bg-muted/50">
+                                                        {s.stockType === 'MASTER' ? t('stockTypeMaster') : 
+                                                         s.stockType === 'WORKING' ? t('stockTypeWorking') : 
+                                                         t('stockTypeDistribution')}
+                                                    </Badge>
+                                                    {s.passageNumber !== undefined && (
+                                                        <span className="text-xs text-muted-foreground font-mono">P{s.passageNumber}</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </a>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-muted-foreground text-sm italic p-3 border rounded-md border-dashed text-center bg-muted/10">
+                                    {t('notAllocated')}
+                                </div>
+                            )}
+                        </div>
+                    </SectionBlock>
+                </div>
+                
+                {/* BOTTOM FULL WIDTH - PHOTOS */}
+                <div className="md:col-span-2">
+                    <SectionBlock title={t('photosCardTitle')} icon={Camera}>
+                         <StrainPhotoUpload
+                            strainId={strain.id}
+                            existingPhotos={strain.photos || []}
+                            readOnly
+                        />
+                    </SectionBlock>
+                </div>
+
+            </div>
         </div>
     )
 }

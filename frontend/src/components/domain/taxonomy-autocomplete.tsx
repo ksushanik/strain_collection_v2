@@ -16,10 +16,11 @@ import { useDebounce } from "@/hooks/use-debounce"
 interface TaxonomyAutocompleteProps {
     value?: string
     onChange: (value: string) => void
+    onSelect?: (item: { taxId: string; name: string; rank: string }) => void
     placeholder?: string
 }
 
-export function TaxonomyAutocomplete({ value, onChange, placeholder = "Search taxonomy..." }: TaxonomyAutocompleteProps) {
+export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = "Search taxonomy..." }: TaxonomyAutocompleteProps) {
     const [open, setOpen] = React.useState(false)
     const [searchTerm, setSearchTerm] = React.useState("")
     const [results, setResults] = React.useState<Array<{ taxId: string; name: string; rank: string }>>([])
@@ -95,6 +96,7 @@ export function TaxonomyAutocomplete({ value, onChange, placeholder = "Search ta
                                 )}
                                 onClick={() => {
                                     onChange(item.name)
+                                    onSelect?.(item)
                                     setOpen(false)
                                 }}
                             >

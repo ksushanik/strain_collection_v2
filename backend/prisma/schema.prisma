@@ -71,42 +71,45 @@ model Strain {
   identifier String @unique
   sampleId   Int    @map("sample_id")
 
-  // Taxonomy
-  taxonomy16s    String? @map("taxonomy_16s") // e.g. "Bacillus subtilis"
-  otherTaxonomy  String? @map("other_taxonomy") // Biochemical, morphological, etc.
+  // Taxonomy (Refactoring v2)
+  taxonomy16s        String?         @map("taxonomy_16s")
+  ncbiTaxonomyId     Int?            @map("ncbi_taxonomy_id")
+  ncbiScientificName String?         @map("ncbi_scientific_name")
+  otherTaxonomy      String?         @map("other_taxonomy")
+  biosafetyLevel     BiosafetyLevel? @map("biosafety_level")
 
+  // Provenance (Refactoring v2)
+  isolatorId    Int?         @map("isolator_id")
+  isolationDate DateTime?    @map("isolation_date")
+  status        StrainStatus @default(ACTIVE)
+  
+  // Inventory (Refactoring v2)
+  stockType     StockType?   @map("stock_type")
+  passageNumber Int?         @map("passage_number")
 
-  // Indexing
+  // Legacy/Index Fields (to be migrated or kept)
   indexerInitials String? @map("indexer_initials")
   collectionRcam  String? @map("collection_rcam")
 
-  // Characteristics
-  seq                Boolean    @default(false)
-  biochemistry       String?
-  genome             String?
-  antibioticActivity String?    @map("antibiotic_activity")
-  gramStain          GramStain? @map("gram_stain")
-
-  // Growth
-  phosphates       Boolean          @default(false)
-  siderophores     Boolean          @default(false)
-  pigmentSecretion Boolean          @default(false) @map("pigment_secretion")
-  amylase          Amylase?
-  isolationRegion  IsolationRegion? @map("isolation_region")
-  iuk              String? // Indole acetic acid (IUK in Russian context often refers to IAA)
-
-  features String?
-  comments String?
+  // Characteristics (Legacy - moving to StrainPhenotype)
+  isolationRegion    IsolationRegion? @map("isolation_region")
+  features           String?
+  comments           String?
 
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   customFields Json?    @map("custom_fields")
 
   // Relations
-  sample  Sample          @relation(fields: [sampleId], references: [id])
-  media   StrainMedia[]
-  storage StrainStorage[]
-  photos  StrainPhoto[]
+  sample   Sample          @relation(fields: [sampleId], references: [id])
+  isolator User?           @relation("StrainIsolator", fields: [isolatorId], references: [id])
+  media    StrainMedia[]
+  storage  StrainStorage[]
+  photos   StrainPhoto[]
+
+  // New Relations (Refactoring v2)
+  phenotypes StrainPhenotype[]
+  genetics   StrainGenetics?
 
   @@map("strains")
 }
@@ -176,11 +179,14 @@ model StorageCell {
 }
 
 model StrainStorage {
-  id          Int      @id @default(autoincrement())
-  strainId    Int      @map("strain_id")
-  cellId      Int      @unique @map("cell_id") // One cell = max one strain
-  isPrimary   Boolean  @default(false) @map("is_primary")
-  allocatedAt DateTime @default(now()) @map("allocated_at")
+  id             Int        @id @default(autoincrement())
+  strainId       Int        @map("strain_id")
+  cellId         Int        @unique @map("cell_id") // One cell = max one strain
+  stockType      StockType? @map("stock_type")
+  passageNumber  Int?       @map("passage_number")
+  parentStrainId Int?       @map("parent_strain_id")
+  isPrimary      Boolean    @default(false) @map("is_primary")
+  allocatedAt    DateTime   @default(now()) @map("allocated_at")
 
   strain Strain      @relation(fields: [strainId], references: [id])
   cell   StorageCell @relation(fields: [cellId], references: [id])
@@ -234,7 +240,8 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  auditLogs AuditLog[]
+  auditLogs       AuditLog[]
+  isolatedStrains Strain[]   @relation("StrainIsolator")
 
   @@map("users")
 }
@@ -274,17 +281,6 @@ enum SampleType {
   WATER
   SOIL
   OTHER
-}
-
-enum GramStain {
-  POSITIVE
-  NEGATIVE
-  VARIABLE
-}
-
-enum Amylase {
-  POSITIVE
-  NEGATIVE
 }
 
 enum IsolationRegion {
@@ -338,4 +334,90 @@ enum AuditAction {
   UNALLOCATE
   BULK_ALLOCATE
   CONFIG
+}
+
+// --- Refactoring v2 Models ---
+
+model StrainPhenotype {
+  id                Int              @id @default(autoincrement())
+  strainId          Int              @map("strain_id")
+  traitDefinitionId Int?             @map("trait_definition_id")
+  traitName         String?          @map("trait_name") // Kept for legacy/fallback
+  result            String
+  method            String?
+  conditions        Json? // e.g. { temp: 28, time: "48h" }
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  strain          Strain           @relation(fields: [strainId], references: [id], onDelete: Cascade)
+  traitDefinition TraitDefinition? @relation(fields: [traitDefinitionId], references: [id])
+
+  @@map("strain_phenotypes")
+}
+
+model StrainGenetics {
+  id               Int       @id @default(autoincrement())
+  strainId         Int       @unique @map("strain_id")
+  wgsStatus        WgsStatus @default(NONE) @map("wgs_status")
+  sequencingDate   DateTime? @map("sequencing_date")
+  marker16sAccession String? @map("marker_16s_accession")
+  marker16sSequence  String? @map("marker_16s_sequence") // FASTA
+  assemblyAccession String?  @map("assembly_accession") // NCBI Accession
+  rawDataAccession  String?  @map("raw_data_accession") // SRA
+  fastaUrl         String?   @map("fasta_url") // Local or S3 path
+  
+  strain           Strain    @relation(fields: [strainId], references: [id], onDelete: Cascade)
+
+  @@map("strain_genetics")
+}
+
+enum BiosafetyLevel {
+  BSL_1
+  BSL_2
+  BSL_3
+  BSL_4
+}
+
+enum StrainStatus {
+  ACTIVE
+  ARCHIVED
+  LOST
+  DESTROYED
+}
+
+enum WgsStatus {
+  NONE
+  PLANNED
+  SEQUENCED
+  ASSEMBLED
+  PUBLISHED
+}
+
+enum StockType {
+  MASTER
+  WORKING
+  DISTRIBUTION
+}
+
+enum TraitDataType {
+  BOOLEAN
+  NUMERIC
+  CATEGORICAL
+  TEXT
+}
+
+model TraitDefinition {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  code        String        @unique
+  dataType    TraitDataType @map("data_type")
+  options     Json?         // Array of strings for CATEGORICAL
+  units       String?
+  description String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relation to actual values
+  phenotypes StrainPhenotype[]
+
+  @@map("trait_definitions")
 }

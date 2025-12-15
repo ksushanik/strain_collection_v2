@@ -57,11 +57,6 @@ const MOCK_STRAINS: Strain[] = [
         sampleCode: "24-PL-Rose-01",
         taxonomy16s: "Pseudomonas fluorescens",
         indexerInitials: "AK",
-        seq: true,
-        gramStain: "NEGATIVE",
-        phosphates: true,
-        siderophores: true,
-        pigmentSecretion: true,
         features: "Strong fluorescence under UV"
     },
     {
@@ -71,11 +66,6 @@ const MOCK_STRAINS: Strain[] = [
         sampleCode: "24-PL-Rose-01",
         taxonomy16s: "Bacillus subtilis",
         indexerInitials: "AK",
-        seq: false,
-        gramStain: "POSITIVE",
-        phosphates: false,
-        siderophores: false,
-        pigmentSecretion: false,
         features: "Spore forming"
     },
     {
@@ -85,12 +75,6 @@ const MOCK_STRAINS: Strain[] = [
         sampleCode: "24-SO-Forest-05",
         taxonomy16s: "Streptomyces sp.",
         indexerInitials: "VB",
-        seq: true,
-        gramStain: "POSITIVE",
-        phosphates: true,
-        siderophores: true,
-        pigmentSecretion: true,
-        antibioticActivity: "High against E. coli"
     }
 ];
 

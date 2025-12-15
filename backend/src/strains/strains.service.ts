@@ -8,6 +8,7 @@ import { CellStatus, Prisma } from '@prisma/client';
 import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
+import { CreateStrainPhenotypeDto } from './dto/create-strain-phenotype.dto';
 import { ImageKitService } from '../services/imagekit.service';
 
 @Injectable()
@@ -20,21 +21,11 @@ export class StrainsService {
   async findAll(query: StrainQueryDto) {
     const {
       sampleId,
-      seq,
-      gramStain,
-      phosphates,
-      siderophores,
-      pigmentSecretion,
       sampleCode,
-      antibioticActivity,
-      genome,
       hasGenome,
       taxonomy,
       search,
-      amylase,
       isolationRegion,
-      biochemistry,
-      iuk,
       sortBy = 'createdAt',
       sortOrder = 'desc',
       page = 1,
@@ -44,30 +35,16 @@ export class StrainsService {
     const where: Prisma.StrainWhereInput = {};
 
     if (sampleId !== undefined) where.sampleId = sampleId;
-    if (seq !== undefined) where.seq = seq;
-    if (gramStain) where.gramStain = gramStain;
-    if (phosphates !== undefined) where.phosphates = phosphates;
-    if (siderophores !== undefined) where.siderophores = siderophores;
-    if (pigmentSecretion !== undefined)
-      where.pigmentSecretion = pigmentSecretion;
-    if (amylase) where.amylase = amylase;
     if (isolationRegion) where.isolationRegion = isolationRegion;
-    if (biochemistry)
-      where.biochemistry = { contains: biochemistry, mode: 'insensitive' };
-    if (iuk) where.iuk = { contains: iuk, mode: 'insensitive' };
-    if (antibioticActivity)
-      where.antibioticActivity = {
-        contains: antibioticActivity,
-        mode: 'insensitive',
-      };
-    if (genome) where.genome = { contains: genome, mode: 'insensitive' };
     if (hasGenome !== undefined) {
-      where.genome = hasGenome ? { not: null } : null;
+      // Check StrainGenetics
+      where.genetics = hasGenome ? { isNot: null } : null;
     }
     if (taxonomy) {
       where.OR = [
         ...(where.OR || []),
         { taxonomy16s: { contains: taxonomy, mode: 'insensitive' } },
+        { ncbiScientificName: { contains: taxonomy, mode: 'insensitive' } },
       ];
     }
     if (sampleCode) {
@@ -82,11 +59,8 @@ export class StrainsService {
         { identifier: { contains: search, mode: 'insensitive' } },
         { features: { contains: search, mode: 'insensitive' } },
         { comments: { contains: search, mode: 'insensitive' } },
-        { antibioticActivity: { contains: search, mode: 'insensitive' } },
-        { genome: { contains: search, mode: 'insensitive' } },
+        { ncbiScientificName: { contains: search, mode: 'insensitive' } },
         { taxonomy16s: { contains: search, mode: 'insensitive' } },
-        { biochemistry: { contains: search, mode: 'insensitive' } },
-        { iuk: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -161,6 +135,12 @@ export class StrainsService {
           },
         },
         photos: true,
+        phenotypes: {
+          include: {
+            traitDefinition: true,
+          } as any,
+        },
+        genetics: true,
       },
     });
 
@@ -172,26 +152,94 @@ export class StrainsService {
   }
 
   async create(createStrainDto: CreateStrainDto) {
+    this.validateTaxonomy(createStrainDto);
+    let { phenotypes, genetics, ...strainData } = createStrainDto;
+
+    // Auto-enrich based on taxonomy if needed
+    if (
+      createStrainDto.ncbiScientificName?.toLowerCase().includes('stenotrophomonas')
+    ) {
+      // Check if Gram Stain is already provided in phenotypes
+      const hasGramStain = phenotypes?.some((p) => p.traitName === 'Gram Stain');
+      if (!hasGramStain) {
+        phenotypes = phenotypes || [];
+        phenotypes.push({
+          traitName: 'Gram Stain',
+          result: '-',
+          method: 'Taxonomy Rule (Auto)',
+        });
+      }
+    }
+
     return this.prisma.strain.create({
-      data: createStrainDto,
+      data: {
+        ...strainData,
+        phenotypes: phenotypes
+          ? {
+              create: phenotypes.map((p) => ({
+                ...p,
+                traitName: p.traitName ?? null,
+              })),
+            }
+          : undefined,
+        genetics: genetics
+          ? {
+              create: genetics,
+            }
+          : undefined,
+      },
       include: {
         sample: {
           select: { id: true, code: true },
         },
+        phenotypes: {
+          include: {
+            traitDefinition: true,
+          } as any,
+        },
+        genetics: true,
       },
     });
   }
 
   async update(id: number, updateStrainDto: UpdateStrainDto) {
     await this.findOne(id); // Check existence
+    this.validateTaxonomy(updateStrainDto);
+
+    const { phenotypes, genetics, ...strainData } = updateStrainDto;
 
     return this.prisma.strain.update({
       where: { id },
-      data: updateStrainDto,
+      data: {
+        ...strainData,
+        genetics: genetics
+          ? {
+              upsert: {
+                create: genetics,
+                update: genetics,
+              },
+            }
+          : undefined,
+        phenotypes: phenotypes
+          ? {
+              deleteMany: {}, // Clear existing phenotypes
+              create: phenotypes.map((p) => ({
+                ...p,
+                traitName: p.traitName ?? null,
+              })),
+            }
+          : undefined,
+      },
       include: {
         sample: {
           select: { id: true, code: true },
         },
+        phenotypes: {
+          include: {
+            traitDefinition: true,
+          } as any,
+        },
+        genetics: true,
       },
     });
   }
@@ -268,6 +316,26 @@ export class StrainsService {
     return { message: 'Media link removed' };
   }
 
+  async addPhenotype(strainId: number, dto: CreateStrainPhenotypeDto) {
+    await this.findOne(strainId);
+    return this.prisma.strainPhenotype.create({
+      data: {
+        strainId,
+        ...dto,
+      } as any,
+    });
+  }
+
+  async getPhenotypes(strainId: number) {
+    await this.findOne(strainId);
+    return this.prisma.strainPhenotype.findMany({
+      where: { strainId },
+      include: {
+        traitDefinition: true,
+      } as any,
+    });
+  }
+
   async uploadPhoto(strainId: number, file: Express.Multer.File) {
     await this.findOne(strainId); // Check strain exists
 
@@ -323,5 +391,31 @@ export class StrainsService {
     });
 
     return { message: 'Photo deleted successfully' };
+  }
+
+  private validateTaxonomy(dto: CreateStrainDto | UpdateStrainDto) {
+    if (dto.ncbiScientificName) {
+      const name = dto.ncbiScientificName.toLowerCase();
+
+      // Example rule: Stenotrophomonas is Gram Negative
+      if (name.includes('stenotrophomonas')) {
+        // Check phenotypes
+        const gramStain = dto.phenotypes?.find(
+          (p) => p.traitName === 'Gram Stain',
+        );
+        if (gramStain) {
+          const result = gramStain.result.toLowerCase();
+          if (
+            result === '+' ||
+            result === 'positive' ||
+            result.includes('positive')
+          ) {
+            throw new BadRequestException(
+              'Biological mismatch: Genus Stenotrophomonas is Gram-negative.',
+            );
+          }
+        }
+      }
+    }
   }
 }

@@ -63,7 +63,7 @@ describe('StrainsService', () => {
     await service.findAll({ hasGenome: true, page: 1, limit: 10 });
     expect(prisma.strain.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ genome: { not: null } }),
+        where: expect.objectContaining({ genetics: { isNot: null } }),
         skip: 0,
         take: 10,
       }),

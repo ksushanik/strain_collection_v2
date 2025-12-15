@@ -29,15 +29,6 @@ export interface Strain {
     otherTaxonomy?: string;
     indexerInitials?: string;
     collectionRcam?: string;
-    seq: boolean;
-    biochemistry?: string;
-    genome?: string;
-    antibioticActivity?: string;
-    gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
-    phosphates: boolean;
-    siderophores: boolean;
-    pigmentSecretion: boolean;
-    amylase?: 'POSITIVE' | 'NEGATIVE';
     isolationRegion?: 'RHIZOSPHERE' | 'ENDOSPHERE' | 'PHYLLOSPHERE' | 'SOIL' | 'OTHER';
     features?: string;
     comments?: string;

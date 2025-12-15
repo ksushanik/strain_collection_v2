@@ -4,8 +4,13 @@ import {
   IsBoolean,
   IsOptional,
   IsEnum,
+  ValidateNested,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { BiosafetyLevel, StrainStatus } from '@prisma/client';
+import { CreateStrainPhenotypeDto } from './create-strain-phenotype.dto';
+import { CreateStrainGeneticsDto } from './create-strain-genetics.dto';
 
 export class CreateStrainDto {
   @IsString()
@@ -15,6 +20,53 @@ export class CreateStrainDto {
   @Type(() => Number)
   sampleId: number;
 
+  // --- Refactoring v2 Fields ---
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  ncbiTaxonomyId?: number;
+
+  @IsOptional()
+  @IsString()
+  ncbiScientificName?: string;
+
+  @IsOptional()
+  @IsEnum(BiosafetyLevel)
+  biosafetyLevel?: BiosafetyLevel;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  isolatorId?: number;
+
+  @IsOptional()
+  @IsDateString()
+  isolationDate?: string;
+
+  @IsOptional()
+  @IsEnum(StrainStatus)
+  status?: StrainStatus;
+
+  @IsOptional()
+  @IsEnum(['MASTER', 'WORKING', 'DISTRIBUTION'])
+  stockType?: 'MASTER' | 'WORKING' | 'DISTRIBUTION';
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  passageNumber?: number;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreateStrainPhenotypeDto)
+  phenotypes?: CreateStrainPhenotypeDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateStrainGeneticsDto)
+  genetics?: CreateStrainGeneticsDto;
+
+  // --- Legacy Fields ---
   @IsOptional()
   @IsString()
   taxonomy16s?: string; // e.g. "Bacillus subtilis"
@@ -31,42 +83,6 @@ export class CreateStrainDto {
   @IsString()
   collectionRcam?: string;
 
-  @IsBoolean()
-  @Type(() => Boolean)
-  seq: boolean;
-
-  @IsOptional()
-  @IsString()
-  biochemistry?: string;
-
-  @IsOptional()
-  @IsString()
-  genome?: string;
-
-  @IsOptional()
-  @IsString()
-  antibioticActivity?: string;
-
-  @IsOptional()
-  @IsEnum(['POSITIVE', 'NEGATIVE', 'VARIABLE'])
-  gramStain?: 'POSITIVE' | 'NEGATIVE' | 'VARIABLE';
-
-  @IsBoolean()
-  @Type(() => Boolean)
-  phosphates: boolean;
-
-  @IsBoolean()
-  @Type(() => Boolean)
-  siderophores: boolean;
-
-  @IsBoolean()
-  @Type(() => Boolean)
-  pigmentSecretion: boolean;
-
-  @IsOptional()
-  @IsEnum(['POSITIVE', 'NEGATIVE'])
-  amylase?: 'POSITIVE' | 'NEGATIVE';
-
   @IsOptional()
   @IsEnum(['RHIZOSPHERE', 'ENDOSPHERE', 'PHYLLOSPHERE', 'SOIL', 'OTHER'])
   isolationRegion?:
@@ -75,10 +91,6 @@ export class CreateStrainDto {
     | 'PHYLLOSPHERE'
     | 'SOIL'
     | 'OTHER';
-
-  @IsOptional()
-  @IsString()
-  iuk?: string;
 
   @IsOptional()
   @IsString()

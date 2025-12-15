@@ -231,18 +231,28 @@ async function main() {
   console.log('Creating 20 strains...');
   const strains = [];
   for (let i = 1; i <= 20; i++) {
+    const gramPositive = Math.random() > 0.5;
     const strain = await prisma.strain.create({
       data: {
         identifier: `STR-2024-${String(i).padStart(3, '0')}`,
         sampleId: samples[i % samples.length].id,
         taxonomy16s: `Bacterium species_${i}`,
         indexerInitials: 'TEST',
-        seq: Math.random() > 0.5,
-        gramStain: Math.random() > 0.5 ? 'POSITIVE' : 'NEGATIVE',
-        phosphates: Math.random() > 0.5,
-        siderophores: Math.random() > 0.5,
-        pigmentSecretion: Math.random() > 0.5,
         features: `Feature description for strain ${i}`,
+        phenotypes: {
+            create: [
+                { traitName: "Gram Stain", result: gramPositive ? "+" : "-", method: "Microscopy" },
+                { traitName: "Phosphate Solubilization", result: Math.random() > 0.5 ? "+" : "-", method: "Agar Plate" },
+                { traitName: "Siderophore Production", result: Math.random() > 0.5 ? "+" : "-", method: "CAS Assay" },
+                { traitName: "Pigment Production", result: Math.random() > 0.5 ? "+" : "-", method: "Visual" }
+            ]
+        },
+        genetics: {
+            create: {
+                wgsStatus: Math.random() > 0.5 ? "SEQUENCED" : "NONE",
+                assemblyAccession: Math.random() > 0.5 ? "GCA_00000000" : undefined
+            }
+        }
       },
     });
     strains.push(strain);

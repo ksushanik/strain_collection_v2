@@ -121,8 +121,8 @@ export class SamplesService {
           select: {
             id: true,
             identifier: true,
-            seq: true,
-            gramStain: true,
+            // legacy fields removed: seq, gramStain
+            phenotypes: true,
           },
         },
         photos: true,

@@ -61,7 +61,6 @@ export class StorageService {
                   select: {
                     id: true,
                     identifier: true,
-                    seq: true,
                   },
                 },
               },
