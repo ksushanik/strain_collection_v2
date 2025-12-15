@@ -154,19 +154,46 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Leaf className="h-5 w-5" />
-                                {t('collectionSite')}
+                                {t('sampleDetails')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-start gap-2">
-                                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                <div>
-                                    <p className="font-medium">{sample.siteName}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {tCommon('lat')}: {sample.lat}, {tCommon('lng')}: {sample.lng}
-                                    </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <span className="text-sm font-medium text-muted-foreground">{t('sampleType')}</span>
+                                    <div className="font-medium">
+                                        {t(sample.sampleType.toLowerCase())}
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-sm font-medium text-muted-foreground">{t('subject')}</span>
+                                    <div className="font-medium">
+                                        {sample.subject || '-'}
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-sm font-medium text-muted-foreground">{t('collectionDate')}</span>
+                                    <div className="font-medium flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        {new Date(sample.collectedAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-sm font-medium text-muted-foreground">{t('collectionSite')}</span>
+                                    <div className="font-medium flex items-start gap-2">
+                                        <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
+                                        <div>
+                                            <div>{sample.siteName}</div>
+                                            {(sample.lat !== undefined && sample.lng !== undefined) && (
+                                                <div className="text-sm text-muted-foreground font-normal">
+                                                    {tCommon('lat')}: {sample.lat}, {tCommon('lng')}: {sample.lng}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
                             {sample.description && (
                                 <div className="pt-4 border-t">
                                     <span className="text-sm font-medium block mb-1">{tCommon('description')}:</span>
