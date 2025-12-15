@@ -40,6 +40,21 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
 
   const selectedTrait = traits.find((t) => t.id === value)
 
+  const groupedTraits = React.useMemo(() => {
+    const groups: Record<string, TraitDefinition[]> = {}
+    traits.forEach(trait => {
+      const category = trait.category || "Uncategorized"
+      if (!groups[category]) groups[category] = []
+      groups[category].push(trait)
+    })
+    // Sort categories: Uncategorized last
+    return Object.entries(groups).sort(([a], [b]) => {
+      if (a === "Uncategorized") return 1
+      if (b === "Uncategorized") return -1
+      return a.localeCompare(b)
+    })
+  }, [traits])
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -59,29 +74,31 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
           <CommandInput placeholder="Search traits..." />
           <CommandList>
             <CommandEmpty>No traits found.</CommandEmpty>
-            <CommandGroup>
-              {traits.map((trait) => (
-                <CommandItem
-                  key={trait.id}
-                  value={trait.name}
-                  onSelect={() => {
-                    onSelect(trait)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === trait.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span>{trait.name}</span>
-                    <span className="text-xs text-muted-foreground">{trait.code}</span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {groupedTraits.map(([category, items]) => (
+              <CommandGroup key={category} heading={category}>
+                {items.map((trait) => (
+                  <CommandItem
+                    key={trait.id}
+                    value={trait.name}
+                    onSelect={() => {
+                      onSelect(trait)
+                      setOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === trait.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex flex-col">
+                      <span>{trait.name}</span>
+                      <span className="text-xs text-muted-foreground">{trait.code}</span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ))}
           </CommandList>
         </Command>
       </PopoverContent>

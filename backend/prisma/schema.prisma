@@ -410,6 +410,9 @@ model TraitDefinition {
   name        String        @unique
   code        String        @unique
   dataType    TraitDataType @map("data_type")
+  category    String?       // e.g. MORPHOLOGY, BIOCHEMISTRY
+  defaultMethod String?     @map("default_method")
+  isSystem    Boolean       @default(false) @map("is_system")
   options     Json?         // Array of strings for CATEGORICAL
   units       String?
   description String?

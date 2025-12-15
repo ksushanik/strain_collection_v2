@@ -60,6 +60,7 @@ export interface Strain {
   passageNumber?: number;
   phenotypes?: StrainPhenotype[];
   genetics?: StrainGenetics | null;
+  gramStainLabel?: string | null;
 
   // Legacy / Fallback Fields
   taxonomy16s?: string;

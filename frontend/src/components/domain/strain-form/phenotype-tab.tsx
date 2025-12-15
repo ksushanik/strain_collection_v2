@@ -72,7 +72,8 @@ function PhenotypeDialog({ open, onOpenChange, initialData, onSave, onDelete }: 
             dataType: trait.dataType,
             options: trait.options,
             units: trait.units,
-            result: trait.dataType === TraitDataType.BOOLEAN ? "false" : ""
+            result: trait.dataType === TraitDataType.BOOLEAN ? "false" : "",
+            method: trait.defaultMethod || ""
         }))
     }
 
@@ -157,6 +158,14 @@ function PhenotypeDialog({ open, onOpenChange, initialData, onSave, onDelete }: 
                             value={data.traitDefinitionId}
                             onSelect={handleTraitSelect}
                         />
+                    </div>
+                    <div className="grid gap-2">
+                         <Label>{t('traitMethod')}</Label>
+                         <Input
+                             value={data.method || ""}
+                             onChange={(e) => setData({ ...data, method: e.target.value })}
+                             placeholder={t('methodPlaceholder') || "e.g. Microscopy"}
+                         />
                     </div>
                     <div className="grid gap-2">
                         <Label>{t('traitResult')}</Label>

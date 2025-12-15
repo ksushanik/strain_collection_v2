@@ -38,7 +38,18 @@ export class TraitsService {
   }
 
   async update(id: number, dto: UpdateTraitDto) {
-    await this.ensureExists(id);
+    const existing = await this.ensureExists(id);
+    
+    // @ts-ignore: Prisma Client needs regeneration
+    if (existing.isSystem) {
+      if (dto.code && dto.code !== existing.code) {
+        throw new NotFoundException(`Cannot change code for system trait`); // Using NotFound as generic client error, ideally BadRequest
+      }
+      if (dto.dataType && dto.dataType !== existing.dataType) {
+        throw new NotFoundException(`Cannot change dataType for system trait`);
+      }
+    }
+
     return this.prisma.traitDefinition.update({
       where: { id },
       data: dto,
@@ -46,8 +57,38 @@ export class TraitsService {
   }
 
   async remove(id: number) {
-    await this.ensureExists(id);
+    const existing = await this.ensureExists(id);
+    // @ts-ignore: Prisma Client needs regeneration
+    if (existing.isSystem) {
+      throw new NotFoundException(`Cannot delete system trait`);
+    }
     return this.prisma.traitDefinition.delete({ where: { id } });
+  }
+
+  async onModuleInit() {
+    await this.seedSystemTraits();
+  }
+
+  private async seedSystemTraits() {
+    const gramStain = await this.prisma.traitDefinition.findUnique({
+      where: { code: 'gram_stain' },
+    });
+
+    if (!gramStain) {
+      await this.prisma.traitDefinition.create({
+        data: {
+          name: 'Gram Stain',
+          code: 'gram_stain',
+          dataType: 'CATEGORICAL',
+          // @ts-ignore: Prisma Client needs regeneration
+          category: 'MORPHOLOGY',
+          options: ['Positive (+)', 'Negative (-)', 'Variable'],
+          // @ts-ignore: Prisma Client needs regeneration
+          isSystem: true,
+        },
+      });
+      console.log('Seeded system trait: Gram Stain');
+    }
   }
 
   async getDictionary() {
@@ -59,6 +100,11 @@ export class TraitsService {
         dataType: true,
         options: true,
         units: true,
+        // @ts-ignore: Prisma Client needs regeneration
+        category: true,
+        defaultMethod: true,
+        // @ts-ignore: Prisma Client needs regeneration
+        isSystem: true,
       },
       orderBy: { name: 'asc' },
     });
@@ -71,5 +117,6 @@ export class TraitsService {
     if (!trait) {
       throw new NotFoundException(`TraitDefinition with ID ${id} not found`);
     }
+    return trait;
   }
 }

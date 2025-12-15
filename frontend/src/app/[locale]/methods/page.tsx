@@ -18,6 +18,8 @@ const initialFormData = {
   name: "",
   code: "",
   dataType: TraitDataType.BOOLEAN,
+  category: "",
+  defaultMethod: "",
   options: [] as string[],
   units: "",
   description: "",
@@ -36,6 +38,7 @@ export default function MethodsPage() {
   const [editingId, setEditingId] = React.useState<number | null>(null)
   const [formData, setFormData] = React.useState(initialFormData)
   const [error, setError] = React.useState<string | null>(null)
+  const [isSystem, setIsSystem] = React.useState(false)
 
   // Options management for CATEGORICAL type
   const [optionInput, setOptionInput] = React.useState("")
@@ -63,6 +66,7 @@ export default function MethodsPage() {
   const handleCreate = () => {
     setFormData(initialFormData)
     setEditingId(null)
+    setIsSystem(false)
     setIsDialogOpen(true)
   }
 
@@ -71,11 +75,14 @@ export default function MethodsPage() {
       name: trait.name,
       code: trait.code,
       dataType: trait.dataType,
+      category: trait.category || "",
+      defaultMethod: trait.defaultMethod || "",
       options: trait.options || [],
       units: trait.units || "",
       description: trait.description || "",
     })
     setEditingId(trait.id)
+    setIsSystem(!!trait.isSystem)
     setIsDialogOpen(true)
   }
 
@@ -258,6 +265,38 @@ export default function MethodsPage() {
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label htmlFor="category">{t("fields.category")}</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(val) => setFormData({ ...formData, category: val })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MORPHOLOGY">MORPHOLOGY</SelectItem>
+                    <SelectItem value="BIOCHEMISTRY">BIOCHEMISTRY</SelectItem>
+                    <SelectItem value="PHYSIOLOGY">PHYSIOLOGY</SelectItem>
+                    <SelectItem value="ANTIBIOTICS">ANTIBIOTICS</SelectItem>
+                    <SelectItem value="GENETICS">GENETICS</SelectItem>
+                    <SelectItem value="OTHER">OTHER</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="defaultMethod">{t("fields.defaultMethod")}</Label>
+                <Input
+                  id="defaultMethod"
+                  value={formData.defaultMethod}
+                  onChange={(e) => setFormData({ ...formData, defaultMethod: e.target.value })}
+                  placeholder="e.g. Microscopy"
+                />
+                <p className="text-[0.8rem] text-muted-foreground">
+                  Auto-filled when selecting this trait
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="name">{t("fields.name")}</Label>
                 <Input
                   id="name"
@@ -275,6 +314,7 @@ export default function MethodsPage() {
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   placeholder="e.g. gram_stain"
                   required
+                  disabled={isSystem}
                 />
               </div>
             </div>
@@ -284,6 +324,7 @@ export default function MethodsPage() {
               <Select
                 value={formData.dataType}
                 onValueChange={(val) => setFormData({ ...formData, dataType: val as TraitDataType })}
+                disabled={isSystem}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -361,7 +402,8 @@ export default function MethodsPage() {
                       setIsDialogOpen(false)
                     }
                   }}
-                  disabled={saving}
+                  disabled={saving || isSystem}
+                  className={isSystem ? "opacity-50 cursor-not-allowed" : ""}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   {tCommon("delete")}

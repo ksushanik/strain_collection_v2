@@ -132,6 +132,7 @@
         "traitName": "Trait / Test",
         "traitResult": "Result",
         "traitMethod": "Method (opt.)",
+        "methodPlaceholder": "e.g. Microscopy",
         "editTrait": "Edit Trait",
         "addTrait": "Add Trait",
         "inventory": "Inventory",
@@ -403,6 +404,8 @@
             "name": "Name",
             "code": "Code",
             "type": "Data Type",
+            "category": "Category",
+            "defaultMethod": "Default Method",
             "options": "Options",
             "units": "Units",
             "description": "Description"

@@ -17,6 +17,9 @@ export interface TraitDefinition {
   name: string;
   code: string;
   dataType: TraitDataType;
+  category?: string | null;
+  defaultMethod?: string | null;
+  isSystem?: boolean;
   options?: string[] | null;
   units?: string | null;
   description?: string | null;

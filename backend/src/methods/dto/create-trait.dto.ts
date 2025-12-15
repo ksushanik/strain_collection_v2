@@ -20,6 +20,14 @@ export class CreateTraitDto {
   dataType: TraitDataType;
 
   @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  defaultMethod?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   options?: string[];

@@ -126,6 +126,7 @@
         "traitName": "Свойство / Тест",
         "traitResult": "Результат",
         "traitMethod": "Метод (опц.)",
+        "methodPlaceholder": "напр. Микроскопия",
         "editTrait": "Редактировать свойство",
         "addTrait": "Добавить свойство",
         "inventory": "Инвентарь",
@@ -404,6 +405,8 @@
             "name": "Название",
             "code": "Код",
             "type": "Тип данных",
+            "category": "Категория",
+            "defaultMethod": "Метод по умолчанию",
             "options": "Опции",
             "units": "Единицы измерения",
             "description": "Описание"

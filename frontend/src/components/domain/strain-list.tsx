@@ -242,7 +242,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     <TableHead>{t('sampleSource')}</TableHead>
                                     <TableHead className="w-[220px]">{t('storage')}</TableHead>
                                     {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
-                                    {showGrowth && <TableHead>{t('gramStain')}</TableHead>}
+                                    <TableHead>{t('gramStain')}</TableHead>
                                     {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                                 </TableRow>
                             </TableHeader>
@@ -290,12 +290,22 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                                 </TableCell>
                                             )}
 
-                                            {showGrowth && (
-                                                <TableCell>
-                                                    {strain.phenotypes?.find(p => p.traitName === 'Gram Stain')?.result === '+' && <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">{t('gramPosBadge')}</Badge>}
-                                                    {strain.phenotypes?.find(p => p.traitName === 'Gram Stain')?.result === '-' && <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">{t('gramNegBadge')}</Badge>}
-                                                </TableCell>
-                                            )}
+                                            <TableCell>
+                                              {strain.gramStainLabel && (
+                                                <Badge 
+                                                  variant="outline" 
+                                                  className={
+                                                    strain.gramStainLabel.includes("+") 
+                                                      ? "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-50" 
+                                                      : strain.gramStainLabel.includes("-") 
+                                                        ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-50"
+                                                        : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-50"
+                                                  }
+                                                >
+                                                  {strain.gramStainLabel}
+                                                </Badge>
+                                              )}
+                                            </TableCell>
 
                                             {showGrowth && (
                                                 <TableCell>

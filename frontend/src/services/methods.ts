@@ -68,6 +68,8 @@ export interface CreateTraitPayload {
   name: string;
   code: string;
   dataType: TraitDataType;
+  category?: string;
+  defaultMethod?: string;
   options?: string[];
   units?: string;
   description?: string;

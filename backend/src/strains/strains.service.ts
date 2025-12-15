@@ -77,6 +77,15 @@ export class StrainsService {
           sample: {
             select: { id: true, code: true, siteName: true },
           },
+          phenotypes: {
+             where: {
+               traitDefinition: { code: 'gram_stain' }
+             },
+             select: {
+                result: true
+             },
+             take: 1
+          },
           storage: {
             orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
             select: {
@@ -105,7 +114,11 @@ export class StrainsService {
     ]);
 
     return {
-      data: strains,
+      data: strains.map(s => ({
+        ...s,
+        gramStainLabel: s.phenotypes?.[0]?.result || null,
+        phenotypes: undefined, // Hide the raw array from response to keep it clean, or keep it if needed. Keeping clean.
+      })),
       meta: {
         total,
         page,
