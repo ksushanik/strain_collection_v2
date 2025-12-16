@@ -243,7 +243,7 @@ export function StrainPassportTab() {
                 control={control}
                 name="ncbiTaxonomyId"
                 render={({ field }) => (
-                    <input type="hidden" {...field} />
+                    <input type="hidden" {...field} value={field.value ?? ''} />
                 )}
             />
         </div>

@@ -48,10 +48,11 @@ export function StrainInventoryTab() {
                          <FormItem>
                             <FormLabel>{t('passageNumber')}</FormLabel>
                             <FormControl>
-                                <Input 
-                                    type="number" 
-                                    placeholder={t('passageNumberPlaceholder')} 
-                                    {...field} 
+                                <Input
+                                    type="number"
+                                    placeholder={t('passageNumberPlaceholder')}
+                                    {...field}
+                                    value={field.value ?? ''}
                                     onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                                 />
                             </FormControl>

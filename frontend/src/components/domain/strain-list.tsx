@@ -186,12 +186,10 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         {t('filters')}
                     </Button>
                     {user && (
-                        <div className="flex justify-end mb-4">
-                            <Button onClick={() => router.push('/strains/new')}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                {t('createStrain')}
-                            </Button>
-                        </div>
+                        <Button size="sm" onClick={() => router.push('/strains/new')}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            {t('createStrain')}
+                        </Button>
                     )}
                 </div>
             </div>
