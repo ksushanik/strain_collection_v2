@@ -6,3 +6,4 @@ export * from './media';
 export * from './methods';
 export * from './storage';
 export * from './analytics';
+export * from './search';

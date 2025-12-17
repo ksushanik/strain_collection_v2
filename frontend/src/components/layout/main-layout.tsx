@@ -7,6 +7,7 @@ import { AuthGuard } from "@/components/AuthGuard"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
+import { GlobalSearch } from "@/components/domain/global-search/global-search"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
@@ -33,10 +34,16 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                             <Button variant="ghost" size="icon" onClick={() => setIsMobileNavOpen(true)}>
                                 <Menu className="h-5 w-5" />
                             </Button>
-                            <LanguageSwitcher />
+                            <div className="flex items-center gap-2">
+                                <GlobalSearch trigger="icon" />
+                                <LanguageSwitcher />
+                            </div>
                         </div>
-                        <div className="hidden justify-end border-b bg-card px-4 py-3 md:flex">
-                            <LanguageSwitcher />
+                        <div className="hidden items-center gap-3 border-b bg-card px-4 py-3 md:flex">
+                            <GlobalSearch />
+                            <div className="ml-auto">
+                                <LanguageSwitcher />
+                            </div>
                         </div>
                         <main className="flex-1 overflow-y-auto bg-muted/10">
                             <div className="mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">

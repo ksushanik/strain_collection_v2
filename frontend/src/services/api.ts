@@ -8,6 +8,7 @@ import * as storage from './storage';
 import * as strains from './strains';
 import * as taxonomy from './taxonomy';
 import * as uploads from './uploads';
+import * as search from './search';
 import { assertOk, request, toApiError } from './http';
 import type { ApiError } from './http';
 
@@ -27,6 +28,7 @@ import type {
   StorageBox,
   StorageBoxWithCells,
   TraitDefinition,
+  GlobalSearchResponse,
 } from '../types/api';
 
 import { TraitDataType } from '../types/api';
@@ -42,6 +44,7 @@ export const ApiService = {
   ...taxonomy,
   ...analytics,
   ...uploads,
+  ...search,
 };
 
 export {
@@ -68,4 +71,5 @@ export type {
   StorageBox,
   StorageBoxWithCells,
   TraitDefinition,
+  GlobalSearchResponse,
 };

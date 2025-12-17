@@ -495,5 +495,13 @@
         "reassign": "Переназначить",
         "allocate": "Назначить",
         "unallocate": "Освободить"
+    },
+    "GlobalSearch": {
+        "placeholder": "Поиск по всему…",
+        "shortcut": "Ctrl/⌘K",
+        "startTyping": "Введите минимум 2 символа для поиска.",
+        "loading": "Поиск…",
+        "noResults": "Ничего не найдено по запросу \"{query}\"",
+        "showAll": "Показать все результаты"
     }
 }

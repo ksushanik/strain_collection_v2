@@ -16,6 +16,7 @@ import { MediaModule } from './media/media.module';
 import { TaxonomyModule } from './taxonomy/taxonomy.module';
 import { AdminModule } from './admin/admin.module';
 import { MethodsModule } from './methods/methods.module';
+import { SearchModule } from './search/search.module';
 
 const includeAdmin = process.env.SKIP_ADMIN !== 'true';
 
@@ -37,6 +38,7 @@ const includeAdmin = process.env.SKIP_ADMIN !== 'true';
     AnalyticsModule,
     MediaModule,
     MethodsModule,
+    SearchModule,
     TaxonomyModule,
     ...(includeAdmin ? [AdminModule] : []),
   ],
