@@ -32,8 +32,13 @@ export interface StrainSampleRef {
 export interface StrainPhenotype {
     id: number
     traitName: string
+    traitDefinitionId?: number | null
+    traitCode?: string | null
     result: string
     method?: string
+    traitDefinition?: {
+      code: string
+    } | null
 }
 
 export type StrainPhenotypeInput = Omit<StrainPhenotype, 'id'> & { id?: number };

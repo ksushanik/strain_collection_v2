@@ -16,6 +16,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ApiService } from "@/services/api"
+import { useTranslations } from "next-intl"
+import { getTraitDisplayName } from "@/lib/trait-labels"
 import type { TraitDefinition } from "@/services/api"
 
 interface TraitSelectProps {
@@ -26,6 +28,7 @@ interface TraitSelectProps {
 }
 
 export function TraitSelect({ value, onSelect, disabled, className }: TraitSelectProps) {
+  const tStrains = useTranslations("Strains")
   const [open, setOpen] = React.useState(false)
   const [traits, setTraits] = React.useState<TraitDefinition[]>([])
   const [loading, setLoading] = React.useState(false)
@@ -65,7 +68,9 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
           className={cn("w-full justify-between", className)}
           disabled={disabled || loading}
         >
-          {selectedTrait ? selectedTrait.name : "Select trait..."}
+          {selectedTrait
+            ? getTraitDisplayName(selectedTrait.code, selectedTrait.name, tStrains)
+            : "Select trait..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -79,7 +84,7 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
                 {items.map((trait) => (
                   <CommandItem
                     key={trait.id}
-                    value={trait.name}
+                    value={`${trait.name} ${trait.code}`}
                     onSelect={() => {
                       onSelect(trait)
                       setOpen(false)
@@ -92,7 +97,7 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
                       )}
                     />
                     <div className="flex flex-col">
-                      <span>{trait.name}</span>
+                      <span>{getTraitDisplayName(trait.code, trait.name, tStrains)}</span>
                       <span className="text-xs text-muted-foreground">{trait.code}</span>
                     </div>
                   </CommandItem>

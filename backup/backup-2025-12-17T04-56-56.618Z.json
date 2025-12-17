@@ -1,0 +1,6034 @@
+{
+  "sampleTypeDictionary": [
+    {
+      "id": 1,
+      "name": "Plant",
+      "slug": "plant"
+    },
+    {
+      "id": 2,
+      "name": "Animal",
+      "slug": "animal"
+    },
+    {
+      "id": 3,
+      "name": "Water",
+      "slug": "water"
+    },
+    {
+      "id": 4,
+      "name": "Soil",
+      "slug": "soil"
+    },
+    {
+      "id": 5,
+      "name": "Other",
+      "slug": "other"
+    }
+  ],
+  "samples": [
+    {
+      "id": 49,
+      "code": "49_plant_Hedysarum-zundukii-Peschkova",
+      "sampleType": "PLANT",
+      "sampleTypeId": 1,
+      "subject": "Hedysarum zundukii Peschkova",
+      "siteName": "мыс Зундук",
+      "lat": 53.386361,
+      "lng": 107.391056,
+      "description": "<p>Красная книга Иркутской области / Редколлегия: С.М. Трофиова. – Улан-Удэ: Изд-во ПАО «Республиканская типография», 2020. – 552 с.: ил. ISBN 978-5-91407-216-9</p><p>Копеечник Зундукский <strong><em>Hedysarum zundukii </em>Peschkova</strong>. </p><p>Порядок Бобовоцветные - <em>Fabales</em> </p><p>Семейство Бобовые (Мотыльковые) - <em>Fabaceae</em> (<em>Leguminosae</em>). </p><p>Имеют статус категории 1 (вид, находящийся под угрозой исчезновения). Включен в Красную книгу РФ.</p><p>Это травянистое растение с сильно укороченными побегами, образующее дерновины. Листья 3-5 см длиной немного короче цветоносов или равны им, по оси и черешку с редкими отстоящими волосками. Листочки в числе 3, реже 5, узкоовальные или удлиненно-яйцевидные, 10-20 мм длиной и 3-7 мм шириной, с обеих сторон голые, по краю длиннореснитчатые. Цветоносы тонкие, волосистые, несущие по 2-3 цветка. Венчик 25-30 мм длиной, красно-фиолетовый, флаг выемчатый. Остроконечие лодочки 3-4 мм длиной. Цветет в мае, плодоносит в июне. Плоды - бобы округло-яйцевидные, вздутые, до 15 мм длиной, тонкокожистые, беловойлочные. Размножается семенами.</p><p>Эндемик Прибайкалья и Западного Забайкалья. Третичный реликт древне диземноморской (миоцен-плиоценовой) степной флоры. В Иркутской обл. распространен в Ольхонском р-не: на побережье Мал. Моря оз. Байкал, в Тажеранской степи и на о-ве Ольхон. В РФ встречается также в Республике Бурятия. Растет в низкотравных каменистых степях, на щебнистых и каменистых склонах с выхода ми карбонатов и кварцитов. Ксерофит. Кальцефил.</p><p>По данным 2013 г. численность в локальных популяциях у сел. Озера составляла 194 особи на площади 300 м2, на м. Улан-Нур - 300 особей, в окрест. оз. Шадор-Нур и Намиш-Нур - 50 и 88 особей соответственно, на плато Ая - 210 особей, с плотностью 0,06-0,4 особи на 1 м2 на разных участках. В целом, на западном побережье оз. Байкал (в бухте Ая и ее окрест., долине р. Усть-Анга и на м. Улан-Нур) плотность особей в локальных популяциях варьировала в широких приделах, от менее чем 2 особи на 1 м2 - в одной из локальной популяции в долине р. Усть-Анга до 10,6 особи на 1 м2 - на м. Улан-Нур.</p><p>Ограничивающим фактором распространения выступает реликтовая природа вида. На северной оконечности о-ва Ольхон, в р-не м. Хобой популяции испытывают интенсивное антропогенное воздействие - растения вытаптываются туристами до полного уничтожения, а на м. Саган-Хушун затруднено семенное возобновление. Вид внесен в Красную книгу Рес публики Бурятия. Основная часть популяций вида в Иркутской обл. находится в пределах Прибайкальского национального парка. Разработан метод клонального микроразмножения, позволяющий за небольшой промежуток времени получать в большом количестве регенеранты, укоренять их и переводить в условия открытого грунта, что может быть использован для реинтродукции. Семена заложены на длительное хранение в специализированный банк СИФИБР СО РАН (г. Иркутск).</p>",
+      "collectedAt": "2025-11-29T16:00:00.000Z",
+      "createdAt": "2025-12-05T03:29:21.279Z",
+      "updatedAt": "2025-12-11T03:26:06.608Z",
+      "customFields": null
+    },
+    {
+      "id": 50,
+      "code": "50_other_До-обработки,-БЦБК",
+      "sampleType": "OTHER",
+      "sampleTypeId": 5,
+      "subject": "До обработки, БЦБК",
+      "siteName": "БЦБК",
+      "lat": null,
+      "lng": null,
+      "description": "",
+      "collectedAt": "2025-11-30T16:00:00.000Z",
+      "createdAt": "2025-12-11T05:15:30.678Z",
+      "updatedAt": "2025-12-11T05:15:30.680Z",
+      "customFields": null
+    },
+    {
+      "id": 48,
+      "code": "48_plant_Oxytropis-triphylla-Pall.",
+      "sampleType": "PLANT",
+      "sampleTypeId": 1,
+      "subject": "Oxytropis triphylla Pall.",
+      "siteName": "мыс Зундук",
+      "lat": 53.396374,
+      "lng": 107.426795,
+      "description": "<p><strong>Остролодочник трехлисточковый</strong> (*Oxytropis triphylla* (Pall.) Pers.)</p><p>*   <strong>Порядок:</strong> Бобовоцветные (Fabales)</p><p>*   <strong>Семейство:</strong> Бобовые (Мотыльковые) (Fabaceae, Leguminosae)</p><p>*   <strong>Статус:</strong> Категория 1 – вид, находящийся под угрозой исчезновения. Включен в Красную книгу РФ и Красную книгу Республики Бурятия.</p><p><strong>Морфологическое описание:</strong></p><p>Травянистое растение с сильно укороченными побегами, образующее дерновины.</p><p>*   <strong>Листья:</strong> длиной 3-5 см, немного короче цветоносов или равны им. Ось и черешки с редкими отстоящими волосками. Листочков 3 (реже 5), узкоовальные или удлиненно-яйцевидные (10-20 мм х 3-7 мм), с обеих сторон голые, по краю длиннореснитчатые.</p><p>*   <strong>Цветоносы:</strong> тонкие, волосистые, несут по 2-3 цветка.</p><p>*   <strong>Цветки:</strong> венчик длиной 25-30 мм, красно-фиолетовый; флаг выемчатый. Остроконечие лодочки 3-4 мм длиной.</p><p>*   <strong>Плоды:</strong> бобы округло-яйцевидные, вздутые, до 15 мм длиной, тонкокожие, беловойлочные.</p><p>*   <strong>Фенология:</strong> цветет в мае, плодоносит в июне.</p><p>*   <strong>Размножение:</strong> семенное.</p><p><strong>Экология и распространение:</strong></p><p>*   <strong>Экология:</strong> Ксерофит. Кальцефил. Растет в низкотравных каменистых степях, на щебнистых и каменистых склонах с выходами карбонатов и кварцитов.</p><p>*   <strong>Общее распространение:</strong> Эндемик Прибайкалья и Западного Забайкалья. Третичный реликт древнесредиземноморской (миоцен-плиоценовой) степной флоры.</p><p>*   <strong>В Иркутской области:</strong> распространен в Ольхонском районе: на побережье Малого Моря оз. Байкал, в Тажеранской степи и на о. Ольхон.</p><p>*   <strong>В Российской Федерации:</strong> также встречается в Республике Бурятия.</p><p><strong>Состояние популяций и лимитирующие факторы:</strong></p><p>*   <strong>Численность (примеры, данные 2013 г.):</strong></p><p>    *   у сел. Озера: 194 особи на 300 м²</p><p>    *   на м. Улан-Нур: 300 особей</p><p>    *   в окрестностях оз. Шадор-Нур и Намиш-Нур: 50 и 88 особей соответственно</p><p>    *   на плато Ая: 210 особей</p><p>    *   Плотность на разных участках варьирует от 0,06 до 0,4 особи/м².</p><p>*   <strong>Плотность популяций на западном побережье Байкала</strong> варьирует в широких пределах: от менее 2 особей/м² (в долине р. Усть-Анга) до 10,6 особей/м² (на м. Улан-Нур).</p><p>*   <strong>Основной лимитирующий фактор:</strong> реликтовая природа вида.</p><p>*   <strong>Угрозы:</strong></p><p>    *   <strong>На м. Хобой (о. Ольхон):</strong> интенсивное антропогенное воздействие – вытаптывание туристами до полного уничтожения.</p><p>    *   <strong>На м. Саган-Хушун:</strong> затруднено семенное возобновление.</p><p><strong>Меры охраны:</strong></p><p>*   Основная часть популяций в Иркутской области находится в пределах Прибайкальского национального парка.</p><p>*   <strong>Разработан метод клонального микроразмножения</strong>, позволяющий быстро получать большое количество регенерантов, укоренять их и переводить в открытый грунт для целей реинтродукции.</p><p>*   Семена заложены на длительное хранение в специализированный банк СИФИБР СО РАН (г. Иркутск).</p>",
+      "collectedAt": "2025-10-11T16:00:00.000Z",
+      "createdAt": "2025-12-05T03:12:48.218Z",
+      "updatedAt": "2025-12-08T01:55:54.309Z",
+      "customFields": null
+    }
+  ],
+  "samplePhotos": [
+    {
+      "id": 8,
+      "sampleId": 48,
+      "url": "https://ik.imagekit.io/ksushanik/sample-photos/3217af055861cb259eb6466fe79d670e_wBHHTuSTU.jpg",
+      "meta": {
+        "size": 59097,
+        "width": 514,
+        "fileId": "69324e335c7cd75eb86f0273",
+        "height": 566,
+        "fileType": "image",
+        "originalName": "3217af055861cb259eb6466fe79d670e.jpg"
+      },
+      "createdAt": "2025-12-05T03:14:59.482Z"
+    },
+    {
+      "id": 9,
+      "sampleId": 48,
+      "url": "https://ik.imagekit.io/ksushanik/sample-photos/558449_1afebadc_tBEoeg4Bo.jpg",
+      "meta": {
+        "size": 335244,
+        "width": 1150,
+        "fileId": "69324e335c7cd75eb86f0379",
+        "height": 901,
+        "fileType": "image",
+        "originalName": "558449_1afebadc.jpg"
+      },
+      "createdAt": "2025-12-05T03:14:59.672Z"
+    },
+    {
+      "id": 13,
+      "sampleId": 49,
+      "url": "https://ik.imagekit.io/ksushanik/sample-photos/Kopeechnik_zundukskij_Hedysarum-zundukii_Foto_Moldavskoj_Lyubovi-1200x796_0n9S94LM9.jpg",
+      "meta": {
+        "size": 302812,
+        "width": 1200,
+        "fileId": "693a37435c7cd75eb881ba61",
+        "height": 796,
+        "fileType": "image",
+        "originalName": "Kopeechnik_zundukskij_Hedysarum-zundukii_Foto_Moldavskoj_Lyubovi-1200x796.jpg"
+      },
+      "createdAt": "2025-12-11T03:15:15.793Z"
+    },
+    {
+      "id": 14,
+      "sampleId": 49,
+      "url": "https://ik.imagekit.io/ksushanik/sample-photos/198_1CsACi9RF.jpg",
+      "meta": {
+        "size": 7275,
+        "width": 240,
+        "fileId": "693a379c5c7cd75eb8837d2c",
+        "height": 240,
+        "fileType": "image",
+        "originalName": "198.jpg"
+      },
+      "createdAt": "2025-12-11T03:16:45.114Z"
+    }
+  ],
+  "strains": [
+    {
+      "id": 40,
+      "identifier": "Otzr-23-16",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Очень плохо окрашивается</p>",
+      "createdAt": "2025-12-11T03:52:11.980Z",
+      "updatedAt": "2025-12-11T03:52:11.980Z",
+      "customFields": null
+    },
+    {
+      "id": 41,
+      "identifier": "Otzr-23-17",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": true,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Бесцветное галло</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:53:26.671Z",
+      "updatedAt": "2025-12-11T03:53:26.671Z",
+      "customFields": null
+    },
+    {
+      "id": 42,
+      "identifier": "Otzr-23-18",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": true,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:54:19.683Z",
+      "updatedAt": "2025-12-11T03:54:19.683Z",
+      "customFields": null
+    },
+    {
+      "id": 43,
+      "identifier": "Otzr-23-19",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": true,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>На ГМФ похож на 23-10, но мельче и активно пигментирует среду</p>",
+      "createdAt": "2025-12-11T03:55:28.410Z",
+      "updatedAt": "2025-12-11T03:55:28.410Z",
+      "customFields": null
+    },
+    {
+      "id": 44,
+      "identifier": "Otzr-23-20",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "<p>Прозрачный</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:57:14.255Z",
+      "updatedAt": "2025-12-11T03:57:14.255Z",
+      "customFields": null
+    },
+    {
+      "id": 45,
+      "identifier": "Otzr-23-21",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Полупрозрачный; мелкие колонии</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:58:05.250Z",
+      "updatedAt": "2025-12-11T03:58:05.250Z",
+      "customFields": null
+    },
+    {
+      "id": 46,
+      "identifier": "Otzr-23-22",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:58:45.568Z",
+      "updatedAt": "2025-12-11T03:58:45.568Z",
+      "customFields": null
+    },
+    {
+      "id": 47,
+      "identifier": "Otzr-23-23",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:59:35.249Z",
+      "updatedAt": "2025-12-11T03:59:35.249Z",
+      "customFields": null
+    },
+    {
+      "id": 48,
+      "identifier": "Otzr-23-24",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": null,
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "<p>Очень мелкие колонии</p>",
+      "comments": "<p>Хорошая суспензия в жидкой среде</p>",
+      "createdAt": "2025-12-11T04:01:07.729Z",
+      "updatedAt": "2025-12-11T04:01:07.729Z",
+      "customFields": null
+    },
+    {
+      "id": 27,
+      "identifier": "Hz 1 MP ",
+      "sampleId": 49,
+      "taxonomy16s": "Stenotrophomonas sp.",
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "Должен был быть грамм-",
+      "createdAt": "2025-12-05T03:32:44.676Z",
+      "updatedAt": "2025-12-05T03:32:44.676Z",
+      "customFields": null
+    },
+    {
+      "id": 49,
+      "identifier": "Otzr-23-25",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Вероятно R-S диссоциация</p>",
+      "createdAt": "2025-12-11T04:02:19.014Z",
+      "updatedAt": "2025-12-11T04:02:19.014Z",
+      "customFields": null
+    },
+    {
+      "id": 50,
+      "identifier": "Otzr-23-26",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Возможно r-форма Otzr-23-14</p>",
+      "createdAt": "2025-12-11T04:03:20.718Z",
+      "updatedAt": "2025-12-11T04:03:20.718Z",
+      "customFields": null
+    },
+    {
+      "id": 29,
+      "identifier": "Otzr-23-5",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "NEGATIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:38:31.721Z",
+      "updatedAt": "2025-12-11T05:58:05.713Z",
+      "customFields": null
+    },
+    {
+      "id": 25,
+      "identifier": "Otzr-23-2",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": true,
+      "pigmentSecretion": false,
+      "amylase": "NEGATIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "Поверхность колонии плотная",
+      "comments": null,
+      "createdAt": "2025-12-05T03:24:41.368Z",
+      "updatedAt": "2025-12-11T05:54:53.016Z",
+      "customFields": null
+    },
+    {
+      "id": 38,
+      "identifier": "Otzr-23-14",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "<p>Небольшое галло</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:49:46.240Z",
+      "updatedAt": "2025-12-11T03:49:46.240Z",
+      "customFields": null
+    },
+    {
+      "id": 39,
+      "identifier": "Otzr-23-15",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": true,
+      "pigmentSecretion": true,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Выделяет в среду красный пигмент который со временем становится фиолетовым</p>",
+      "createdAt": "2025-12-11T03:51:04.781Z",
+      "updatedAt": "2025-12-11T03:51:04.781Z",
+      "customFields": null
+    },
+    {
+      "id": 51,
+      "identifier": "Otzr-23-27",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:04:44.888Z",
+      "updatedAt": "2025-12-11T04:04:44.888Z",
+      "customFields": null
+    },
+    {
+      "id": 52,
+      "identifier": "Otzr-23-28",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:05:12.698Z",
+      "updatedAt": "2025-12-11T04:05:12.698Z",
+      "customFields": null
+    },
+    {
+      "id": 53,
+      "identifier": "Otzr-23-29",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Биокристализация</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T04:06:41.937Z",
+      "updatedAt": "2025-12-11T04:06:41.937Z",
+      "customFields": null
+    },
+    {
+      "id": 54,
+      "identifier": "Otzr-23-30",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Биокристализация</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T04:07:33.096Z",
+      "updatedAt": "2025-12-11T04:07:33.096Z",
+      "customFields": null
+    },
+    {
+      "id": 55,
+      "identifier": "Otzr-23-31",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:08:20.135Z",
+      "updatedAt": "2025-12-11T04:08:20.135Z",
+      "customFields": null
+    },
+    {
+      "id": 56,
+      "identifier": "Otzr-23-32",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": true,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:10:47.542Z",
+      "updatedAt": "2025-12-11T04:10:47.542Z",
+      "customFields": null
+    },
+    {
+      "id": 57,
+      "identifier": "Otzr-23-33",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": true,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:11:27.006Z",
+      "updatedAt": "2025-12-11T04:11:27.006Z",
+      "customFields": null
+    },
+    {
+      "id": 58,
+      "identifier": "Otzr-23-34",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Возможно синоним Otzr-23-16</p>",
+      "createdAt": "2025-12-11T04:12:48.952Z",
+      "updatedAt": "2025-12-11T04:12:48.952Z",
+      "customFields": null
+    },
+    {
+      "id": 59,
+      "identifier": "Otzr-23-35",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Не растет на ГМФ</p>",
+      "createdAt": "2025-12-11T04:14:12.189Z",
+      "updatedAt": "2025-12-11T04:14:12.189Z",
+      "customFields": null
+    },
+    {
+      "id": 60,
+      "identifier": "Otzr-23-36",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:15:06.501Z",
+      "updatedAt": "2025-12-11T04:15:06.501Z",
+      "customFields": null
+    },
+    {
+      "id": 61,
+      "identifier": "Otzr-23-37",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "<p>Медленный рост</p>",
+      "comments": "<p>На Эшби со временем розовеет</p>",
+      "createdAt": "2025-12-11T04:18:38.412Z",
+      "updatedAt": "2025-12-11T04:18:38.412Z",
+      "customFields": null
+    },
+    {
+      "id": 62,
+      "identifier": "Otzr-23-38",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:20:15.882Z",
+      "updatedAt": "2025-12-11T04:20:15.882Z",
+      "customFields": null
+    },
+    {
+      "id": 63,
+      "identifier": "Otzr-23-39",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:20:43.399Z",
+      "updatedAt": "2025-12-11T04:20:43.399Z",
+      "customFields": null
+    },
+    {
+      "id": 64,
+      "identifier": "Otzr-23-40",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": true,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Серо-зеленый оттенок воздушного мицелия и суспензии</p>",
+      "createdAt": "2025-12-11T04:22:00.833Z",
+      "updatedAt": "2025-12-11T04:22:00.833Z",
+      "customFields": null
+    },
+    {
+      "id": 65,
+      "identifier": "Otzr-23-41",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:30:20.953Z",
+      "updatedAt": "2025-12-11T04:30:20.953Z",
+      "customFields": null
+    },
+    {
+      "id": 66,
+      "identifier": "Otzr-23-42",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": null,
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Актиномицет</p>",
+      "createdAt": "2025-12-11T04:41:19.608Z",
+      "updatedAt": "2025-12-11T04:41:19.608Z",
+      "customFields": null
+    },
+    {
+      "id": 67,
+      "identifier": "Otzr-23-43",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": true,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>На Эшби со временем пигментирует среду в коричневый цвет</p>",
+      "createdAt": "2025-12-11T04:42:30.209Z",
+      "updatedAt": "2025-12-11T04:42:30.209Z",
+      "customFields": null
+    },
+    {
+      "id": 68,
+      "identifier": "Otzr-23-44",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": true,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:45:22.155Z",
+      "updatedAt": "2025-12-11T04:45:22.155Z",
+      "customFields": null
+    },
+    {
+      "id": 69,
+      "identifier": "Otzr-23-45",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:45:54.931Z",
+      "updatedAt": "2025-12-11T04:45:54.931Z",
+      "customFields": null
+    },
+    {
+      "id": 70,
+      "identifier": "Otzr-23-46",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:46:31.302Z",
+      "updatedAt": "2025-12-11T04:46:31.302Z",
+      "customFields": null
+    },
+    {
+      "id": 71,
+      "identifier": "Otzr-23-47",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>На КАА и Эшби-образует галло. По периметру колонии клетки в форме палочек собранных в нити, в центре- винегрет</p>",
+      "createdAt": "2025-12-11T04:48:17.478Z",
+      "updatedAt": "2025-12-11T04:48:17.478Z",
+      "customFields": null
+    },
+    {
+      "id": 72,
+      "identifier": "Otzr-23-48",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": true,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Очень сильная пигментация среды</p>",
+      "createdAt": "2025-12-11T04:49:07.202Z",
+      "updatedAt": "2025-12-11T04:49:07.202Z",
+      "customFields": null
+    },
+    {
+      "id": 73,
+      "identifier": "Otzr-23-49",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "VARIABLE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:51:19.356Z",
+      "updatedAt": "2025-12-11T04:51:19.356Z",
+      "customFields": null
+    },
+    {
+      "id": 74,
+      "identifier": "Otzr-23-50",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": true,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Сильная пигментация среды</p>",
+      "createdAt": "2025-12-11T04:52:13.234Z",
+      "updatedAt": "2025-12-11T04:52:13.234Z",
+      "customFields": null
+    },
+    {
+      "id": 75,
+      "identifier": "Otzr-23-51",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:52:50.531Z",
+      "updatedAt": "2025-12-11T04:52:50.531Z",
+      "customFields": null
+    },
+    {
+      "id": 76,
+      "identifier": "Otzr-23-52",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:53:25.052Z",
+      "updatedAt": "2025-12-11T04:53:25.052Z",
+      "customFields": null
+    },
+    {
+      "id": 77,
+      "identifier": "Otzr-23-53",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:53:53.092Z",
+      "updatedAt": "2025-12-11T04:53:53.092Z",
+      "customFields": null
+    },
+    {
+      "id": 78,
+      "identifier": "Otzr-23-54",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:54:29.512Z",
+      "updatedAt": "2025-12-11T04:54:29.512Z",
+      "customFields": null
+    },
+    {
+      "id": 79,
+      "identifier": "Otzr-23-55",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:54:58.252Z",
+      "updatedAt": "2025-12-11T04:54:58.252Z",
+      "customFields": null
+    },
+    {
+      "id": 80,
+      "identifier": "Otzr-23-56",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:55:24.551Z",
+      "updatedAt": "2025-12-11T04:55:24.551Z",
+      "customFields": null
+    },
+    {
+      "id": 81,
+      "identifier": "Otzr-23-57",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:55:56.294Z",
+      "updatedAt": "2025-12-11T04:55:56.294Z",
+      "customFields": null
+    },
+    {
+      "id": 82,
+      "identifier": "Otzr-23-58",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": true,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Чрезвычайно мелкие колонии</p>",
+      "createdAt": "2025-12-11T04:56:58.272Z",
+      "updatedAt": "2025-12-11T04:56:58.272Z",
+      "customFields": null
+    },
+    {
+      "id": 83,
+      "identifier": "Otzr-23-59",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": "<p>Чрезвычайно мелкие колонии</p>",
+      "createdAt": "2025-12-11T04:57:47.469Z",
+      "updatedAt": "2025-12-11T04:57:47.469Z",
+      "customFields": null
+    },
+    {
+      "id": 84,
+      "identifier": "Otzr-23-60",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T04:58:10.061Z",
+      "updatedAt": "2025-12-11T04:58:10.061Z",
+      "customFields": null
+    },
+    {
+      "id": 26,
+      "identifier": "Otzr-23-3",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "Биокристализация",
+      "comments": null,
+      "createdAt": "2025-12-05T03:28:15.631Z",
+      "updatedAt": "2025-12-11T05:55:53.919Z",
+      "customFields": null
+    },
+    {
+      "id": 28,
+      "identifier": "Otzr-23-4",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Биокристализация</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:32:59.393Z",
+      "updatedAt": "2025-12-11T05:56:35.679Z",
+      "customFields": null
+    },
+    {
+      "id": 30,
+      "identifier": "Otzr-23-6",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": true,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:39:29.971Z",
+      "updatedAt": "2025-12-11T05:59:23.283Z",
+      "customFields": null
+    },
+    {
+      "id": 32,
+      "identifier": "Otzr-23-8",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:41:09.930Z",
+      "updatedAt": "2025-12-11T06:01:42.134Z",
+      "customFields": null
+    },
+    {
+      "id": 31,
+      "identifier": "Otzr-23-7",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:40:15.244Z",
+      "updatedAt": "2025-12-11T06:00:31.922Z",
+      "customFields": null
+    },
+    {
+      "id": 33,
+      "identifier": "Otzr-23-9",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "<p>Биокристализация</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:42:45.104Z",
+      "updatedAt": "2025-12-11T06:02:50.352Z",
+      "customFields": null
+    },
+    {
+      "id": 34,
+      "identifier": "Otzr-23-10",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:43:31.728Z",
+      "updatedAt": "2025-12-11T06:04:06.573Z",
+      "customFields": null
+    },
+    {
+      "id": 35,
+      "identifier": "Otzr-23-11",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": "<p>Биокристализация</p>",
+      "comments": null,
+      "createdAt": "2025-12-11T03:45:57.296Z",
+      "updatedAt": "2025-12-11T06:09:32.145Z",
+      "customFields": null
+    },
+    {
+      "id": 36,
+      "identifier": "Otzr-23-12",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T03:46:33.530Z",
+      "updatedAt": "2025-12-11T06:10:12.024Z",
+      "customFields": null
+    },
+    {
+      "id": 86,
+      "identifier": "Hz 3 МР  ",
+      "sampleId": 49,
+      "taxonomy16s": "Oceanobacillus",
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T05:13:04.201Z",
+      "updatedAt": "2025-12-11T05:13:04.201Z",
+      "customFields": null
+    },
+    {
+      "id": 85,
+      "identifier": "Hz 2 MP",
+      "sampleId": 49,
+      "taxonomy16s": "Bacillus",
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "NEGATIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T05:06:57.633Z",
+      "updatedAt": "2025-12-11T05:13:44.409Z",
+      "customFields": null
+    },
+    {
+      "id": 87,
+      "identifier": "1Б",
+      "sampleId": 50,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "МК",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": null,
+      "isolationRegion": "OTHER",
+      "iuk": null,
+      "features": null,
+      "comments": null,
+      "createdAt": "2025-12-11T05:16:42.444Z",
+      "updatedAt": "2025-12-11T05:20:43.966Z",
+      "customFields": null
+    },
+    {
+      "id": 24,
+      "identifier": "Otzr-23-1",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "POSITIVE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": null,
+      "features": "Биокристализация",
+      "comments": null,
+      "createdAt": "2025-12-05T03:21:23.024Z",
+      "updatedAt": "2025-12-11T05:49:10.322Z",
+      "customFields": null
+    },
+    {
+      "id": 37,
+      "identifier": "Otzr-23-13",
+      "sampleId": 48,
+      "taxonomy16s": null,
+      "otherTaxonomy": null,
+      "indexerInitials": "ИВ",
+      "collectionRcam": null,
+      "seq": false,
+      "biochemistry": null,
+      "genome": null,
+      "antibioticActivity": null,
+      "gramStain": "VARIABLE",
+      "phosphates": false,
+      "siderophores": false,
+      "pigmentSecretion": false,
+      "amylase": "POSITIVE",
+      "isolationRegion": "RHIZOSPHERE",
+      "iuk": "+",
+      "features": null,
+      "comments": "<p>Если \"побрить\" то цвет колонии зеленоватый</p>",
+      "createdAt": "2025-12-11T03:47:50.850Z",
+      "updatedAt": "2025-12-11T06:11:35.374Z",
+      "customFields": null
+    }
+  ],
+  "strainPhotos": [],
+  "strainMedia": [
+    {
+      "strainId": 24,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 28,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 25,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 26,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 29,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 30,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 31,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 32,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 33,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 34,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 35,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 36,
+      "mediaId": 7,
+      "notes": null
+    },
+    {
+      "strainId": 37,
+      "mediaId": 7,
+      "notes": null
+    }
+  ],
+  "strainStorage": [
+    {
+      "id": 24,
+      "strainId": 87,
+      "cellId": 2035,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:19:52.520Z"
+    },
+    {
+      "id": 25,
+      "strainId": 87,
+      "cellId": 2036,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:20:38.473Z"
+    },
+    {
+      "id": 27,
+      "strainId": 24,
+      "cellId": 1793,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:38:25.450Z"
+    },
+    {
+      "id": 26,
+      "strainId": 24,
+      "cellId": 1792,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:38:19.943Z"
+    },
+    {
+      "id": 29,
+      "strainId": 25,
+      "cellId": 1802,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:54:48.861Z"
+    },
+    {
+      "id": 28,
+      "strainId": 25,
+      "cellId": 1801,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:54:40.673Z"
+    },
+    {
+      "id": 31,
+      "strainId": 26,
+      "cellId": 1811,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:55:52.153Z"
+    },
+    {
+      "id": 30,
+      "strainId": 26,
+      "cellId": 1810,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:55:46.283Z"
+    },
+    {
+      "id": 33,
+      "strainId": 28,
+      "cellId": 1820,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:56:32.052Z"
+    },
+    {
+      "id": 32,
+      "strainId": 28,
+      "cellId": 1819,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:56:25.467Z"
+    },
+    {
+      "id": 35,
+      "strainId": 29,
+      "cellId": 1829,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:58:03.296Z"
+    },
+    {
+      "id": 34,
+      "strainId": 29,
+      "cellId": 1828,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:57:56.599Z"
+    },
+    {
+      "id": 37,
+      "strainId": 30,
+      "cellId": 1838,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T05:59:21.075Z"
+    },
+    {
+      "id": 36,
+      "strainId": 30,
+      "cellId": 1837,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T05:59:11.197Z"
+    },
+    {
+      "id": 39,
+      "strainId": 31,
+      "cellId": 1847,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:00:09.382Z"
+    },
+    {
+      "id": 38,
+      "strainId": 31,
+      "cellId": 1846,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:00:02.504Z"
+    },
+    {
+      "id": 41,
+      "strainId": 32,
+      "cellId": 1856,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:01:40.387Z"
+    },
+    {
+      "id": 40,
+      "strainId": 32,
+      "cellId": 1855,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:01:31.419Z"
+    },
+    {
+      "id": 43,
+      "strainId": 33,
+      "cellId": 1865,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:02:44.275Z"
+    },
+    {
+      "id": 42,
+      "strainId": 33,
+      "cellId": 1864,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:02:34.120Z"
+    },
+    {
+      "id": 45,
+      "strainId": 34,
+      "cellId": 1795,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:04:04.584Z"
+    },
+    {
+      "id": 44,
+      "strainId": 34,
+      "cellId": 1794,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:04:00.038Z"
+    },
+    {
+      "id": 47,
+      "strainId": 35,
+      "cellId": 1804,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:09:29.377Z"
+    },
+    {
+      "id": 46,
+      "strainId": 35,
+      "cellId": 1803,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:09:25.127Z"
+    },
+    {
+      "id": 49,
+      "strainId": 36,
+      "cellId": 1813,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:10:09.516Z"
+    },
+    {
+      "id": 48,
+      "strainId": 36,
+      "cellId": 1812,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:10:04.746Z"
+    },
+    {
+      "id": 51,
+      "strainId": 37,
+      "cellId": 1822,
+      "isPrimary": true,
+      "allocatedAt": "2025-12-11T06:11:32.963Z"
+    },
+    {
+      "id": 50,
+      "strainId": 37,
+      "cellId": 1821,
+      "isPrimary": false,
+      "allocatedAt": "2025-12-11T06:11:27.554Z"
+    }
+  ],
+  "storageBoxes": [
+    {
+      "id": 19,
+      "displayName": "Бокс 1",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-05T03:22:12.563Z",
+      "updatedAt": "2025-12-05T03:22:12.563Z"
+    },
+    {
+      "id": 20,
+      "displayName": "Бокс 2",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-11T03:07:25.116Z",
+      "updatedAt": "2025-12-11T03:07:25.116Z"
+    },
+    {
+      "id": 21,
+      "displayName": "Бокс 3",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-11T03:07:35.840Z",
+      "updatedAt": "2025-12-11T03:07:35.840Z"
+    },
+    {
+      "id": 22,
+      "displayName": "Бокс 4",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-11T03:07:45.997Z",
+      "updatedAt": "2025-12-11T03:07:45.997Z"
+    },
+    {
+      "id": 23,
+      "displayName": "Бокс 5",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-11T03:07:54.262Z",
+      "updatedAt": "2025-12-11T03:07:54.262Z"
+    },
+    {
+      "id": 24,
+      "displayName": "Бокс 6 ",
+      "rows": 9,
+      "cols": 9,
+      "description": "",
+      "createdAt": "2025-12-11T05:19:25.094Z",
+      "updatedAt": "2025-12-11T05:19:25.094Z"
+    }
+  ],
+  "storageCells": [
+    {
+      "id": 1631,
+      "boxId": 19,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "FREE"
+    },
+    {
+      "id": 1632,
+      "boxId": 19,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "FREE"
+    },
+    {
+      "id": 1633,
+      "boxId": 19,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "FREE"
+    },
+    {
+      "id": 1634,
+      "boxId": 19,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 1635,
+      "boxId": 19,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 1636,
+      "boxId": 19,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 1637,
+      "boxId": 19,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 1638,
+      "boxId": 19,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 1639,
+      "boxId": 19,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "FREE"
+    },
+    {
+      "id": 1640,
+      "boxId": 19,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "FREE"
+    },
+    {
+      "id": 1641,
+      "boxId": 19,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "FREE"
+    },
+    {
+      "id": 1642,
+      "boxId": 19,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "FREE"
+    },
+    {
+      "id": 1643,
+      "boxId": 19,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 1644,
+      "boxId": 19,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 1645,
+      "boxId": 19,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 1646,
+      "boxId": 19,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 1647,
+      "boxId": 19,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 1648,
+      "boxId": 19,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "FREE"
+    },
+    {
+      "id": 1649,
+      "boxId": 19,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "FREE"
+    },
+    {
+      "id": 1650,
+      "boxId": 19,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "FREE"
+    },
+    {
+      "id": 1651,
+      "boxId": 19,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "FREE"
+    },
+    {
+      "id": 1652,
+      "boxId": 19,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 1653,
+      "boxId": 19,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 1654,
+      "boxId": 19,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 1655,
+      "boxId": 19,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 1656,
+      "boxId": 19,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 1657,
+      "boxId": 19,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "FREE"
+    },
+    {
+      "id": 1658,
+      "boxId": 19,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "FREE"
+    },
+    {
+      "id": 1659,
+      "boxId": 19,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "FREE"
+    },
+    {
+      "id": 1660,
+      "boxId": 19,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "FREE"
+    },
+    {
+      "id": 1661,
+      "boxId": 19,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 1662,
+      "boxId": 19,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 1663,
+      "boxId": 19,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 1664,
+      "boxId": 19,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 1665,
+      "boxId": 19,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 1666,
+      "boxId": 19,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "FREE"
+    },
+    {
+      "id": 1667,
+      "boxId": 19,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "FREE"
+    },
+    {
+      "id": 1668,
+      "boxId": 19,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 1669,
+      "boxId": 19,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 1670,
+      "boxId": 19,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 1671,
+      "boxId": 19,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 1672,
+      "boxId": 19,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 1673,
+      "boxId": 19,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 1674,
+      "boxId": 19,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 1675,
+      "boxId": 19,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "FREE"
+    },
+    {
+      "id": 1676,
+      "boxId": 19,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "FREE"
+    },
+    {
+      "id": 1677,
+      "boxId": 19,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 1678,
+      "boxId": 19,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 1679,
+      "boxId": 19,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 1680,
+      "boxId": 19,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 1681,
+      "boxId": 19,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 1682,
+      "boxId": 19,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 1683,
+      "boxId": 19,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 1684,
+      "boxId": 19,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "FREE"
+    },
+    {
+      "id": 1685,
+      "boxId": 19,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "FREE"
+    },
+    {
+      "id": 1686,
+      "boxId": 19,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 1687,
+      "boxId": 19,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 1688,
+      "boxId": 19,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 1689,
+      "boxId": 19,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 1690,
+      "boxId": 19,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 1691,
+      "boxId": 19,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 1692,
+      "boxId": 19,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 1693,
+      "boxId": 19,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "FREE"
+    },
+    {
+      "id": 1694,
+      "boxId": 19,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "FREE"
+    },
+    {
+      "id": 1695,
+      "boxId": 19,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 1696,
+      "boxId": 19,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 1697,
+      "boxId": 19,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 1698,
+      "boxId": 19,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 1699,
+      "boxId": 19,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 1700,
+      "boxId": 19,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 1701,
+      "boxId": 19,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 1702,
+      "boxId": 19,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "FREE"
+    },
+    {
+      "id": 1703,
+      "boxId": 19,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "FREE"
+    },
+    {
+      "id": 1704,
+      "boxId": 19,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 1705,
+      "boxId": 19,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 1706,
+      "boxId": 19,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 1707,
+      "boxId": 19,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 1708,
+      "boxId": 19,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 1709,
+      "boxId": 19,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 1710,
+      "boxId": 19,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 1630,
+      "boxId": 19,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "FREE"
+    },
+    {
+      "id": 1711,
+      "boxId": 20,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "FREE"
+    },
+    {
+      "id": 1712,
+      "boxId": 20,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "FREE"
+    },
+    {
+      "id": 1713,
+      "boxId": 20,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "FREE"
+    },
+    {
+      "id": 1714,
+      "boxId": 20,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "FREE"
+    },
+    {
+      "id": 1715,
+      "boxId": 20,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 1716,
+      "boxId": 20,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 1717,
+      "boxId": 20,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 1718,
+      "boxId": 20,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 1719,
+      "boxId": 20,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 1720,
+      "boxId": 20,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "FREE"
+    },
+    {
+      "id": 1721,
+      "boxId": 20,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "FREE"
+    },
+    {
+      "id": 1722,
+      "boxId": 20,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "FREE"
+    },
+    {
+      "id": 1723,
+      "boxId": 20,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "FREE"
+    },
+    {
+      "id": 1724,
+      "boxId": 20,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 1725,
+      "boxId": 20,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 1726,
+      "boxId": 20,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 1727,
+      "boxId": 20,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 1728,
+      "boxId": 20,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 1729,
+      "boxId": 20,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "FREE"
+    },
+    {
+      "id": 1730,
+      "boxId": 20,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "FREE"
+    },
+    {
+      "id": 1731,
+      "boxId": 20,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "FREE"
+    },
+    {
+      "id": 1732,
+      "boxId": 20,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "FREE"
+    },
+    {
+      "id": 1733,
+      "boxId": 20,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 1734,
+      "boxId": 20,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 1735,
+      "boxId": 20,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 1736,
+      "boxId": 20,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 1737,
+      "boxId": 20,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 1738,
+      "boxId": 20,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "FREE"
+    },
+    {
+      "id": 1739,
+      "boxId": 20,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "FREE"
+    },
+    {
+      "id": 1740,
+      "boxId": 20,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "FREE"
+    },
+    {
+      "id": 1741,
+      "boxId": 20,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "FREE"
+    },
+    {
+      "id": 1742,
+      "boxId": 20,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 1743,
+      "boxId": 20,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 1744,
+      "boxId": 20,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 1745,
+      "boxId": 20,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 1746,
+      "boxId": 20,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 1747,
+      "boxId": 20,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "FREE"
+    },
+    {
+      "id": 1748,
+      "boxId": 20,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "FREE"
+    },
+    {
+      "id": 1749,
+      "boxId": 20,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 1750,
+      "boxId": 20,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 1751,
+      "boxId": 20,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 1752,
+      "boxId": 20,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 1753,
+      "boxId": 20,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 1754,
+      "boxId": 20,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 1755,
+      "boxId": 20,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 1756,
+      "boxId": 20,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "FREE"
+    },
+    {
+      "id": 1757,
+      "boxId": 20,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "FREE"
+    },
+    {
+      "id": 1758,
+      "boxId": 20,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 1759,
+      "boxId": 20,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 1760,
+      "boxId": 20,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 1761,
+      "boxId": 20,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 1762,
+      "boxId": 20,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 1763,
+      "boxId": 20,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 1764,
+      "boxId": 20,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 1765,
+      "boxId": 20,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "FREE"
+    },
+    {
+      "id": 1766,
+      "boxId": 20,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "FREE"
+    },
+    {
+      "id": 1767,
+      "boxId": 20,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 1768,
+      "boxId": 20,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 1769,
+      "boxId": 20,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 1770,
+      "boxId": 20,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 1771,
+      "boxId": 20,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 1772,
+      "boxId": 20,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 1773,
+      "boxId": 20,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 1774,
+      "boxId": 20,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "FREE"
+    },
+    {
+      "id": 1775,
+      "boxId": 20,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "FREE"
+    },
+    {
+      "id": 1776,
+      "boxId": 20,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 1777,
+      "boxId": 20,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 1778,
+      "boxId": 20,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 1779,
+      "boxId": 20,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 1780,
+      "boxId": 20,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 1781,
+      "boxId": 20,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 1782,
+      "boxId": 20,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 1783,
+      "boxId": 20,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "FREE"
+    },
+    {
+      "id": 1784,
+      "boxId": 20,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "FREE"
+    },
+    {
+      "id": 1785,
+      "boxId": 20,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 1786,
+      "boxId": 20,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 1787,
+      "boxId": 20,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 1788,
+      "boxId": 20,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 1789,
+      "boxId": 20,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 1790,
+      "boxId": 20,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 1791,
+      "boxId": 20,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 1796,
+      "boxId": 21,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 1797,
+      "boxId": 21,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 1798,
+      "boxId": 21,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 1799,
+      "boxId": 21,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 1800,
+      "boxId": 21,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 1805,
+      "boxId": 21,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 1806,
+      "boxId": 21,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 1807,
+      "boxId": 21,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 1808,
+      "boxId": 21,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 1809,
+      "boxId": 21,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 1814,
+      "boxId": 21,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 1815,
+      "boxId": 21,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 1816,
+      "boxId": 21,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 1817,
+      "boxId": 21,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 1818,
+      "boxId": 21,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 1823,
+      "boxId": 21,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 1824,
+      "boxId": 21,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 1825,
+      "boxId": 21,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 1826,
+      "boxId": 21,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 1827,
+      "boxId": 21,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 1830,
+      "boxId": 21,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 1831,
+      "boxId": 21,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 1832,
+      "boxId": 21,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 1833,
+      "boxId": 21,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 1834,
+      "boxId": 21,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 1835,
+      "boxId": 21,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 1836,
+      "boxId": 21,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 1839,
+      "boxId": 21,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 1840,
+      "boxId": 21,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 1841,
+      "boxId": 21,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 1842,
+      "boxId": 21,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 1843,
+      "boxId": 21,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 1844,
+      "boxId": 21,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 1845,
+      "boxId": 21,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 1848,
+      "boxId": 21,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 1849,
+      "boxId": 21,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 1850,
+      "boxId": 21,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 1851,
+      "boxId": 21,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 1852,
+      "boxId": 21,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 1853,
+      "boxId": 21,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 1854,
+      "boxId": 21,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 1857,
+      "boxId": 21,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 1858,
+      "boxId": 21,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 1859,
+      "boxId": 21,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 1860,
+      "boxId": 21,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 1861,
+      "boxId": 21,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 1862,
+      "boxId": 21,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 1863,
+      "boxId": 21,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 1866,
+      "boxId": 21,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 1867,
+      "boxId": 21,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 1868,
+      "boxId": 21,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 1869,
+      "boxId": 21,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 1870,
+      "boxId": 21,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 1871,
+      "boxId": 21,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 1872,
+      "boxId": 21,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 1873,
+      "boxId": 22,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "FREE"
+    },
+    {
+      "id": 1874,
+      "boxId": 22,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "FREE"
+    },
+    {
+      "id": 1875,
+      "boxId": 22,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "FREE"
+    },
+    {
+      "id": 1876,
+      "boxId": 22,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "FREE"
+    },
+    {
+      "id": 1877,
+      "boxId": 22,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 1878,
+      "boxId": 22,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 1879,
+      "boxId": 22,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 1880,
+      "boxId": 22,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 1881,
+      "boxId": 22,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 1882,
+      "boxId": 22,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "FREE"
+    },
+    {
+      "id": 1883,
+      "boxId": 22,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "FREE"
+    },
+    {
+      "id": 1884,
+      "boxId": 22,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "FREE"
+    },
+    {
+      "id": 1885,
+      "boxId": 22,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "FREE"
+    },
+    {
+      "id": 1886,
+      "boxId": 22,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 1887,
+      "boxId": 22,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 1888,
+      "boxId": 22,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 1889,
+      "boxId": 22,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 1890,
+      "boxId": 22,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 1891,
+      "boxId": 22,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "FREE"
+    },
+    {
+      "id": 1892,
+      "boxId": 22,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "FREE"
+    },
+    {
+      "id": 1893,
+      "boxId": 22,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "FREE"
+    },
+    {
+      "id": 1894,
+      "boxId": 22,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "FREE"
+    },
+    {
+      "id": 1895,
+      "boxId": 22,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 1896,
+      "boxId": 22,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 1897,
+      "boxId": 22,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 1898,
+      "boxId": 22,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 1899,
+      "boxId": 22,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 1900,
+      "boxId": 22,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "FREE"
+    },
+    {
+      "id": 1901,
+      "boxId": 22,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "FREE"
+    },
+    {
+      "id": 1902,
+      "boxId": 22,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "FREE"
+    },
+    {
+      "id": 1903,
+      "boxId": 22,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "FREE"
+    },
+    {
+      "id": 1904,
+      "boxId": 22,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 1905,
+      "boxId": 22,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 1906,
+      "boxId": 22,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 1907,
+      "boxId": 22,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 1908,
+      "boxId": 22,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 1909,
+      "boxId": 22,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "FREE"
+    },
+    {
+      "id": 1910,
+      "boxId": 22,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "FREE"
+    },
+    {
+      "id": 1911,
+      "boxId": 22,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 1912,
+      "boxId": 22,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 1913,
+      "boxId": 22,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 1914,
+      "boxId": 22,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 1915,
+      "boxId": 22,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 1916,
+      "boxId": 22,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 1917,
+      "boxId": 22,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 1918,
+      "boxId": 22,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "FREE"
+    },
+    {
+      "id": 1919,
+      "boxId": 22,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "FREE"
+    },
+    {
+      "id": 1920,
+      "boxId": 22,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 1921,
+      "boxId": 22,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 1922,
+      "boxId": 22,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 1923,
+      "boxId": 22,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 1924,
+      "boxId": 22,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 1925,
+      "boxId": 22,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 1926,
+      "boxId": 22,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 1927,
+      "boxId": 22,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "FREE"
+    },
+    {
+      "id": 1928,
+      "boxId": 22,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "FREE"
+    },
+    {
+      "id": 1929,
+      "boxId": 22,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 1930,
+      "boxId": 22,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 1931,
+      "boxId": 22,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 1932,
+      "boxId": 22,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 1933,
+      "boxId": 22,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 1934,
+      "boxId": 22,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 1935,
+      "boxId": 22,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 1936,
+      "boxId": 22,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "FREE"
+    },
+    {
+      "id": 1937,
+      "boxId": 22,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "FREE"
+    },
+    {
+      "id": 1938,
+      "boxId": 22,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 1939,
+      "boxId": 22,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 1940,
+      "boxId": 22,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 1941,
+      "boxId": 22,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 1793,
+      "boxId": 21,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1802,
+      "boxId": 21,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1810,
+      "boxId": 21,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1811,
+      "boxId": 21,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1819,
+      "boxId": 21,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1820,
+      "boxId": 21,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1828,
+      "boxId": 21,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1829,
+      "boxId": 21,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1837,
+      "boxId": 21,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1838,
+      "boxId": 21,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1846,
+      "boxId": 21,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1847,
+      "boxId": 21,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1855,
+      "boxId": 21,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1864,
+      "boxId": 21,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1865,
+      "boxId": 21,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1794,
+      "boxId": 21,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1795,
+      "boxId": 21,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1803,
+      "boxId": 21,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1804,
+      "boxId": 21,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1812,
+      "boxId": 21,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1813,
+      "boxId": 21,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1821,
+      "boxId": 21,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1822,
+      "boxId": 21,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1942,
+      "boxId": 22,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 1943,
+      "boxId": 22,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 1944,
+      "boxId": 22,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 1945,
+      "boxId": 22,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "FREE"
+    },
+    {
+      "id": 1946,
+      "boxId": 22,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "FREE"
+    },
+    {
+      "id": 1947,
+      "boxId": 22,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 1948,
+      "boxId": 22,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 1949,
+      "boxId": 22,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 1950,
+      "boxId": 22,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 1951,
+      "boxId": 22,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 1952,
+      "boxId": 22,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 1953,
+      "boxId": 22,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 1954,
+      "boxId": 23,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "FREE"
+    },
+    {
+      "id": 1955,
+      "boxId": 23,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "FREE"
+    },
+    {
+      "id": 1956,
+      "boxId": 23,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "FREE"
+    },
+    {
+      "id": 1957,
+      "boxId": 23,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "FREE"
+    },
+    {
+      "id": 1958,
+      "boxId": 23,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 1959,
+      "boxId": 23,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 1960,
+      "boxId": 23,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 1961,
+      "boxId": 23,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 1962,
+      "boxId": 23,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 1963,
+      "boxId": 23,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "FREE"
+    },
+    {
+      "id": 1964,
+      "boxId": 23,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "FREE"
+    },
+    {
+      "id": 1965,
+      "boxId": 23,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "FREE"
+    },
+    {
+      "id": 1966,
+      "boxId": 23,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "FREE"
+    },
+    {
+      "id": 1967,
+      "boxId": 23,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 1968,
+      "boxId": 23,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 1969,
+      "boxId": 23,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 1970,
+      "boxId": 23,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 1971,
+      "boxId": 23,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 1972,
+      "boxId": 23,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "FREE"
+    },
+    {
+      "id": 1973,
+      "boxId": 23,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "FREE"
+    },
+    {
+      "id": 1974,
+      "boxId": 23,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "FREE"
+    },
+    {
+      "id": 1975,
+      "boxId": 23,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "FREE"
+    },
+    {
+      "id": 1976,
+      "boxId": 23,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 1977,
+      "boxId": 23,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 1978,
+      "boxId": 23,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 1979,
+      "boxId": 23,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 1980,
+      "boxId": 23,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 1981,
+      "boxId": 23,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "FREE"
+    },
+    {
+      "id": 1982,
+      "boxId": 23,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "FREE"
+    },
+    {
+      "id": 1983,
+      "boxId": 23,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "FREE"
+    },
+    {
+      "id": 1984,
+      "boxId": 23,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "FREE"
+    },
+    {
+      "id": 1985,
+      "boxId": 23,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 1986,
+      "boxId": 23,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 1987,
+      "boxId": 23,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 1988,
+      "boxId": 23,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 1989,
+      "boxId": 23,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 1990,
+      "boxId": 23,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "FREE"
+    },
+    {
+      "id": 1991,
+      "boxId": 23,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "FREE"
+    },
+    {
+      "id": 1992,
+      "boxId": 23,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 1993,
+      "boxId": 23,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 1994,
+      "boxId": 23,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 1995,
+      "boxId": 23,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 1996,
+      "boxId": 23,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 1997,
+      "boxId": 23,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 1998,
+      "boxId": 23,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 1999,
+      "boxId": 23,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "FREE"
+    },
+    {
+      "id": 2000,
+      "boxId": 23,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "FREE"
+    },
+    {
+      "id": 2001,
+      "boxId": 23,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 2002,
+      "boxId": 23,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 2003,
+      "boxId": 23,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 2004,
+      "boxId": 23,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 2005,
+      "boxId": 23,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 2006,
+      "boxId": 23,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 2007,
+      "boxId": 23,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 2008,
+      "boxId": 23,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "FREE"
+    },
+    {
+      "id": 2009,
+      "boxId": 23,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "FREE"
+    },
+    {
+      "id": 2010,
+      "boxId": 23,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 2011,
+      "boxId": 23,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 2012,
+      "boxId": 23,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 2013,
+      "boxId": 23,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 2014,
+      "boxId": 23,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 2015,
+      "boxId": 23,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 2016,
+      "boxId": 23,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 2017,
+      "boxId": 23,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "FREE"
+    },
+    {
+      "id": 2018,
+      "boxId": 23,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "FREE"
+    },
+    {
+      "id": 2019,
+      "boxId": 23,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 2020,
+      "boxId": 23,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 2021,
+      "boxId": 23,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 2022,
+      "boxId": 23,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 2023,
+      "boxId": 23,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 2024,
+      "boxId": 23,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 2025,
+      "boxId": 23,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 2026,
+      "boxId": 23,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "FREE"
+    },
+    {
+      "id": 2027,
+      "boxId": 23,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "FREE"
+    },
+    {
+      "id": 2028,
+      "boxId": 23,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 2029,
+      "boxId": 23,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 2030,
+      "boxId": 23,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 2031,
+      "boxId": 23,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 2032,
+      "boxId": 23,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 2033,
+      "boxId": 23,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 2034,
+      "boxId": 23,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 2037,
+      "boxId": 24,
+      "row": 1,
+      "col": 3,
+      "cellCode": "A3",
+      "status": "FREE"
+    },
+    {
+      "id": 2038,
+      "boxId": 24,
+      "row": 1,
+      "col": 4,
+      "cellCode": "A4",
+      "status": "FREE"
+    },
+    {
+      "id": 2039,
+      "boxId": 24,
+      "row": 1,
+      "col": 5,
+      "cellCode": "A5",
+      "status": "FREE"
+    },
+    {
+      "id": 2040,
+      "boxId": 24,
+      "row": 1,
+      "col": 6,
+      "cellCode": "A6",
+      "status": "FREE"
+    },
+    {
+      "id": 2041,
+      "boxId": 24,
+      "row": 1,
+      "col": 7,
+      "cellCode": "A7",
+      "status": "FREE"
+    },
+    {
+      "id": 2042,
+      "boxId": 24,
+      "row": 1,
+      "col": 8,
+      "cellCode": "A8",
+      "status": "FREE"
+    },
+    {
+      "id": 2043,
+      "boxId": 24,
+      "row": 1,
+      "col": 9,
+      "cellCode": "A9",
+      "status": "FREE"
+    },
+    {
+      "id": 2044,
+      "boxId": 24,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "FREE"
+    },
+    {
+      "id": 2045,
+      "boxId": 24,
+      "row": 2,
+      "col": 2,
+      "cellCode": "B2",
+      "status": "FREE"
+    },
+    {
+      "id": 2046,
+      "boxId": 24,
+      "row": 2,
+      "col": 3,
+      "cellCode": "B3",
+      "status": "FREE"
+    },
+    {
+      "id": 2047,
+      "boxId": 24,
+      "row": 2,
+      "col": 4,
+      "cellCode": "B4",
+      "status": "FREE"
+    },
+    {
+      "id": 2048,
+      "boxId": 24,
+      "row": 2,
+      "col": 5,
+      "cellCode": "B5",
+      "status": "FREE"
+    },
+    {
+      "id": 2049,
+      "boxId": 24,
+      "row": 2,
+      "col": 6,
+      "cellCode": "B6",
+      "status": "FREE"
+    },
+    {
+      "id": 2050,
+      "boxId": 24,
+      "row": 2,
+      "col": 7,
+      "cellCode": "B7",
+      "status": "FREE"
+    },
+    {
+      "id": 2051,
+      "boxId": 24,
+      "row": 2,
+      "col": 8,
+      "cellCode": "B8",
+      "status": "FREE"
+    },
+    {
+      "id": 2052,
+      "boxId": 24,
+      "row": 2,
+      "col": 9,
+      "cellCode": "B9",
+      "status": "FREE"
+    },
+    {
+      "id": 2053,
+      "boxId": 24,
+      "row": 3,
+      "col": 1,
+      "cellCode": "C1",
+      "status": "FREE"
+    },
+    {
+      "id": 2054,
+      "boxId": 24,
+      "row": 3,
+      "col": 2,
+      "cellCode": "C2",
+      "status": "FREE"
+    },
+    {
+      "id": 2055,
+      "boxId": 24,
+      "row": 3,
+      "col": 3,
+      "cellCode": "C3",
+      "status": "FREE"
+    },
+    {
+      "id": 2056,
+      "boxId": 24,
+      "row": 3,
+      "col": 4,
+      "cellCode": "C4",
+      "status": "FREE"
+    },
+    {
+      "id": 2057,
+      "boxId": 24,
+      "row": 3,
+      "col": 5,
+      "cellCode": "C5",
+      "status": "FREE"
+    },
+    {
+      "id": 2058,
+      "boxId": 24,
+      "row": 3,
+      "col": 6,
+      "cellCode": "C6",
+      "status": "FREE"
+    },
+    {
+      "id": 2059,
+      "boxId": 24,
+      "row": 3,
+      "col": 7,
+      "cellCode": "C7",
+      "status": "FREE"
+    },
+    {
+      "id": 2060,
+      "boxId": 24,
+      "row": 3,
+      "col": 8,
+      "cellCode": "C8",
+      "status": "FREE"
+    },
+    {
+      "id": 2061,
+      "boxId": 24,
+      "row": 3,
+      "col": 9,
+      "cellCode": "C9",
+      "status": "FREE"
+    },
+    {
+      "id": 2062,
+      "boxId": 24,
+      "row": 4,
+      "col": 1,
+      "cellCode": "D1",
+      "status": "FREE"
+    },
+    {
+      "id": 2063,
+      "boxId": 24,
+      "row": 4,
+      "col": 2,
+      "cellCode": "D2",
+      "status": "FREE"
+    },
+    {
+      "id": 2064,
+      "boxId": 24,
+      "row": 4,
+      "col": 3,
+      "cellCode": "D3",
+      "status": "FREE"
+    },
+    {
+      "id": 2065,
+      "boxId": 24,
+      "row": 4,
+      "col": 4,
+      "cellCode": "D4",
+      "status": "FREE"
+    },
+    {
+      "id": 2066,
+      "boxId": 24,
+      "row": 4,
+      "col": 5,
+      "cellCode": "D5",
+      "status": "FREE"
+    },
+    {
+      "id": 2067,
+      "boxId": 24,
+      "row": 4,
+      "col": 6,
+      "cellCode": "D6",
+      "status": "FREE"
+    },
+    {
+      "id": 2068,
+      "boxId": 24,
+      "row": 4,
+      "col": 7,
+      "cellCode": "D7",
+      "status": "FREE"
+    },
+    {
+      "id": 2069,
+      "boxId": 24,
+      "row": 4,
+      "col": 8,
+      "cellCode": "D8",
+      "status": "FREE"
+    },
+    {
+      "id": 2070,
+      "boxId": 24,
+      "row": 4,
+      "col": 9,
+      "cellCode": "D9",
+      "status": "FREE"
+    },
+    {
+      "id": 2071,
+      "boxId": 24,
+      "row": 5,
+      "col": 1,
+      "cellCode": "E1",
+      "status": "FREE"
+    },
+    {
+      "id": 2072,
+      "boxId": 24,
+      "row": 5,
+      "col": 2,
+      "cellCode": "E2",
+      "status": "FREE"
+    },
+    {
+      "id": 2073,
+      "boxId": 24,
+      "row": 5,
+      "col": 3,
+      "cellCode": "E3",
+      "status": "FREE"
+    },
+    {
+      "id": 2074,
+      "boxId": 24,
+      "row": 5,
+      "col": 4,
+      "cellCode": "E4",
+      "status": "FREE"
+    },
+    {
+      "id": 2075,
+      "boxId": 24,
+      "row": 5,
+      "col": 5,
+      "cellCode": "E5",
+      "status": "FREE"
+    },
+    {
+      "id": 2076,
+      "boxId": 24,
+      "row": 5,
+      "col": 6,
+      "cellCode": "E6",
+      "status": "FREE"
+    },
+    {
+      "id": 2077,
+      "boxId": 24,
+      "row": 5,
+      "col": 7,
+      "cellCode": "E7",
+      "status": "FREE"
+    },
+    {
+      "id": 2078,
+      "boxId": 24,
+      "row": 5,
+      "col": 8,
+      "cellCode": "E8",
+      "status": "FREE"
+    },
+    {
+      "id": 2079,
+      "boxId": 24,
+      "row": 5,
+      "col": 9,
+      "cellCode": "E9",
+      "status": "FREE"
+    },
+    {
+      "id": 2080,
+      "boxId": 24,
+      "row": 6,
+      "col": 1,
+      "cellCode": "F1",
+      "status": "FREE"
+    },
+    {
+      "id": 2081,
+      "boxId": 24,
+      "row": 6,
+      "col": 2,
+      "cellCode": "F2",
+      "status": "FREE"
+    },
+    {
+      "id": 2082,
+      "boxId": 24,
+      "row": 6,
+      "col": 3,
+      "cellCode": "F3",
+      "status": "FREE"
+    },
+    {
+      "id": 2083,
+      "boxId": 24,
+      "row": 6,
+      "col": 4,
+      "cellCode": "F4",
+      "status": "FREE"
+    },
+    {
+      "id": 2084,
+      "boxId": 24,
+      "row": 6,
+      "col": 5,
+      "cellCode": "F5",
+      "status": "FREE"
+    },
+    {
+      "id": 2085,
+      "boxId": 24,
+      "row": 6,
+      "col": 6,
+      "cellCode": "F6",
+      "status": "FREE"
+    },
+    {
+      "id": 2086,
+      "boxId": 24,
+      "row": 6,
+      "col": 7,
+      "cellCode": "F7",
+      "status": "FREE"
+    },
+    {
+      "id": 2087,
+      "boxId": 24,
+      "row": 6,
+      "col": 8,
+      "cellCode": "F8",
+      "status": "FREE"
+    },
+    {
+      "id": 2088,
+      "boxId": 24,
+      "row": 6,
+      "col": 9,
+      "cellCode": "F9",
+      "status": "FREE"
+    },
+    {
+      "id": 2089,
+      "boxId": 24,
+      "row": 7,
+      "col": 1,
+      "cellCode": "G1",
+      "status": "FREE"
+    },
+    {
+      "id": 2090,
+      "boxId": 24,
+      "row": 7,
+      "col": 2,
+      "cellCode": "G2",
+      "status": "FREE"
+    },
+    {
+      "id": 2091,
+      "boxId": 24,
+      "row": 7,
+      "col": 3,
+      "cellCode": "G3",
+      "status": "FREE"
+    },
+    {
+      "id": 2092,
+      "boxId": 24,
+      "row": 7,
+      "col": 4,
+      "cellCode": "G4",
+      "status": "FREE"
+    },
+    {
+      "id": 2093,
+      "boxId": 24,
+      "row": 7,
+      "col": 5,
+      "cellCode": "G5",
+      "status": "FREE"
+    },
+    {
+      "id": 2094,
+      "boxId": 24,
+      "row": 7,
+      "col": 6,
+      "cellCode": "G6",
+      "status": "FREE"
+    },
+    {
+      "id": 2095,
+      "boxId": 24,
+      "row": 7,
+      "col": 7,
+      "cellCode": "G7",
+      "status": "FREE"
+    },
+    {
+      "id": 2096,
+      "boxId": 24,
+      "row": 7,
+      "col": 8,
+      "cellCode": "G8",
+      "status": "FREE"
+    },
+    {
+      "id": 2097,
+      "boxId": 24,
+      "row": 7,
+      "col": 9,
+      "cellCode": "G9",
+      "status": "FREE"
+    },
+    {
+      "id": 2098,
+      "boxId": 24,
+      "row": 8,
+      "col": 1,
+      "cellCode": "H1",
+      "status": "FREE"
+    },
+    {
+      "id": 2099,
+      "boxId": 24,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "FREE"
+    },
+    {
+      "id": 2100,
+      "boxId": 24,
+      "row": 8,
+      "col": 3,
+      "cellCode": "H3",
+      "status": "FREE"
+    },
+    {
+      "id": 2101,
+      "boxId": 24,
+      "row": 8,
+      "col": 4,
+      "cellCode": "H4",
+      "status": "FREE"
+    },
+    {
+      "id": 2102,
+      "boxId": 24,
+      "row": 8,
+      "col": 5,
+      "cellCode": "H5",
+      "status": "FREE"
+    },
+    {
+      "id": 2103,
+      "boxId": 24,
+      "row": 8,
+      "col": 6,
+      "cellCode": "H6",
+      "status": "FREE"
+    },
+    {
+      "id": 2104,
+      "boxId": 24,
+      "row": 8,
+      "col": 7,
+      "cellCode": "H7",
+      "status": "FREE"
+    },
+    {
+      "id": 2105,
+      "boxId": 24,
+      "row": 8,
+      "col": 8,
+      "cellCode": "H8",
+      "status": "FREE"
+    },
+    {
+      "id": 2106,
+      "boxId": 24,
+      "row": 8,
+      "col": 9,
+      "cellCode": "H9",
+      "status": "FREE"
+    },
+    {
+      "id": 2107,
+      "boxId": 24,
+      "row": 9,
+      "col": 1,
+      "cellCode": "I1",
+      "status": "FREE"
+    },
+    {
+      "id": 2108,
+      "boxId": 24,
+      "row": 9,
+      "col": 2,
+      "cellCode": "I2",
+      "status": "FREE"
+    },
+    {
+      "id": 2109,
+      "boxId": 24,
+      "row": 9,
+      "col": 3,
+      "cellCode": "I3",
+      "status": "FREE"
+    },
+    {
+      "id": 2110,
+      "boxId": 24,
+      "row": 9,
+      "col": 4,
+      "cellCode": "I4",
+      "status": "FREE"
+    },
+    {
+      "id": 2036,
+      "boxId": 24,
+      "row": 1,
+      "col": 2,
+      "cellCode": "A2",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 2111,
+      "boxId": 24,
+      "row": 9,
+      "col": 5,
+      "cellCode": "I5",
+      "status": "FREE"
+    },
+    {
+      "id": 2112,
+      "boxId": 24,
+      "row": 9,
+      "col": 6,
+      "cellCode": "I6",
+      "status": "FREE"
+    },
+    {
+      "id": 2113,
+      "boxId": 24,
+      "row": 9,
+      "col": 7,
+      "cellCode": "I7",
+      "status": "FREE"
+    },
+    {
+      "id": 2114,
+      "boxId": 24,
+      "row": 9,
+      "col": 8,
+      "cellCode": "I8",
+      "status": "FREE"
+    },
+    {
+      "id": 2115,
+      "boxId": 24,
+      "row": 9,
+      "col": 9,
+      "cellCode": "I9",
+      "status": "FREE"
+    },
+    {
+      "id": 2035,
+      "boxId": 24,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1792,
+      "boxId": 21,
+      "row": 1,
+      "col": 1,
+      "cellCode": "A1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1801,
+      "boxId": 21,
+      "row": 2,
+      "col": 1,
+      "cellCode": "B1",
+      "status": "OCCUPIED"
+    },
+    {
+      "id": 1856,
+      "boxId": 21,
+      "row": 8,
+      "col": 2,
+      "cellCode": "H2",
+      "status": "OCCUPIED"
+    }
+  ],
+  "media": [
+    {
+      "id": 5,
+      "name": "LB Agar",
+      "composition": "Lysogeny broth agar",
+      "createdAt": "2025-11-24T08:51:05.627Z"
+    },
+    {
+      "id": 6,
+      "name": "ISP2",
+      "composition": "International Streptomyces Project medium 2",
+      "createdAt": "2025-11-24T08:51:05.627Z"
+    },
+    {
+      "id": 8,
+      "name": "Эшби",
+      "composition": "сахароза – 20 г/л, K2HPO4 – 0,2 г/л, MgSO4 – 0,2 г/л, NaCl – 0,2 г/л, K2SO4 – 0,1 г/л, CaCO3 – 5 г/л, агар – 14 г/л. pH=7.2",
+      "createdAt": "2025-12-11T05:49:33.728Z"
+    },
+    {
+      "id": 7,
+      "name": "ГМФ",
+      "composition": "аналог МПА\nГМФ–агар производства ООО «НИЦФ» Санкт–Петербург",
+      "createdAt": "2025-11-28T03:40:51.649Z"
+    },
+    {
+      "id": 9,
+      "name": "КАА",
+      "composition": "Крахмал-аммиачный агар: крахмал – 10 г/л, (NH4)2SO4 – 1г/л, MgSO4*7H2O – 1 г/л, CaCO3 – 3 г/л, агар – 14 г/л.",
+      "createdAt": "2025-12-11T05:50:43.003Z"
+    },
+    {
+      "id": 10,
+      "name": "SIM",
+      "composition": "...",
+      "createdAt": "2025-12-11T05:51:45.461Z"
+    }
+  ],
+  "legendContent": [
+    {
+      "id": 2,
+      "content": "<p>Индекс: </p><p>ИВ - Илья Васильев </p><p>УВ (U) - Ульяна Васильева</p><p>МК - Марина Карепова</p>",
+      "updatedAt": "2025-12-11T05:53:20.116Z"
+    }
+  ],
+  "uiBindings": [
+    {
+      "id": 10,
+      "menuLabel": "My Collection",
+      "profileKey": "STRAIN",
+      "order": 0,
+      "legendId": null,
+      "routeSlug": "my-collection",
+      "icon": "Microscope",
+      "enabledFieldPacks": [
+        "basic_info",
+        "taxonomy",
+        "growth_characteristics"
+      ],
+      "updatedAt": "2025-12-14T02:34:03.007Z"
+    },
+    {
+      "id": 11,
+      "menuLabel": "Field Samples",
+      "profileKey": "SAMPLE",
+      "order": 1,
+      "legendId": null,
+      "routeSlug": "field-samples",
+      "icon": "Leaf",
+      "enabledFieldPacks": [
+        "site_info"
+      ],
+      "updatedAt": "2025-12-14T02:34:03.007Z"
+    },
+    {
+      "id": 12,
+      "menuLabel": "Storage",
+      "profileKey": "STORAGE",
+      "order": 2,
+      "legendId": null,
+      "routeSlug": "storage",
+      "icon": "Box",
+      "enabledFieldPacks": [],
+      "updatedAt": "2025-12-14T02:34:03.007Z"
+    }
+  ]
+}

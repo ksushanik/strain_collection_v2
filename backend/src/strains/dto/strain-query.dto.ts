@@ -47,8 +47,13 @@ export class StrainQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'identifier', 'sampleCode', 'taxonomy16s'])
-  sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s';
+  @IsEnum(['createdAt', 'identifier', 'sampleCode', 'taxonomy16s', 'ncbiScientificName'])
+  sortBy?:
+    | 'createdAt'
+    | 'identifier'
+    | 'sampleCode'
+    | 'taxonomy16s'
+    | 'ncbiScientificName';
 
   @IsOptional()
   @IsEnum(['asc', 'desc'])

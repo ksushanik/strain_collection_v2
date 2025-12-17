@@ -23,6 +23,142 @@ async function main() {
   await prisma.sample.deleteMany();
   await prisma.sampleTypeDictionary.deleteMany();
 
+  // Ensure required system traits exist even after full reset/wipe
+  await Promise.all([
+    prisma.traitDefinition.upsert({
+      where: { code: 'gram_stain' },
+      update: {
+        name: 'Gram Stain',
+        dataType: 'CATEGORICAL',
+        category: 'MORPHOLOGY',
+        options: ['+', '-', 'Variable'],
+        isSystem: true,
+      },
+      create: {
+        name: 'Gram Stain',
+        code: 'gram_stain',
+        dataType: 'CATEGORICAL',
+        category: 'MORPHOLOGY',
+        options: ['+', '-', 'Variable'],
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'amylase' },
+      update: {
+        name: 'Amylase',
+        dataType: 'CATEGORICAL',
+        category: 'BIOCHEMISTRY',
+        options: ['+', '-'],
+        isSystem: true,
+      },
+      create: {
+        name: 'Amylase',
+        code: 'amylase',
+        dataType: 'CATEGORICAL',
+        category: 'BIOCHEMISTRY',
+        options: ['+', '-'],
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'iuk_iaa' },
+      update: {
+        name: 'IUK / IAA',
+        dataType: 'TEXT',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      create: {
+        name: 'IUK / IAA',
+        code: 'iuk_iaa',
+        dataType: 'TEXT',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'antibiotic_activity' },
+      update: {
+        name: 'Antibiotic Activity',
+        dataType: 'TEXT',
+        category: 'ANTIBIOTICS',
+        isSystem: true,
+      },
+      create: {
+        name: 'Antibiotic Activity',
+        code: 'antibiotic_activity',
+        dataType: 'TEXT',
+        category: 'ANTIBIOTICS',
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'sequenced_seq' },
+      update: {
+        name: 'Sequenced (SEQ)',
+        dataType: 'BOOLEAN',
+        category: 'GENETICS',
+        isSystem: true,
+      },
+      create: {
+        name: 'Sequenced (SEQ)',
+        code: 'sequenced_seq',
+        dataType: 'BOOLEAN',
+        category: 'GENETICS',
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'phosphate_solubilization' },
+      update: {
+        name: 'Phosphate Solubilization',
+        dataType: 'BOOLEAN',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      create: {
+        name: 'Phosphate Solubilization',
+        code: 'phosphate_solubilization',
+        dataType: 'BOOLEAN',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'siderophore_production' },
+      update: {
+        name: 'Siderophore Production',
+        dataType: 'BOOLEAN',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      create: {
+        name: 'Siderophore Production',
+        code: 'siderophore_production',
+        dataType: 'BOOLEAN',
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+    }),
+    prisma.traitDefinition.upsert({
+      where: { code: 'pigment_secretion' },
+      update: {
+        name: 'Pigment Secretion',
+        dataType: 'BOOLEAN',
+        category: 'MORPHOLOGY',
+        isSystem: true,
+      },
+      create: {
+        name: 'Pigment Secretion',
+        code: 'pigment_secretion',
+        dataType: 'BOOLEAN',
+        category: 'MORPHOLOGY',
+        isSystem: true,
+      },
+    }),
+  ]);
+
   // 2. Create legend and UI bindings
   console.log('Creating UI bindings and legend...');
   const legend = await prisma.legendContent.create({
@@ -244,7 +380,7 @@ async function main() {
                 { traitName: "Gram Stain", result: gramPositive ? "+" : "-", method: "Microscopy" },
                 { traitName: "Phosphate Solubilization", result: Math.random() > 0.5 ? "+" : "-", method: "Agar Plate" },
                 { traitName: "Siderophore Production", result: Math.random() > 0.5 ? "+" : "-", method: "CAS Assay" },
-                { traitName: "Pigment Production", result: Math.random() > 0.5 ? "+" : "-", method: "Visual" }
+                { traitName: "Pigment Secretion", result: Math.random() > 0.5 ? "true" : "false", method: "Visual" }
             ]
         },
         genetics: {

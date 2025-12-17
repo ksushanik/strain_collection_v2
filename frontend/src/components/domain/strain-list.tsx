@@ -27,15 +27,18 @@ import {
 } from "@/components/ui/select"
 import { useApiError } from "@/hooks/use-api-error"
 import { useAuth } from "@/contexts/AuthContext"
+import { isPositiveLike } from "@/lib/trait-labels"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 interface StrainListProps {
     enabledPacks: string[]
     returnPath?: string
 }
 
-const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonomy16s"] as const
+const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonomy16s", "ncbiScientificName"] as const
 type StrainSortBy = (typeof STRAIN_SORT_BY_VALUES)[number]
 type SortOrder = "asc" | "desc"
+type Phenotype = NonNullable<Strain["phenotypes"]>[number]
 
 function isStrainSortBy(value: unknown): value is StrainSortBy {
     return typeof value === "string" && (STRAIN_SORT_BY_VALUES as readonly string[]).includes(value)
@@ -101,6 +104,18 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         taxonomy: "",
         isolationRegion: "",
     })
+
+    const matchesTrait = (p: Phenotype, code: string, name: string) =>
+        p?.traitDefinition?.code === code ||
+        p?.traitCode === code ||
+        p?.traitName === name ||
+        (code === 'pigment_secretion' && p?.traitName === 'Pigment Production')
+
+    const isNegativeLike = (result: unknown) => {
+        if (typeof result !== 'string') return false
+        const normalized = result.trim().toLowerCase()
+        return normalized === '-' || normalized.includes('negative') || normalized === 'false'
+    }
 
     const loadStrains = React.useCallback(() => {
         setLoading(true)
@@ -171,7 +186,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             <option value="createdAt">{t('created')}</option>
                             <option value="identifier">{t('identifier')}</option>
                             <option value="sampleCode">{t('sampleCode')}</option>
-                            <option value="taxonomy16s">{t('taxonomy')}</option>
+                            <option value="ncbiScientificName">{t('ncbiScientificName')}</option>
                         </select>
                         <Button
                             variant="outline"
@@ -239,7 +254,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     <TableHead className="w-[150px]">{t('identifier')}</TableHead>
                                     <TableHead>{t('sampleSource')}</TableHead>
                                     <TableHead className="w-[220px]">{t('storage')}</TableHead>
-                                    {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
+                                    {showTaxonomy && <TableHead>{t('ncbiScientificName')}</TableHead>}
                                     <TableHead>{t('gramStain')}</TableHead>
                                     {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                                 </TableRow>
@@ -260,7 +275,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                                     <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
                                                 )}
                                             </TableCell>
-                                            <TableCell>{strain.sample?.code || '-'}</TableCell>
+                                            <TableCell>{strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : '-'}</TableCell>
                                             <TableCell>
                                                 {storageSummary.first ? (
                                                     <div className="flex items-center gap-2 min-w-0">
@@ -280,8 +295,8 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
                                             {showTaxonomy && (
                                                 <TableCell>
-                                                    {strain.taxonomy16s ? (
-                                                        <span className="italic">{strain.taxonomy16s}</span>
+                                                    {strain.ncbiScientificName ? (
+                                                        <span className="italic">{strain.ncbiScientificName}</span>
                                                     ) : (
                                                         <span className="text-muted-foreground">-</span>
                                                     )}
@@ -308,9 +323,10 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                             {showGrowth && (
                                                 <TableCell>
                                                     <div className="flex gap-1 flex-wrap">
-                                                        {strain.phenotypes?.some(p => p.traitName === 'Phosphate Solubilization' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                                        {strain.phenotypes?.some(p => p.traitName === 'Siderophore Production' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                                        {strain.phenotypes?.some(p => p.traitName === 'Pigment Secretion' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'amylase', 'Amylase') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('amylasePosBadge')}</Badge>}
+                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'phosphate_solubilization', 'Phosphate Solubilization') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
+                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'siderophore_production', 'Siderophore Production') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
+                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'pigment_secretion', 'Pigment Secretion') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
                                                     </div>
                                                 </TableCell>
                                             )}
@@ -335,12 +351,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                         <div className="font-semibold">{strain.identifier}</div>
                                         <div className="flex items-center gap-1">
                                             {strain.genetics?.wgsStatus && strain.genetics.wgsStatus !== 'NONE' && <Badge variant="secondary" className="text-[10px]">{t('seqBadge')}</Badge>}
-                                            {strain.phenotypes?.find(p => p.traitName === 'Gram Stain')?.result === '+' && <Badge variant="outline" className="text-[10px]">{t('gramPosBadge')}</Badge>}
-                                            {strain.phenotypes?.find(p => p.traitName === 'Gram Stain')?.result === '-' && <Badge variant="outline" className="text-[10px]">{t('gramNegBadge')}</Badge>}
+                                            {isPositiveLike(strain.phenotypes?.find((p) => matchesTrait(p, 'gram_stain', 'Gram Stain'))?.result) && <Badge variant="outline" className="text-[10px]">{t('gramPosBadge')}</Badge>}
+                                            {isNegativeLike(strain.phenotypes?.find((p) => matchesTrait(p, 'gram_stain', 'Gram Stain'))?.result) && <Badge variant="outline" className="text-[10px]">{t('gramNegBadge')}</Badge>}
                                         </div>
                                     </div>
                                     <div className="text-sm text-muted-foreground">
-                                        {t('sample')}: {strain.sample?.code || '-'}
+                                        {t('sample')}: {strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : '-'}
                                     </div>
                                     <div className="text-sm text-muted-foreground">
                                         {t('storage')}: {storageSummary.first ? (
@@ -354,14 +370,15 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     </div>
                                     {showTaxonomy && (
                                         <div className="text-sm">
-                                            {strain.taxonomy16s ? <span className="italic">{strain.taxonomy16s}</span> : <span className="text-muted-foreground">-</span>}
+                                            {strain.ncbiScientificName ? <span className="italic">{strain.ncbiScientificName}</span> : <span className="text-muted-foreground">-</span>}
                                         </div>
                                     )}
                                     {showGrowth && (
                                         <div className="flex flex-wrap gap-1 pt-2">
-                                            {strain.phenotypes?.some(p => p.traitName === 'Phosphate Solubilization' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                            {strain.phenotypes?.some(p => p.traitName === 'Siderophore Production' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                            {strain.phenotypes?.some(p => p.traitName === 'Pigment Secretion' && p.result === '+') && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'amylase', 'Amylase') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('amylasePosBadge')}</Badge>}
+                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'phosphate_solubilization', 'Phosphate Solubilization') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
+                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'siderophore_production', 'Siderophore Production') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
+                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'pigment_secretion', 'Pigment Secretion') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
                                         </div>
                                     )}
                                 </div>

@@ -4,7 +4,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { ApiService, Strain, CreateStrainInput } from "@/services/api"
+import { ApiService, Strain, CreateStrainInput, TraitDataType } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -42,16 +42,25 @@ const strainSchema = z.object({
     otherTaxonomy: z.string().optional(),
     isolationRegion: z.enum(["RHIZOSPHERE", "ENDOSPHERE", "PHYLLOSPHERE", "SOIL", "OTHER"]).optional(),
 
-    // Dynamic Traits
-    phenotypes: z.array(z.object({
-        traitDefinitionId: z.number().optional().nullable(),
-        traitName: z.string().min(1, "Required"),
-        result: z.string().min(1, "Required"),
-        method: z.string().optional(),
-        dataType: z.any().optional(),
-        options: z.any().optional(),
-        units: z.any().optional(),
-    })).optional(),
+    // Dynamic Traits (may be present but unset in UI; unset entries are ignored on submit)
+    phenotypes: z.array(
+        z.object({
+            traitDefinitionId: z.number().optional().nullable(),
+            traitName: z.string().optional(),
+            traitCode: z.string().optional().nullable(),
+            result: z.string().optional(),
+            method: z.string().optional(),
+            dataType: z.nativeEnum(TraitDataType).optional(),
+            options: z.array(z.string()).optional().nullable(),
+            units: z.string().optional().nullable(),
+        }).superRefine((val, ctx) => {
+            const result = (val.result ?? "").trim()
+            const hasTraitRef = (val.traitDefinitionId ?? null) !== null || !!(val.traitName ?? "").trim()
+            if (result.length > 0 && !hasTraitRef) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Required", path: ["traitName"] })
+            }
+        }),
+    ).optional(),
 
     // Genetics
     genetics: z.object({
@@ -63,6 +72,13 @@ const strainSchema = z.object({
 })
 
 type StrainFormValues = z.infer<typeof strainSchema>
+
+const ISOLATION_REGION_VALUES = ["RHIZOSPHERE", "ENDOSPHERE", "PHYLLOSPHERE", "SOIL", "OTHER"] as const
+type IsolationRegion = (typeof ISOLATION_REGION_VALUES)[number]
+
+function isIsolationRegion(value: unknown): value is IsolationRegion {
+    return typeof value === "string" && (ISOLATION_REGION_VALUES as readonly string[]).includes(value)
+}
 
 interface StrainFormProps {
     initialData?: Strain
@@ -96,8 +112,8 @@ export function StrainForm({
             // New fields defaults
             ncbiScientificName: initialData?.ncbiScientificName || "",
             ncbiTaxonomyId: initialData?.ncbiTaxonomyId || undefined,
-            biosafetyLevel: (initialData?.biosafetyLevel as any) || undefined,
-            stockType: (initialData?.stockType as any) || undefined,
+            biosafetyLevel: initialData?.biosafetyLevel || undefined,
+            stockType: initialData?.stockType || undefined,
             passageNumber: initialData?.passageNumber || undefined,
             
             // Legacy defaults
@@ -107,7 +123,7 @@ export function StrainForm({
             indexerInitials: initialData?.indexerInitials || "",
             collectionRcam: initialData?.collectionRcam || "",
             otherTaxonomy: initialData?.otherTaxonomy || "",
-            isolationRegion: (initialData?.isolationRegion as any) || undefined,
+            isolationRegion: isIsolationRegion(initialData?.isolationRegion) ? initialData?.isolationRegion : undefined,
 
             phenotypes: initialData?.phenotypes || [],
             genetics: initialData?.genetics || { wgsStatus: "NONE" },
@@ -123,12 +139,31 @@ export function StrainForm({
                 sampleId: data.sampleId ? parseInt(data.sampleId) : undefined,
                 // Clean up optional fields
                 genetics: data.genetics?.wgsStatus === "NONE" && !data.genetics.marker16sSequence ? undefined : data.genetics,
-                phenotypes: data.phenotypes?.map(({ traitDefinitionId, traitName, result, method }) => ({
-                    traitDefinitionId,
-                    traitName,
-                    result,
-                    method,
-                })),
+                phenotypes: data.phenotypes
+                    ?.filter((p) => {
+                        const result = (p.result ?? "").trim()
+                        if (!result) return false
+                        // For boolean toggles we only persist explicit true
+                        if (result === "false") return false
+                        const traitCode = p.traitCode ?? undefined
+                        const traitName = (p.traitName ?? "").trim().toLowerCase()
+                        const isKnownBooleanLegacy =
+                            traitName === "phosphate solubilization" ||
+                            traitName === "siderophore production" ||
+                            traitName === "pigment secretion" ||
+                            traitName === "sequenced (seq)"
+
+                        if (result === "-" && (p.dataType === TraitDataType.BOOLEAN || isKnownBooleanLegacy || traitCode === "phosphate_solubilization" || traitCode === "siderophore_production" || traitCode === "pigment_secretion" || traitCode === "sequenced_seq")) {
+                            return false
+                        }
+                        return true
+                    })
+                    .map(({ traitDefinitionId, traitName, result, method }) => ({
+                        traitDefinitionId: traitDefinitionId ?? undefined,
+                        traitName: (traitName ?? "").trim(),
+                        result: (result ?? "").trim(),
+                        method,
+                    })),
             }
 
             if (isEdit && initialData) {

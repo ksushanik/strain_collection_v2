@@ -78,13 +78,26 @@ export class StrainsService {
             select: { id: true, code: true, siteName: true },
           },
           phenotypes: {
-             where: {
-               traitDefinition: { code: 'gram_stain' }
-             },
-             select: {
-                result: true
-             },
-             take: 1
+            where: {
+              traitDefinition: {
+                code: {
+                  in: [
+                    'gram_stain',
+                    'amylase',
+                    'phosphate_solubilization',
+                    'siderophore_production',
+                    'pigment_secretion',
+                  ],
+                },
+              },
+            },
+            select: {
+              result: true,
+              traitName: true,
+              traitDefinition: {
+                select: { code: true },
+              },
+            },
           },
           storage: {
             orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
@@ -114,11 +127,15 @@ export class StrainsService {
     ]);
 
     return {
-      data: strains.map(s => ({
-        ...s,
-        gramStainLabel: s.phenotypes?.[0]?.result || null,
-        phenotypes: undefined, // Hide the raw array from response to keep it clean, or keep it if needed. Keeping clean.
-      })),
+      data: strains.map((s) => {
+        const gram = s.phenotypes?.find(
+          (p) => p.traitDefinition?.code === 'gram_stain',
+        );
+        return {
+          ...s,
+          gramStainLabel: gram?.result || null,
+        };
+      }),
       meta: {
         total,
         page,
@@ -172,12 +189,22 @@ export class StrainsService {
     if (
       createStrainDto.ncbiScientificName?.toLowerCase().includes('stenotrophomonas')
     ) {
+      const gramTrait = await this.prisma.traitDefinition.findUnique({
+        where: { code: 'gram_stain' },
+        select: { id: true, name: true },
+      });
+
       // Check if Gram Stain is already provided in phenotypes
-      const hasGramStain = phenotypes?.some((p) => p.traitName === 'Gram Stain');
+      const hasGramStain = phenotypes?.some(
+        (p) =>
+          (gramTrait?.id && p.traitDefinitionId === gramTrait.id) ||
+          p.traitName === (gramTrait?.name ?? 'Gram Stain'),
+      );
       if (!hasGramStain) {
         phenotypes = phenotypes || [];
         phenotypes.push({
-          traitName: 'Gram Stain',
+          traitDefinitionId: gramTrait?.id,
+          traitName: gramTrait?.name ?? 'Gram Stain',
           result: '-',
           method: 'Taxonomy Rule (Auto)',
         });

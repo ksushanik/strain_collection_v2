@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { slugify } from "@/lib/utils"
+import { getTraitDisplayName } from "@/lib/trait-labels"
 
 const initialFormData = {
   name: "",
@@ -28,6 +29,7 @@ const initialFormData = {
 export default function MethodsPage() {
   const t = useTranslations("Methods")
   const tCommon = useTranslations("Common")
+  const tStrains = useTranslations("Strains")
   const { user } = useAuth()
   
   const [data, setData] = React.useState<TraitDefinition[]>([])
@@ -227,7 +229,7 @@ export default function MethodsPage() {
                   className={canEdit ? "cursor-pointer hover:bg-muted/50" : ""}
                 >
                   <TableCell className="font-medium">
-                    {trait.name}
+                    {getTraitDisplayName(trait.code, trait.name, tStrains)}
                     {trait.description && (
                       <div className="text-xs text-muted-foreground mt-0.5">{trait.description}</div>
                     )}
@@ -304,6 +306,7 @@ export default function MethodsPage() {
                   onChange={handleNameChange}
                   placeholder="e.g. Gram Stain"
                   required
+                  disabled={isSystem}
                 />
               </div>
               <div className="space-y-2">

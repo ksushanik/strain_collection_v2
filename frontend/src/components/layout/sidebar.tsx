@@ -62,7 +62,9 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             setBindings(data)
             setLoading(false)
         }).catch(err => {
-            console.error('Failed to load UI bindings:', err)
+            // UI bindings are optional; avoid noisy dev overlay when API is temporarily unavailable.
+            console.warn('Failed to load UI bindings:', err)
+            setBindings([])
             setLoading(false)
         })
     }, [user])

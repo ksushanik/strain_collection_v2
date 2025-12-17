@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTraitDto } from './dto/create-trait.dto';
 import { UpdateTraitDto } from './dto/update-trait.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, TraitDataType } from '@prisma/client';
 
 @Injectable()
 export class TraitsService {
@@ -70,25 +70,122 @@ export class TraitsService {
   }
 
   private async seedSystemTraits() {
-    const gramStain = await this.prisma.traitDefinition.findUnique({
-      where: { code: 'gram_stain' },
+    const systemTraits: Prisma.TraitDefinitionUncheckedCreateInput[] = [
+      {
+        name: 'Gram Stain',
+        code: 'gram_stain',
+        dataType: TraitDataType.CATEGORICAL,
+        category: 'MORPHOLOGY',
+        options: ['+', '-', 'Variable'],
+        isSystem: true,
+      },
+      {
+        name: 'Amylase',
+        code: 'amylase',
+        dataType: TraitDataType.CATEGORICAL,
+        category: 'BIOCHEMISTRY',
+        options: ['+', '-'],
+        isSystem: true,
+      },
+      {
+        name: 'IUK / IAA',
+        code: 'iuk_iaa',
+        dataType: TraitDataType.TEXT,
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      {
+        name: 'Antibiotic Activity',
+        code: 'antibiotic_activity',
+        dataType: TraitDataType.TEXT,
+        category: 'ANTIBIOTICS',
+        isSystem: true,
+      },
+      {
+        name: 'Sequenced (SEQ)',
+        code: 'sequenced_seq',
+        dataType: TraitDataType.BOOLEAN,
+        category: 'GENETICS',
+        isSystem: true,
+      },
+      {
+        name: 'Phosphate Solubilization',
+        code: 'phosphate_solubilization',
+        dataType: TraitDataType.BOOLEAN,
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      {
+        name: 'Siderophore Production',
+        code: 'siderophore_production',
+        dataType: TraitDataType.BOOLEAN,
+        category: 'BIOCHEMISTRY',
+        isSystem: true,
+      },
+      {
+        name: 'Pigment Secretion',
+        code: 'pigment_secretion',
+        dataType: TraitDataType.BOOLEAN,
+        category: 'MORPHOLOGY',
+        isSystem: true,
+      },
+    ];
+
+    await Promise.all(
+      systemTraits.map((trait) =>
+        this.prisma.traitDefinition.upsert({
+          where: { code: trait.code },
+          update: {
+            name: trait.name,
+            dataType: trait.dataType,
+            category: trait.category ?? null,
+            options: trait.options ?? undefined,
+            isSystem: true,
+          },
+          create: trait,
+        }),
+      ),
+    );
+
+    await this.linkLegacyPhenotypesToSystemTraits();
+  }
+
+  private async linkLegacyPhenotypesToSystemTraits() {
+    const system = await this.prisma.traitDefinition.findMany({
+      // @ts-ignore: Prisma Client needs regeneration
+      where: { isSystem: true },
+      select: { id: true, name: true, code: true },
     });
 
-    if (!gramStain) {
-      await this.prisma.traitDefinition.create({
-        data: {
-          name: 'Gram Stain',
-          code: 'gram_stain',
-          dataType: 'CATEGORICAL',
-          // @ts-ignore: Prisma Client needs regeneration
-          category: 'MORPHOLOGY',
-          options: ['Positive (+)', 'Negative (-)', 'Variable'],
-          // @ts-ignore: Prisma Client needs regeneration
-          isSystem: true,
+    const byCode = new Map(system.map((t) => [t.code, t] as const));
+
+    const pigment = byCode.get('pigment_secretion');
+    if (pigment) {
+      await this.prisma.strainPhenotype.updateMany({
+        where: {
+          traitDefinitionId: null,
+          OR: [
+            { traitName: { equals: pigment.name, mode: 'insensitive' } },
+            { traitName: { equals: 'Pigment Production', mode: 'insensitive' } },
+          ],
         },
+        data: { traitDefinitionId: pigment.id, traitName: pigment.name },
       });
-      console.log('Seeded system trait: Gram Stain');
     }
+
+    await Promise.all(
+      system
+        .filter((t) => t.code !== 'pigment_secretion')
+        .map((t) =>
+          this.prisma.strainPhenotype.updateMany({
+            where: {
+              traitDefinitionId: null,
+              traitName: { equals: t.name, mode: 'insensitive' },
+            },
+            data: { traitDefinitionId: t.id, traitName: t.name },
+          }),
+        ),
+    );
   }
 
   async getDictionary() {

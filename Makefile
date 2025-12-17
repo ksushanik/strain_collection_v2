@@ -32,6 +32,15 @@ deploy-local:
 deploy-prod:
 	ssh 4feb "bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=$$(docker compose ps -q backend) && if [ -n \"$$cid\" ]; then docker exec $$cid sh -lc \"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\"$$src\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\"$$src\\\" ]; then cat \\\"$$src\\\"; fi\" > backend/.adminjs/components.bundle.js || true; fi'"
 
+# One-off: explicitly run Prisma migrations on production (useful for schema/data migrations).
+# Note: backend container is configured to run `prisma migrate deploy` on start, but this command is safer for manual control.
+migrate-prod:
+	ssh 4feb "bash -lc 'cd /home/user/bio_collection && cid=\$$(docker compose ps -q backend) && if [ -z \"\$$cid\" ]; then docker compose up -d backend; cid=\$$(docker compose ps -q backend); fi && docker exec \$$cid sh -lc \"npx prisma migrate deploy\"'"
+
+# For PowerShell/Windows
+migrate-prod-win:
+	powershell -Command "ssh 4feb \"bash -lc 'cd /home/user/bio_collection \&\& cid=\\\$(docker compose ps -q backend) \&\& if [ -z \\\"\\\$cid\\\" ]; then docker compose up -d backend; cid=\\\$(docker compose ps -q backend); fi \&\& docker exec \\\$cid sh -lc \\\"npx prisma migrate deploy\\\"'\""
+
 # Для PowerShell/Windows, где GNU make запускает cmd.exe и ssh не находится,
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 deploy-prod-win:

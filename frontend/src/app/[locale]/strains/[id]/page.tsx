@@ -13,12 +13,11 @@ import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
+import { TraitDataType } from "@/services/api"
+import { getTraitDisplayName } from "@/lib/trait-labels"
+import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
-function formatBinaryEnum(value: string) {
-    if (value === "POSITIVE") return "+"
-    if (value === "NEGATIVE") return "-"
-    return value
-}
+type Phenotype = NonNullable<Strain["phenotypes"]>[number]
 
 // Standard Card-like Section Block
 function SectionBlock({ 
@@ -58,6 +57,112 @@ function StrainDetailContent({ id }: { id: string }) {
     const [loading, setLoading] = React.useState(true)
     const [deleting, setDeleting] = React.useState(false)
 
+    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+
+    const getTraitCode = React.useCallback((p: Phenotype | null | undefined) => {
+        return p?.traitCode || p?.traitDefinition?.code || null
+    }, [])
+
+    const getTraitName = React.useCallback((p: Phenotype | null | undefined) => {
+        return (p as { traitDefinition?: { name?: string } | null } | null | undefined)?.traitDefinition?.name || p?.traitName || ""
+    }, [])
+
+    const getDataType = React.useCallback((p: Phenotype | null | undefined): TraitDataType => {
+        return (
+            (p as { dataType?: TraitDataType; traitDefinition?: { dataType?: TraitDataType } | null } | null | undefined)?.dataType ||
+            (p as { traitDefinition?: { dataType?: TraitDataType } | null } | null | undefined)?.traitDefinition?.dataType ||
+            TraitDataType.TEXT
+        )
+    }, [])
+
+    const definedPhenotypes = React.useMemo(() => {
+        const phenotypes = (strain?.phenotypes ?? []) as Phenotype[]
+        return phenotypes.filter((p) => {
+            const dataType = getDataType(p)
+            if (dataType === TraitDataType.BOOLEAN) return p?.result === "true"
+            return typeof p?.result === "string" && p.result.trim().length > 0
+        })
+    }, [getDataType, strain?.phenotypes])
+
+    const gramPhenotype = React.useMemo(() => {
+        return (
+            (strain?.phenotypes ?? []).find((p) => getTraitCode(p as Phenotype) === "gram_stain") ||
+            (strain?.phenotypes ?? []).find((p) => (p as Phenotype)?.traitName === "Gram Stain") ||
+            null
+        )
+    }, [getTraitCode, strain?.phenotypes])
+
+    const gramLabel = React.useMemo(() => {
+        const raw = gramPhenotype?.result
+        if (!raw || !String(raw).trim()) return "-"
+
+        const normalized = String(raw).trim().toLowerCase()
+        if (normalized === "+" || normalized.includes("+")) return "+"
+        if (normalized === "-" || normalized.includes("-")) return "-"
+        if (normalized.includes("variable")) return t("variable")
+
+        return String(raw).trim()
+    }, [gramPhenotype, t])
+
+    const compactChips = React.useMemo(() => {
+        const chips: { label: string; suffix?: string }[] = []
+
+        // Prefer showing only "signal" traits compactly
+        const codesInOrder = [
+            "siderophore_production",
+            "pigment_secretion",
+            "phosphate_solubilization",
+            "sequenced_seq",
+            "amylase",
+        ]
+
+        const findByCode = (code: string) =>
+            definedPhenotypes.find((p) => getTraitCode(p) === code) || null
+
+        for (const code of codesInOrder) {
+            const p = findByCode(code)
+            if (!p) continue
+            const name = getTraitDisplayName(code, getTraitName(p), t)
+            const dataType = getDataType(p)
+
+            if (dataType === TraitDataType.BOOLEAN) {
+                chips.push({ label: name, suffix: "+" })
+                continue
+            }
+
+            if (dataType === TraitDataType.CATEGORICAL) {
+                const result = String(p.result || "").trim()
+                if (!result) continue
+                const normalized = result.toLowerCase()
+                const suffix =
+                    normalized === "+" || result.includes("+")
+                        ? "+"
+                        : normalized === "-" || result.includes("-")
+                            ? "-"
+                            : result
+                chips.push({ label: name, suffix })
+            }
+        }
+
+        return chips
+    }, [definedPhenotypes, getDataType, getTraitName, getTraitCode, t])
+
+    const isolationRegionLabel = React.useMemo(() => {
+        const value = strain?.isolationRegion
+        if (!value) return null
+        return value === "RHIZOSPHERE"
+            ? t("regionRhizosphere")
+            : value === "ENDOSPHERE"
+                ? t("regionEndosphere")
+                : value === "PHYLLOSPHERE"
+                    ? t("regionPhyllosphere")
+                    : value === "SOIL"
+                        ? t("regionSoil")
+                        : value === "OTHER"
+                            ? t("regionOther")
+                            : value
+    }, [strain?.isolationRegion, t])
+
     React.useEffect(() => {
         if (!id) return;
         const load = async () => {
@@ -88,7 +193,6 @@ function StrainDetailContent({ id }: { id: string }) {
         }
     }
 
-
     if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -105,8 +209,6 @@ function StrainDetailContent({ id }: { id: string }) {
             </div>
         )
     }
-
-    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
     return (
         <div className="p-8 space-y-6 max-w-7xl mx-auto">
@@ -152,12 +254,15 @@ function StrainDetailContent({ id }: { id: string }) {
                 <div>
                     <h1 className="text-4xl font-bold tracking-tight text-foreground">{strain.identifier}</h1>
                     <p className="text-muted-foreground mt-1 flex items-center gap-2">
-                        <span>{t('sample')}: <span className="font-medium text-foreground">{strain.sample?.code || t('unknown')}</span></span>
+                        <span>{t('sample')}: <span className="font-medium text-foreground">{strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : t('unknown')}</span></span>
                         <span className="text-border">|</span>
                         <span className="text-xs">ID: {strain.id}</span>
                     </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
+                    <Badge className="rounded-full bg-foreground text-background px-3 py-1 text-sm">
+                        {t("gramStain")} {gramLabel}
+                    </Badge>
                     {strain.biosafetyLevel && (
                         <Badge variant={strain.biosafetyLevel === 'BSL_1' ? 'secondary' : 'destructive'} className="text-sm px-3 py-1">
                             {t(strain.biosafetyLevel.toLowerCase().replace('_', ''))}
@@ -277,19 +382,19 @@ function StrainDetailContent({ id }: { id: string }) {
                 <div className="space-y-6">
                     {/* PHENOTYPES */}
                     <SectionBlock title={t('growthAndTraits')} icon={FlaskConical}>
-                        {strain.phenotypes && strain.phenotypes.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                {strain.phenotypes.map((p, idx) => (
-                                    <div key={idx} className="flex flex-col p-2.5 rounded-md border bg-muted/30">
-                                        <span className="font-medium text-xs text-muted-foreground">{p.traitName}</span>
-                                        <span className="text-sm font-semibold mt-0.5">{p.result}</span>
-                                        {p.method && <span className="text-muted-foreground text-[10px] mt-0.5 italic">{p.method}</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                             <p className="text-sm text-muted-foreground italic mb-4">{t('noTraitsAdded')}</p>
-                        )}
+                        <div className="space-y-4">
+                            {compactChips.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {compactChips.map((c) => (
+                                        <Badge key={`${c.label}-${c.suffix ?? ""}`} variant="outline" className="rounded-full px-3 py-1">
+                                            {c.label}{c.suffix ? ` ${c.suffix}` : ""}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground italic">{t('noTraitsAdded')}</p>
+                            )}
+                        </div>
 
                         <div className="space-y-3 text-sm">
                             {strain.features && (
@@ -315,7 +420,7 @@ function StrainDetailContent({ id }: { id: string }) {
                                 </div>
                                 <div>
                                     <span className="text-xs font-medium text-muted-foreground block">{t('isolationRegion')}</span>
-                                    <span>{strain.isolationRegion || '-'}</span>
+                                    <span>{isolationRegionLabel || strain.isolationRegion || '-'}</span>
                                 </div>
                             </div>
                             {strain.comments && (

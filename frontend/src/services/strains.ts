@@ -8,7 +8,7 @@ export async function getStrains(params?: {
   isolationRegion?: string;
   page?: number;
   limit?: number;
-  sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s';
+  sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s' | 'ncbiScientificName';
   sortOrder?: 'asc' | 'desc';
 }): Promise<PaginatedResponse<Strain>> {
   const query = new URLSearchParams();
