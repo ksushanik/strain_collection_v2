@@ -46,7 +46,14 @@ docs/промт_для_нового_проекта.md
 # Agent instructions
 AGENTS.md
 
+# Tooling & Agents
+.kilocode
+.nx
+.serena
+.gemini
 
+# Testing
+coverage/
 
-.nx/cache
-.nx/workspace-data
+# AdminJS
+.adminjs
