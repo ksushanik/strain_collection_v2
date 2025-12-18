@@ -17,7 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StrainPassportTab } from "./strain-form/passport-tab"
 import { StrainPhenotypeTab } from "./strain-form/phenotype-tab"
 import { StrainGeneticsTab } from "./strain-form/genetics-tab"
-import { StrainInventoryTab } from "./strain-form/inventory-tab"
 import { SubmitHandler } from "react-hook-form"
 
 const strainSchema = z.object({
@@ -28,10 +27,6 @@ const strainSchema = z.object({
     ncbiScientificName: z.string().optional(),
     ncbiTaxonomyId: z.number().optional(),
     biosafetyLevel: z.enum(["BSL_1", "BSL_2", "BSL_3", "BSL_4"]).optional(),
-    
-    // Inventory
-    stockType: z.enum(["MASTER", "WORKING", "DISTRIBUTION"]).optional(),
-    passageNumber: z.number().optional(),
 
     // Legacy Fields (kept for compatibility)
     features: z.string().optional(),
@@ -113,8 +108,6 @@ export function StrainForm({
             ncbiScientificName: initialData?.ncbiScientificName || "",
             ncbiTaxonomyId: initialData?.ncbiTaxonomyId || undefined,
             biosafetyLevel: initialData?.biosafetyLevel || undefined,
-            stockType: initialData?.stockType || undefined,
-            passageNumber: initialData?.passageNumber || undefined,
             
             // Legacy defaults
             features: initialData?.features || "",
@@ -191,11 +184,10 @@ export function StrainForm({
         <Form {...form}>
             <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <Tabs defaultValue="passport" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-8">
+                    <TabsList className="grid w-full grid-cols-3 mb-8">
                         <TabsTrigger value="passport">{t('passport')}</TabsTrigger>
                         <TabsTrigger value="phenotype">{t('phenotypes')}</TabsTrigger>
                         <TabsTrigger value="genetics">{t('genetics')}</TabsTrigger>
-                        <TabsTrigger value="inventory">{t('inventory')}</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="passport">
@@ -208,10 +200,6 @@ export function StrainForm({
                     
                     <TabsContent value="genetics">
                         <StrainGeneticsTab />
-                    </TabsContent>
-                    
-                    <TabsContent value="inventory">
-                        <StrainInventoryTab />
                     </TabsContent>
                 </Tabs>
 

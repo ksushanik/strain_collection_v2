@@ -450,19 +450,6 @@ function StrainDetailContent({ id }: { id: string }) {
                                                 </div>
                                                 {s.isPrimary && <Badge variant="secondary" className="text-[10px] h-5">{t('primary')}</Badge>}
                                             </div>
-                                            
-                                            {s.stockType && (
-                                                <div className="mt-2 pt-2 border-t flex items-center gap-2">
-                                                    <Badge variant="outline" className="text-[10px] h-5 bg-muted/50">
-                                                        {s.stockType === 'MASTER' ? t('stockTypeMaster') : 
-                                                         s.stockType === 'WORKING' ? t('stockTypeWorking') : 
-                                                         t('stockTypeDistribution')}
-                                                    </Badge>
-                                                    {s.passageNumber !== undefined && (
-                                                        <span className="text-xs text-muted-foreground font-mono">P{s.passageNumber}</span>
-                                                    )}
-                                                </div>
-                                            )}
                                         </a>
                                     ))}
                                 </div>
