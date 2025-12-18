@@ -63,6 +63,7 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          type="button"
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}

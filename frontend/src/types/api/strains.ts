@@ -58,9 +58,9 @@ export interface Strain {
   sample?: StrainSampleRef;
   
   // New V2 Fields
-  ncbiScientificName?: string;
-  ncbiTaxonomyId?: number;
-  biosafetyLevel?: "BSL_1" | "BSL_2" | "BSL_3" | "BSL_4";
+  ncbiScientificName?: string | null;
+  ncbiTaxonomyId?: number | null;
+  biosafetyLevel?: "BSL_1" | "BSL_2" | "BSL_3" | "BSL_4" | null;
   stockType?: "MASTER" | "WORKING" | "DISTRIBUTION";
   passageNumber?: number;
   phenotypes?: StrainPhenotype[];
@@ -68,13 +68,13 @@ export interface Strain {
   gramStainLabel?: string | null;
 
   // Legacy / Fallback Fields
-  taxonomy16s?: string;
-  otherTaxonomy?: string;
-  indexerInitials?: string;
-  collectionRcam?: string;
-  isolationRegion?: string;
-  features?: string;
-  comments?: string;
+  taxonomy16s?: string | null;
+  otherTaxonomy?: string | null;
+  indexerInitials?: string | null;
+  collectionRcam?: string | null;
+  isolationRegion?: string | null;
+  features?: string | null;
+  comments?: string | null;
   
   // Relations
   storage?: StrainStorage[];

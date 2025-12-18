@@ -84,6 +84,13 @@ function getStorageSummary(storage: Strain['storage']) {
     return { first, extraCount, labels }
 }
 
+function getTaxonomyForList(strain: Strain): string | null {
+    const taxonomy16s = (strain.taxonomy16s ?? "").trim()
+    if (taxonomy16s) return taxonomy16s
+    const ncbiScientificName = (strain.ncbiScientificName ?? "").trim()
+    return ncbiScientificName || null
+}
+
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
@@ -254,7 +261,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     <TableHead className="w-[150px]">{t('identifier')}</TableHead>
                                     <TableHead>{t('sampleSource')}</TableHead>
                                     <TableHead className="w-[220px]">{t('storage')}</TableHead>
-                                    {showTaxonomy && <TableHead>{t('ncbiScientificName')}</TableHead>}
+                                    {showTaxonomy && <TableHead>{t('taxonomy16s')}</TableHead>}
                                     <TableHead>{t('gramStain')}</TableHead>
                                     {showGrowth && <TableHead>{t('characteristics')}</TableHead>}
                                 </TableRow>
@@ -262,6 +269,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             <TableBody>
                                 {strains.map((strain) => {
                                     const storageSummary = getStorageSummary(strain.storage)
+                                    const taxonomyForList = getTaxonomyForList(strain)
 
                                     return (
                                         <TableRow
@@ -295,8 +303,8 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
 
                                             {showTaxonomy && (
                                                 <TableCell>
-                                                    {strain.ncbiScientificName ? (
-                                                        <span className="italic">{strain.ncbiScientificName}</span>
+                                                    {taxonomyForList ? (
+                                                        <span className="italic">{taxonomyForList}</span>
                                                     ) : (
                                                         <span className="text-muted-foreground">-</span>
                                                     )}
@@ -340,6 +348,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                     <div className="md:hidden space-y-2 p-4">
                         {strains.map((strain) => {
                             const storageSummary = getStorageSummary(strain.storage)
+                            const taxonomyForList = getTaxonomyForList(strain)
 
                             return (
                                 <div
@@ -370,7 +379,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     </div>
                                     {showTaxonomy && (
                                         <div className="text-sm">
-                                            {strain.ncbiScientificName ? <span className="italic">{strain.ncbiScientificName}</span> : <span className="text-muted-foreground">-</span>}
+                                            {taxonomyForList ? <span className="italic">{taxonomyForList}</span> : <span className="text-muted-foreground">-</span>}
                                         </div>
                                     )}
                                     {showGrowth && (

@@ -12,62 +12,85 @@ export interface DatabaseResourcesDeps {
 }
 
 type BackupPayload = {
+  // Dictionaries / Config
   sampleTypeDictionary: Prisma.SampleTypeDictionaryUncheckedCreateInput[];
+  traitDefinitions: Prisma.TraitDefinitionUncheckedCreateInput[];
+  methods: Prisma.MethodUncheckedCreateInput[];
+  uiBindings: Prisma.UiBindingUncheckedCreateInput[];
+  legendContent: Prisma.LegendContentUncheckedCreateInput[];
+
+  // Samples
   samples: Prisma.SampleUncheckedCreateInput[];
   samplePhotos: Prisma.SamplePhotoUncheckedCreateInput[];
+
+  // Strains
   strains: Prisma.StrainUncheckedCreateInput[];
+  strainPhenotypes: Prisma.StrainPhenotypeUncheckedCreateInput[];
+  strainGenetics: Prisma.StrainGeneticsUncheckedCreateInput[];
   strainPhotos: Prisma.StrainPhotoUncheckedCreateInput[];
   strainMedia: Prisma.StrainMediaUncheckedCreateInput[];
   strainStorage: Prisma.StrainStorageUncheckedCreateInput[];
+
+  // Storage / Media
   storageBoxes: Prisma.StorageBoxUncheckedCreateInput[];
   storageCells: Prisma.StorageCellUncheckedCreateInput[];
   media: Prisma.MediaUncheckedCreateInput[];
-  legendContent: Prisma.LegendContentUncheckedCreateInput[];
-  uiBindings: Prisma.UiBindingUncheckedCreateInput[];
 };
 
 const buildBackup = async (prisma: PrismaClient): Promise<BackupPayload> => {
   const [
     sampleTypeDictionary,
+    traitDefinitions,
+    methods,
+    uiBindings,
+    legendContent,
     samples,
     samplePhotos,
     strains,
+    strainPhenotypes,
+    strainGenetics,
     strainPhotos,
     strainMedia,
     strainStorage,
     storageBoxes,
     storageCells,
     media,
-    legendContent,
-    uiBindings,
   ] = await prisma.$transaction([
     prisma.sampleTypeDictionary.findMany(),
+    prisma.traitDefinition.findMany(),
+    prisma.method.findMany(),
+    prisma.uiBinding.findMany(),
+    prisma.legendContent.findMany(),
     prisma.sample.findMany(),
     prisma.samplePhoto.findMany(),
     prisma.strain.findMany(),
+    prisma.strainPhenotype.findMany(),
+    prisma.strainGenetics.findMany(),
     prisma.strainPhoto.findMany(),
     prisma.strainMedia.findMany(),
     prisma.strainStorage.findMany(),
     prisma.storageBox.findMany(),
     prisma.storageCell.findMany(),
     prisma.media.findMany(),
-    prisma.legendContent.findMany(),
-    prisma.uiBinding.findMany(),
   ]);
 
   return {
     sampleTypeDictionary,
+    traitDefinitions,
+    methods,
+    uiBindings,
+    legendContent,
     samples,
     samplePhotos,
     strains,
+    strainPhenotypes,
+    strainGenetics,
     strainPhotos,
     strainMedia,
     strainStorage,
     storageBoxes,
     storageCells,
     media,
-    legendContent,
-    uiBindings,
   } as BackupPayload;
 };
 
@@ -77,11 +100,15 @@ const wipeAll = async (tx: Prisma.TransactionClient) => {
   await tx.storageBox.deleteMany();
   await tx.strainMedia.deleteMany();
   await tx.strainPhoto.deleteMany();
+  await tx.strainPhenotype.deleteMany();
+  await tx.strainGenetics.deleteMany();
   await tx.strain.deleteMany();
   await tx.samplePhoto.deleteMany();
   await tx.sample.deleteMany();
   await tx.sampleTypeDictionary.deleteMany();
   await tx.media.deleteMany();
+  await tx.method.deleteMany();
+  await tx.traitDefinition.deleteMany();
   await tx.uiBinding.deleteMany();
   await tx.legendContent.deleteMany();
 };
@@ -93,10 +120,19 @@ const restoreBackup = async (prisma: PrismaClient, payload: BackupPayload) => {
     if (payload.legendContent?.length) {
       await tx.legendContent.createMany({ data: payload.legendContent });
     }
+    if (payload.uiBindings?.length) {
+      await tx.uiBinding.createMany({ data: payload.uiBindings });
+    }
     if (payload.sampleTypeDictionary?.length) {
       await tx.sampleTypeDictionary.createMany({
         data: payload.sampleTypeDictionary,
       });
+    }
+    if (payload.methods?.length) {
+      await tx.method.createMany({ data: payload.methods });
+    }
+    if (payload.traitDefinitions?.length) {
+      await tx.traitDefinition.createMany({ data: payload.traitDefinitions });
     }
     if (payload.media?.length) {
       await tx.media.createMany({ data: payload.media });
@@ -109,6 +145,12 @@ const restoreBackup = async (prisma: PrismaClient, payload: BackupPayload) => {
     }
     if (payload.strains?.length) {
       await tx.strain.createMany({ data: payload.strains });
+    }
+    if (payload.strainGenetics?.length) {
+      await tx.strainGenetics.createMany({ data: payload.strainGenetics });
+    }
+    if (payload.strainPhenotypes?.length) {
+      await tx.strainPhenotype.createMany({ data: payload.strainPhenotypes });
     }
     if (payload.strainPhotos?.length) {
       await tx.strainPhoto.createMany({ data: payload.strainPhotos });
@@ -131,9 +173,6 @@ const restoreBackup = async (prisma: PrismaClient, payload: BackupPayload) => {
           data: { status: CellStatus.OCCUPIED },
         });
       }
-    }
-    if (payload.uiBindings?.length) {
-      await tx.uiBinding.createMany({ data: payload.uiBindings });
     }
   });
 };

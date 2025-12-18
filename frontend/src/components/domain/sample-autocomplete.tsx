@@ -85,6 +85,7 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
+                    type="button"
                     role="combobox"
                     aria-expanded={open}
                     className={cn(

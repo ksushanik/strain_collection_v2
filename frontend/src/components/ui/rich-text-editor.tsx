@@ -3,7 +3,6 @@
 import * as React from "react"
 import { useEditor, EditorContent, Editor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import Underline from "@tiptap/extension-underline"
 import { cn } from "@/lib/utils"
 import { Toggle } from "@/components/ui/toggle"
 import {
@@ -124,7 +123,6 @@ export function RichTextEditor({
                     levels: [2, 3],
                 },
             }),
-            Underline,
         ],
         content: value,
         editable: !disabled,

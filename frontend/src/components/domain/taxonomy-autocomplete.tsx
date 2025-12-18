@@ -54,6 +54,7 @@ export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = 
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
+                    type="button"
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
@@ -77,6 +78,19 @@ export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = 
                         {loading && <Loader2 className="h-4 w-4 animate-spin opacity-50" />}
                     </div>
                     <div className="max-h-[300px] overflow-y-auto p-1">
+                        {!!value && (
+                            <div
+                                className="flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground"
+                                onClick={() => {
+                                    onChange("")
+                                    setSearchTerm("")
+                                    setResults([])
+                                    setOpen(false)
+                                }}
+                            >
+                                Clear selection
+                            </div>
+                        )}
                         {results.length === 0 && !loading && searchTerm && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
                                 No results found.

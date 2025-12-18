@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 type BoxSummary = {
     id: number;
@@ -456,9 +457,16 @@ function EditStrainContent({ id }: { id: string }) {
                     {t('cancel')}
                 </Button>
                 <Button
-                    type="submit"
-                    form="strain-form-edit"
+                    type="button"
                     disabled={formSubmitting}
+                    onClick={() => {
+                        const el = document.getElementById("strain-form-edit")
+                        if (!(el instanceof HTMLFormElement)) {
+                            toast.error("Form not found")
+                            return
+                        }
+                        el.requestSubmit()
+                    }}
                 >
                     {formSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {t('saveChanges')}

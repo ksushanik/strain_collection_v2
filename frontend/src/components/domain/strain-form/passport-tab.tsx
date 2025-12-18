@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslations } from "next-intl"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
@@ -13,9 +14,13 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 
 export function StrainPassportTab() {
   const t = useTranslations('Strains')
-  const { control, setValue, watch } = useFormContext()
+  const { control, setValue, watch, register } = useFormContext()
   
   const biosafetyLevel = watch("biosafetyLevel")
+
+  React.useEffect(() => {
+    register("ncbiTaxonomyId")
+  }, [register])
 
   return (
     <div className="space-y-6">
@@ -59,7 +64,7 @@ export function StrainPassportTab() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-                 <FormField
+                <FormField
                     control={control}
                     name="ncbiScientificName"
                     render={({ field }) => (
@@ -68,7 +73,12 @@ export function StrainPassportTab() {
                             <FormControl>
                                 <TaxonomyAutocomplete
                                     value={field.value}
-                                    onChange={field.onChange}
+                                    onChange={(val) => {
+                                        field.onChange(val)
+                                        if (!val) {
+                                            setValue("ncbiTaxonomyId", null)
+                                        }
+                                    }}
                                     onSelect={(item) => {
                                         setValue("ncbiTaxonomyId", parseInt(item.taxId))
                                         setValue("ncbiScientificName", item.name)
@@ -88,13 +98,17 @@ export function StrainPassportTab() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('biosafetyLevel')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                                value={field.value ?? "__none__"}
+                                onValueChange={(val) => field.onChange(val === "__none__" ? null : val)}
+                            >
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder={t('selectBSL')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
+                                    <SelectItem value="__none__">{t('selectBSL')}</SelectItem>
                                     <SelectItem value="BSL_1">{t('bsl1')}</SelectItem>
                                     <SelectItem value="BSL_2">{t('bsl2')}</SelectItem>
                                     <SelectItem value="BSL_3">{t('bsl3')}</SelectItem>
@@ -153,13 +167,17 @@ export function StrainPassportTab() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('isolationRegion')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                                value={field.value ?? "__none__"}
+                                onValueChange={(val) => field.onChange(val === "__none__" ? null : val)}
+                            >
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder={t('selectRegion')} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
+                                    <SelectItem value="__none__">{t('selectRegion')}</SelectItem>
                                     <SelectItem value="RHIZOSPHERE">{t('regionRhizosphere')}</SelectItem>
                                     <SelectItem value="ENDOSPHERE">{t('regionEndosphere')}</SelectItem>
                                     <SelectItem value="PHYLLOSPHERE">{t('regionPhyllosphere')}</SelectItem>
@@ -238,14 +256,6 @@ export function StrainPassportTab() {
                 />
             </div>
 
-             {/* Hidden field for ID */}
-            <FormField
-                control={control}
-                name="ncbiTaxonomyId"
-                render={({ field }) => (
-                    <input type="hidden" {...field} value={field.value ?? ''} />
-                )}
-            />
         </div>
     </div>
   )

@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StrainPassportTab } from "./strain-form/passport-tab"
 import { StrainPhenotypeTab } from "./strain-form/phenotype-tab"
 import { StrainGeneticsTab } from "./strain-form/genetics-tab"
-import { SubmitHandler } from "react-hook-form"
+import { SubmitErrorHandler, SubmitHandler } from "react-hook-form"
 
 const strainSchema = z.object({
     identifier: z.string().min(1, "Identifier is required"),
@@ -25,8 +25,8 @@ const strainSchema = z.object({
     
     // Refactoring v2 Fields
     ncbiScientificName: z.string().optional(),
-    ncbiTaxonomyId: z.number().optional(),
-    biosafetyLevel: z.enum(["BSL_1", "BSL_2", "BSL_3", "BSL_4"]).optional(),
+    ncbiTaxonomyId: z.number().nullable().optional(),
+    biosafetyLevel: z.enum(["BSL_1", "BSL_2", "BSL_3", "BSL_4"]).nullable().optional(),
 
     // Legacy Fields (kept for compatibility)
     features: z.string().optional(),
@@ -35,7 +35,7 @@ const strainSchema = z.object({
     indexerInitials: z.string().optional(),
     collectionRcam: z.string().optional(),
     otherTaxonomy: z.string().optional(),
-    isolationRegion: z.enum(["RHIZOSPHERE", "ENDOSPHERE", "PHYLLOSPHERE", "SOIL", "OTHER"]).optional(),
+    isolationRegion: z.enum(["RHIZOSPHERE", "ENDOSPHERE", "PHYLLOSPHERE", "SOIL", "OTHER"]).nullable().optional(),
 
     // Dynamic Traits (may be present but unset in UI; unset entries are ignored on submit)
     phenotypes: z.array(
@@ -48,12 +48,6 @@ const strainSchema = z.object({
             dataType: z.nativeEnum(TraitDataType).optional(),
             options: z.array(z.string()).optional().nullable(),
             units: z.string().optional().nullable(),
-        }).superRefine((val, ctx) => {
-            const result = (val.result ?? "").trim()
-            const hasTraitRef = (val.traitDefinitionId ?? null) !== null || !!(val.traitName ?? "").trim()
-            if (result.length > 0 && !hasTraitRef) {
-                ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Required", path: ["traitName"] })
-            }
         }),
     ).optional(),
 
@@ -97,6 +91,7 @@ export function StrainForm({
     const tCommon = useTranslations('Common')
 
     const [loading, setLoading] = React.useState(false)
+    const [activeTab, setActiveTab] = React.useState<"passport" | "phenotype" | "genetics">("passport")
 
     const form = useForm<StrainFormValues>({
         resolver: zodResolver(strainSchema),
@@ -106,8 +101,8 @@ export function StrainForm({
             
             // New fields defaults
             ncbiScientificName: initialData?.ncbiScientificName || "",
-            ncbiTaxonomyId: initialData?.ncbiTaxonomyId || undefined,
-            biosafetyLevel: initialData?.biosafetyLevel || undefined,
+            ncbiTaxonomyId: initialData?.ncbiTaxonomyId ?? null,
+            biosafetyLevel: initialData?.biosafetyLevel ?? null,
             
             // Legacy defaults
             features: initialData?.features || "",
@@ -116,7 +111,7 @@ export function StrainForm({
             indexerInitials: initialData?.indexerInitials || "",
             collectionRcam: initialData?.collectionRcam || "",
             otherTaxonomy: initialData?.otherTaxonomy || "",
-            isolationRegion: isIsolationRegion(initialData?.isolationRegion) ? initialData?.isolationRegion : undefined,
+            isolationRegion: isIsolationRegion(initialData?.isolationRegion) ? initialData?.isolationRegion : null,
 
             phenotypes: initialData?.phenotypes || [],
             genetics: initialData?.genetics || { wgsStatus: "NONE" },
@@ -127,15 +122,19 @@ export function StrainForm({
         setLoading(true)
         onSubmittingChange?.(true)
         try {
+            const trimmedScientificName = (data.ncbiScientificName ?? "").trim()
             const payload: CreateStrainInput = {
                 ...data,
                 sampleId: data.sampleId ? parseInt(data.sampleId) : undefined,
+                ncbiScientificName: trimmedScientificName.length > 0 ? trimmedScientificName : null,
                 // Clean up optional fields
                 genetics: data.genetics?.wgsStatus === "NONE" && !data.genetics.marker16sSequence ? undefined : data.genetics,
                 phenotypes: data.phenotypes
                     ?.filter((p) => {
                         const result = (p.result ?? "").trim()
                         if (!result) return false
+                        const hasTraitRef = (p.traitDefinitionId ?? null) !== null || !!(p.traitName ?? "").trim()
+                        if (!hasTraitRef) return false
                         // For boolean toggles we only persist explicit true
                         if (result === "false") return false
                         const traitCode = p.traitCode ?? undefined
@@ -180,10 +179,33 @@ export function StrainForm({
         }
     }
 
+    const onInvalid: SubmitErrorHandler<StrainFormValues> = (errors) => {
+        if (errors.phenotypes) {
+            setActiveTab("phenotype")
+            toast.error(t("phenotypeHasErrors"))
+            return
+        }
+        if (errors.genetics) {
+            setActiveTab("genetics")
+            toast.error(t("geneticsHasErrors"))
+            return
+        }
+        setActiveTab("passport")
+        if (errors.identifier) {
+            toast.error(t("identifierRequiredToast"))
+            return
+        }
+        if (errors.sampleId) {
+            toast.error(t("sampleRequiredToast"))
+            return
+        }
+        toast.error(t("formHasErrors"))
+    }
+
     return (
         <Form {...form}>
-            <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <Tabs defaultValue="passport" className="w-full">
+            <form id={formId} onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
+                <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-8">
                         <TabsTrigger value="passport">{t('passport')}</TabsTrigger>
                         <TabsTrigger value="phenotype">{t('phenotypes')}</TabsTrigger>

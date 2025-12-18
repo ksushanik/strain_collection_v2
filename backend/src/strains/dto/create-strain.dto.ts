@@ -7,7 +7,7 @@ import {
   ValidateNested,
   IsDateString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { BiosafetyLevel, StrainStatus } from '@prisma/client';
 import { CreateStrainPhenotypeDto } from './create-strain-phenotype.dto';
 import { CreateStrainGeneticsDto } from './create-strain-genetics.dto';
@@ -23,8 +23,8 @@ export class CreateStrainDto {
   // --- Refactoring v2 Fields ---
   @IsOptional()
   @IsInt()
-  @Type(() => Number)
-  ncbiTaxonomyId?: number;
+  @Transform(({ value }) => (value === null || value === undefined ? value : Number(value)))
+  ncbiTaxonomyId?: number | null;
 
   @IsOptional()
   @IsString()
