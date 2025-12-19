@@ -6,6 +6,12 @@ export async function getStrains(params?: {
   sampleCode?: string;
   taxonomy?: string;
   isolationRegion?: string;
+  hasGenome?: boolean;
+  gramStain?: 'positive' | 'negative';
+  amylase?: boolean;
+  phosphateSolubilization?: boolean;
+  siderophoreProduction?: boolean;
+  pigmentSecretion?: boolean;
   page?: number;
   limit?: number;
   sortBy?: 'createdAt' | 'identifier' | 'sampleCode' | 'taxonomy16s' | 'ncbiScientificName';
@@ -17,6 +23,26 @@ export async function getStrains(params?: {
   if (params?.taxonomy) query.set('taxonomy', params.taxonomy);
   if (params?.isolationRegion)
     query.set('isolationRegion', params.isolationRegion);
+  if (params?.hasGenome !== undefined)
+    query.set('hasGenome', params.hasGenome ? 'true' : 'false');
+  if (params?.gramStain) query.set('gramStain', params.gramStain);
+  if (params?.amylase !== undefined)
+    query.set('amylase', params.amylase ? 'true' : 'false');
+  if (params?.phosphateSolubilization !== undefined)
+    query.set(
+      'phosphateSolubilization',
+      params.phosphateSolubilization ? 'true' : 'false',
+    );
+  if (params?.siderophoreProduction !== undefined)
+    query.set(
+      'siderophoreProduction',
+      params.siderophoreProduction ? 'true' : 'false',
+    );
+  if (params?.pigmentSecretion !== undefined)
+    query.set(
+      'pigmentSecretion',
+      params.pigmentSecretion ? 'true' : 'false',
+    );
   if (params?.page) query.set('page', params.page.toString());
   if (params?.limit) query.set('limit', params.limit.toString());
   if (params?.sortBy) query.set('sortBy', params.sortBy);

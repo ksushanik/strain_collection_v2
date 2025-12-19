@@ -27,6 +27,11 @@ export class StrainsService {
       sampleCode,
       hasGenome,
       taxonomy,
+      gramStain,
+      amylase,
+      phosphateSolubilization,
+      siderophoreProduction,
+      pigmentSecretion,
       search,
       isolationRegion,
       sortBy = 'createdAt',
@@ -36,6 +41,7 @@ export class StrainsService {
     } = query;
 
     const where: Prisma.StrainWhereInput = {};
+    const andFilters: Prisma.StrainWhereInput[] = [];
 
     if (sampleId !== undefined) where.sampleId = sampleId;
     if (isolationRegion) where.isolationRegion = isolationRegion;
@@ -65,6 +71,61 @@ export class StrainsService {
         { ncbiScientificName: { contains: search, mode: 'insensitive' } },
         { taxonomy16s: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    if (gramStain) {
+      andFilters.push(
+        this.buildTraitFilter(
+          'gram_stain',
+          ['Gram Stain'],
+          gramStain === 'positive',
+        ),
+      );
+    }
+
+    if (amylase !== undefined) {
+      andFilters.push(
+        this.buildTraitFilter('amylase', ['Amylase'], amylase),
+      );
+    }
+
+    if (phosphateSolubilization !== undefined) {
+      andFilters.push(
+        this.buildTraitFilter(
+          'phosphate_solubilization',
+          ['Phosphate Solubilization'],
+          phosphateSolubilization,
+        ),
+      );
+    }
+
+    if (siderophoreProduction !== undefined) {
+      andFilters.push(
+        this.buildTraitFilter(
+          'siderophore_production',
+          ['Siderophore Production'],
+          siderophoreProduction,
+        ),
+      );
+    }
+
+    if (pigmentSecretion !== undefined) {
+      andFilters.push(
+        this.buildTraitFilter(
+          'pigment_secretion',
+          ['Pigment Secretion', 'Pigment Production'],
+          pigmentSecretion,
+        ),
+      );
+    }
+
+    if (andFilters.length > 0) {
+      const existingAnd = Array.isArray(where.AND)
+        ? where.AND
+        : where.AND
+          ? [where.AND]
+          : [];
+      where.AND = [...existingAnd, ...andFilters];
     }
 
     // Dynamic sorting
@@ -534,5 +595,45 @@ export class StrainsService {
     }
 
     return null;
+  }
+
+  private buildTraitFilter(
+    code: string,
+    names: string[],
+    isPositive: boolean,
+  ): Prisma.StrainWhereInput {
+    const resultFilter: Prisma.StrainPhenotypeWhereInput = {
+      OR: isPositive
+        ? [
+            { result: { equals: 'true', mode: 'insensitive' } },
+            { result: { equals: '+', mode: 'insensitive' } },
+            { result: { contains: 'positive', mode: 'insensitive' } },
+          ]
+        : [
+            { result: { equals: 'false', mode: 'insensitive' } },
+            { result: { equals: '-', mode: 'insensitive' } },
+            { result: { contains: 'negative', mode: 'insensitive' } },
+          ],
+    };
+
+    const nameMatches = names.map((name) => ({
+      traitName: { equals: name, mode: Prisma.QueryMode.insensitive },
+    }));
+
+    return {
+      phenotypes: {
+        some: {
+          AND: [
+            {
+              OR: [
+                { traitDefinition: { is: { code } } },
+                ...nameMatches,
+              ],
+            },
+            resultFilter,
+          ],
+        },
+      },
+    };
   }
 }

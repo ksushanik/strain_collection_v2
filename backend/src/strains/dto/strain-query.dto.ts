@@ -43,6 +43,33 @@ export class StrainQueryDto {
   taxonomy?: string;
 
   @IsOptional()
+  @IsEnum(['positive', 'negative'])
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.toLowerCase() : value,
+  )
+  gramStain?: 'positive' | 'negative';
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(toOptionalBool)
+  amylase?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(toOptionalBool)
+  phosphateSolubilization?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(toOptionalBool)
+  siderophoreProduction?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(toOptionalBool)
+  pigmentSecretion?: boolean;
+
+  @IsOptional()
   @IsString()
   search?: string;
 

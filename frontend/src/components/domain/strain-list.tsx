@@ -35,7 +35,7 @@ interface StrainListProps {
     returnPath?: string
 }
 
-const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonomy16s", "ncbiScientificName"] as const
+const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonomy16s"] as const
 type StrainSortBy = (typeof STRAIN_SORT_BY_VALUES)[number]
 type SortOrder = "asc" | "desc"
 type Phenotype = NonNullable<Strain["phenotypes"]>[number]
@@ -110,6 +110,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         sampleCode: "",
         taxonomy: "",
         isolationRegion: "",
+        hasGenome: "any",
+        gramStain: "any",
+        amylase: "any",
+        phosphates: "any",
+        siderophores: "any",
+        pigment: "any",
     })
 
     const matchesTrait = (p: Phenotype, code: string, name: string) =>
@@ -124,6 +130,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         return normalized === '-' || normalized.includes('negative') || normalized === 'false'
     }
 
+    const resolveBoolFilter = (value: string) => {
+        if (value === "true") return true
+        if (value === "false") return false
+        return undefined
+    }
+
     const loadStrains = React.useCallback(() => {
         setLoading(true)
         return ApiService.getStrains({
@@ -131,6 +143,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             sampleCode: filters.sampleCode || undefined,
             taxonomy: filters.taxonomy || undefined,
             isolationRegion: filters.isolationRegion || undefined,
+            hasGenome: resolveBoolFilter(filters.hasGenome),
+            gramStain: filters.gramStain === "any" ? undefined : (filters.gramStain as "positive" | "negative"),
+            amylase: resolveBoolFilter(filters.amylase),
+            phosphateSolubilization: resolveBoolFilter(filters.phosphates),
+            siderophoreProduction: resolveBoolFilter(filters.siderophores),
+            pigmentSecretion: resolveBoolFilter(filters.pigment),
             sortBy,
             sortOrder,
             page,
@@ -193,7 +211,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             <option value="createdAt">{t('created')}</option>
                             <option value="identifier">{t('identifier')}</option>
                             <option value="sampleCode">{t('sampleCode')}</option>
-                            <option value="ncbiScientificName">{t('ncbiScientificName')}</option>
+                            <option value="taxonomy16s">{t('taxonomy16s')}</option>
                         </select>
                         <Button
                             variant="outline"
@@ -243,6 +261,84 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 <SelectItem value="PHYLLOSPHERE">Phyllosphere</SelectItem>
                                 <SelectItem value="SOIL">Soil</SelectItem>
                                 <SelectItem value="OTHER">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.hasGenome}
+                            onValueChange={(value) => { setFilters({ ...filters, hasGenome: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('hasGenome')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anyGenome')}</SelectItem>
+                                <SelectItem value="true">{t('yes')}</SelectItem>
+                                <SelectItem value="false">{t('no')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.gramStain}
+                            onValueChange={(value) => { setFilters({ ...filters, gramStain: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('gramStain')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anyGramStain')}</SelectItem>
+                                <SelectItem value="positive">{t('gramPositive')}</SelectItem>
+                                <SelectItem value="negative">{t('gramNegative')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.amylase}
+                            onValueChange={(value) => { setFilters({ ...filters, amylase: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('amylase')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anyAmylase')}</SelectItem>
+                                <SelectItem value="true">{t('yes')}</SelectItem>
+                                <SelectItem value="false">{t('no')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.phosphates}
+                            onValueChange={(value) => { setFilters({ ...filters, phosphates: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('phosphates')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anyPhosphates')}</SelectItem>
+                                <SelectItem value="true">{t('yes')}</SelectItem>
+                                <SelectItem value="false">{t('no')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.siderophores}
+                            onValueChange={(value) => { setFilters({ ...filters, siderophores: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('siderophores')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anySiderophores')}</SelectItem>
+                                <SelectItem value="true">{t('yes')}</SelectItem>
+                                <SelectItem value="false">{t('no')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select
+                            value={filters.pigment}
+                            onValueChange={(value) => { setFilters({ ...filters, pigment: value }); setPage(1); }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('pigmentSecretion')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">{t('anyPigment')}</SelectItem>
+                                <SelectItem value="true">{t('yes')}</SelectItem>
+                                <SelectItem value="false">{t('no')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
