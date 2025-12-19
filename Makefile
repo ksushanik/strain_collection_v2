@@ -4,7 +4,7 @@ API_URL       ?= https://culturedb.elcity.ru
 BACKEND_IMAGE := $(REGISTRY)/strain-collection-v2-backend:$(TAG)
 FRONTEND_IMAGE:= $(REGISTRY)/strain-collection-v2-frontend:$(TAG)
 
-.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod deploy-local
+.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod deploy-local update-prod-env update-prod-env-win
 
 build-backend:
 	docker build -t $(BACKEND_IMAGE) -f backend/Dockerfile backend
@@ -32,6 +32,11 @@ deploy-local:
 deploy-prod:
 	ssh 4feb "bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=$$(docker compose ps -q backend) && if [ -n \"$$cid\" ]; then docker exec $$cid sh -lc \"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\"$$src\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\"$$src\\\" ]; then cat \\\"$$src\\\"; fi\" > backend/.adminjs/components.bundle.js || true; fi'"
 
+# Обновить .env файлы на production (использует scp)
+update-prod-env:
+	scp backend/.env.prod user@4feb:/home/user/bio_collection/backend/.env
+	scp frontend/.env.prod user@4feb:/home/user/bio_collection/frontend/.env
+
 # One-off: explicitly run Prisma migrations on production (useful for schema/data migrations).
 # Note: backend container is configured to run `prisma migrate deploy` on start, but this command is safer for manual control.
 migrate-prod:
@@ -45,6 +50,10 @@ migrate-prod-win:
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 deploy-prod-win:
 	powershell -Command "ssh 4feb \"bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=\$(docker compose ps -q backend) && if [ -n \\\"\\\$cid\\\" ]; then docker exec \\\$cid sh -lc \\\"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\\\\\"\\\$src\\\\\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\\\\\"\\\$src\\\\\\\" ]; then cat \\\\\\\"\\\$src\\\\\\\"; fi\\\" > backend/.adminjs/components.bundle.js || true; fi'\""
+
+# Windows: обновить .env файлы на production
+update-prod-env-win:
+	powershell -Command "scp backend/.env.prod user@4feb:/home/user/bio_collection/backend/.env; scp frontend/.env.prod user@4feb:/home/user/bio_collection/frontend/.env"
 
 # Очистка неиспользуемых Docker ресурсов на production
 clean-prod:

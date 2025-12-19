@@ -35,14 +35,8 @@ export async function request(path: string, options: RequestInit = {}) {
   } as Record<string, string>;
   const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
 
-  if (response.status === 401) {
-    if (
-      typeof window !== 'undefined' &&
-      !window.location.pathname.startsWith('/login')
-    ) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
+  if (response.status === 401 && typeof window !== 'undefined') {
+    localStorage.removeItem('token');
   }
 
   return response;

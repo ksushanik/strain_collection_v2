@@ -40,10 +40,7 @@ const strainSchema = z.object({
     // Dynamic Traits (may be present but unset in UI; unset entries are ignored on submit)
     phenotypes: z.array(
         z.object({
-            traitDefinitionId: z.preprocess(
-                (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
-                z.number().nullable(),
-            ).optional(),
+            traitDefinitionId: z.number().optional().nullable(),
             traitName: z.string().optional().nullable(),
             traitCode: z.string().optional().nullable(),
             result: z.string().optional().nullable(),
@@ -155,7 +152,7 @@ export function StrainForm({
                         traitDefinitionId: traitDefinitionId ?? undefined,
                         traitName: (traitName ?? "").trim(),
                         result: (result ?? "").trim(),
-                        method,
+                        method: method ?? undefined,
                     })),
             }
 
