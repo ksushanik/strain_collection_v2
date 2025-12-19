@@ -10,9 +10,12 @@ import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
 import { CreateStrainPhenotypeDto } from './dto/create-strain-phenotype.dto';
 import { ImageKitService } from '../services/imagekit.service';
+import { TAXONOMY_RULES, TaxonomyRule } from './taxonomy.rules';
 
 @Injectable()
 export class StrainsService {
+  private gramStainTraitCache?: { id: number; name: string } | null;
+
   constructor(
     private prisma: PrismaService,
     private imagekitService: ImageKitService,
@@ -182,23 +185,18 @@ export class StrainsService {
   }
 
   async create(createStrainDto: CreateStrainDto) {
-    this.validateTaxonomy(createStrainDto);
+    await this.validateTaxonomy(createStrainDto);
     let { phenotypes, genetics, ...strainData } = createStrainDto;
 
     // Auto-enrich based on taxonomy if needed
-    if (
-      createStrainDto.ncbiScientificName?.toLowerCase().includes('stenotrophomonas')
-    ) {
-      const gramTrait = await this.prisma.traitDefinition.findUnique({
-        where: { code: 'gram_stain' },
-        select: { id: true, name: true },
-      });
+    const rule = this.getTaxonomyRule(createStrainDto.ncbiScientificName);
+    if (rule?.autoGramStain) {
+      const gramTrait = await this.getGramStainTrait();
 
       // Check if Gram Stain is already provided in phenotypes
-      const hasGramStain = phenotypes?.some(
-        (p) =>
-          (gramTrait?.id && p.traitDefinitionId === gramTrait.id) ||
-          p.traitName === (gramTrait?.name ?? 'Gram Stain'),
+      const hasGramStain = !!this.findGramStainPhenotype(
+        phenotypes,
+        gramTrait?.id,
       );
       if (!hasGramStain) {
         phenotypes = phenotypes || [];
@@ -244,7 +242,7 @@ export class StrainsService {
 
   async update(id: number, updateStrainDto: UpdateStrainDto) {
     await this.findOne(id); // Check existence
-    this.validateTaxonomy(updateStrainDto);
+    await this.validateTaxonomy(updateStrainDto);
 
     const { phenotypes, genetics, ...strainData } = updateStrainDto;
 
@@ -433,29 +431,108 @@ export class StrainsService {
     return { message: 'Photo deleted successfully' };
   }
 
-  private validateTaxonomy(dto: CreateStrainDto | UpdateStrainDto) {
-    if (dto.ncbiScientificName) {
-      const name = dto.ncbiScientificName.toLowerCase();
+  private async validateTaxonomy(dto: CreateStrainDto | UpdateStrainDto) {
+    const rule = this.getTaxonomyRule(dto.ncbiScientificName);
+    if (!rule || !rule.gramStain) return;
 
-      // Example rule: Stenotrophomonas is Gram Negative
-      if (name.includes('stenotrophomonas')) {
-        // Check phenotypes
-        const gramStain = dto.phenotypes?.find(
-          (p) => p.traitName === 'Gram Stain',
-        );
-        if (gramStain) {
-          const result = gramStain.result.toLowerCase();
-          if (
-            result === '+' ||
-            result === 'positive' ||
-            result.includes('positive')
-          ) {
-            throw new BadRequestException(
-              'Biological mismatch: Genus Stenotrophomonas is Gram-negative.',
-            );
-          }
-        }
-      }
+    const gramTrait = await this.getGramStainTrait();
+    const gramStain = this.findGramStainPhenotype(
+      dto.phenotypes,
+      gramTrait?.id,
+    );
+    if (!gramStain) return;
+
+    const normalized = this.parseGramResult(gramStain.result);
+    if (!normalized) return;
+
+    if (rule.gramStain !== normalized) {
+      throw new BadRequestException(
+        `Biological mismatch: Genus ${rule.genus} is Gram-${rule.gramStain}.`,
+      );
     }
+  }
+
+  private getTaxonomyRule(
+    scientificName?: string | null,
+  ): TaxonomyRule | null {
+    if (!scientificName) return null;
+    const name = scientificName.toLowerCase();
+    return TAXONOMY_RULES.find((rule) => name.includes(rule.genus)) ?? null;
+  }
+
+  private async getGramStainTrait(): Promise<{ id: number; name: string } | null> {
+    if (this.gramStainTraitCache !== undefined) {
+      return this.gramStainTraitCache;
+    }
+
+    const trait = await this.prisma.traitDefinition.findUnique({
+      where: { code: 'gram_stain' },
+      select: { id: true, name: true },
+    });
+
+    this.gramStainTraitCache = trait ?? null;
+    return this.gramStainTraitCache;
+  }
+
+  private normalizeTraitName(name?: string | null): string | null {
+    if (!name) return null;
+    return name
+      .toLowerCase()
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private findGramStainPhenotype(
+    phenotypes?: {
+      traitDefinitionId?: number | null;
+      traitName?: string | null;
+      result?: string | null;
+    }[],
+    gramTraitId?: number,
+  ): {
+    traitDefinitionId?: number | null;
+    traitName?: string | null;
+    result?: string | null;
+  } | null {
+    if (!phenotypes?.length) return null;
+
+    const matchesById =
+      gramTraitId !== undefined && gramTraitId !== null
+        ? phenotypes.find((p) => p.traitDefinitionId === gramTraitId)
+        : undefined;
+    if (matchesById) return matchesById;
+
+    return (
+      phenotypes.find((p) => {
+        const normalized = this.normalizeTraitName(p.traitName);
+        return normalized === 'gram stain';
+      }) ?? null
+    );
+  }
+
+  private parseGramResult(
+    result?: string | null,
+  ): 'positive' | 'negative' | null {
+    if (!result) return null;
+    const normalized = result.toLowerCase().trim();
+    if (!normalized) return null;
+
+    if (
+      normalized === '+' ||
+      normalized === 'positive' ||
+      normalized.includes('positive')
+    ) {
+      return 'positive';
+    }
+    if (
+      normalized === '-' ||
+      normalized === 'negative' ||
+      normalized.includes('negative')
+    ) {
+      return 'negative';
+    }
+
+    return null;
   }
 }

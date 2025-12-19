@@ -91,12 +91,13 @@ import { CaslModule } from '../casl/casl.module';
             CaslModule,
             JwtModule.registerAsync({
               imports: [ConfigModule],
-              useFactory: (config: ConfigService) => ({
-                secret:
-                  config.get<string>('JWT_SECRET') ||
-                  'dev_secret_key_do_not_use_in_prod',
-                signOptions: { expiresIn: '7d' },
-              }),
+              useFactory: (config: ConfigService) => {
+                const jwtSecret = config.get<string>('JWT_SECRET');
+                if (!jwtSecret) {
+                  throw new Error('JWT_SECRET is required');
+                }
+                return { secret: jwtSecret, signOptions: { expiresIn: '7d' } };
+              },
               inject: [ConfigService],
             }),
           ],
@@ -191,12 +192,13 @@ import { CaslModule } from '../casl/casl.module';
     CaslModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        secret:
-          config.get<string>('JWT_SECRET') ||
-          'dev_secret_key_do_not_use_in_prod',
-        signOptions: { expiresIn: '7d' },
-      }),
+      useFactory: (config: ConfigService) => {
+        const jwtSecret = config.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error('JWT_SECRET is required');
+        }
+        return { secret: jwtSecret, signOptions: { expiresIn: '7d' } };
+      },
       inject: [ConfigService],
     }),
   ],

@@ -23,11 +23,25 @@ export class ImageKitService {
   private localMode = false;
   private localDir = path.join(process.cwd(), 'uploads');
   private publicUrlBase = '/uploads';
+  private uploadTimeoutMs: number;
+  private deleteTimeoutMs: number;
+  private maxRetries: number;
+  private retryDelayMs: number;
 
   constructor(private configService: ConfigService) {
     const publicKey = this.configService.get<string>('IMAGEKIT_PUBLIC_KEY');
     const privateKey = this.configService.get<string>('IMAGEKIT_PRIVATE_KEY');
     const urlEndpoint = this.configService.get<string>('IMAGEKIT_URL_ENDPOINT');
+    this.uploadTimeoutMs = this.parseEnvInt(
+      'IMAGEKIT_UPLOAD_TIMEOUT_MS',
+      15000,
+    );
+    this.deleteTimeoutMs = this.parseEnvInt(
+      'IMAGEKIT_DELETE_TIMEOUT_MS',
+      10000,
+    );
+    this.maxRetries = this.parseEnvInt('IMAGEKIT_MAX_RETRIES', 2);
+    this.retryDelayMs = this.parseEnvInt('IMAGEKIT_RETRY_DELAY_MS', 500);
 
     if (!publicKey || !privateKey || !urlEndpoint) {
       // Fallback to local storage mode
@@ -70,12 +84,22 @@ export class ImageKitService {
       };
     } else {
       try {
-        const response = await this.imagekit.upload({
-          file: file.toString('base64'),
-          fileName: fileName,
-          folder: folder,
-          useUniqueFileName: true,
-        });
+        const response = await this.withRetries(
+          () =>
+            this.withTimeout(
+              this.imagekit.upload({
+                file: file.toString('base64'),
+                fileName: fileName,
+                folder: folder,
+                useUniqueFileName: true,
+              }),
+              this.uploadTimeoutMs,
+              'ImageKit upload',
+            ),
+          this.maxRetries,
+          this.retryDelayMs,
+          'ImageKit upload',
+        );
 
         return {
           fileId: response.fileId,
@@ -101,7 +125,17 @@ export class ImageKitService {
       return;
     } else {
       try {
-        await this.imagekit.deleteFile(fileId);
+        await this.withRetries(
+          () =>
+            this.withTimeout(
+              this.imagekit.deleteFile(fileId),
+              this.deleteTimeoutMs,
+              'ImageKit delete',
+            ),
+          this.maxRetries,
+          this.retryDelayMs,
+          'ImageKit delete',
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         throw new Error(`Failed to delete image from ImageKit: ${message}`);
@@ -118,5 +152,49 @@ export class ImageKitService {
       return { signature: '', expire: 0, token: '' };
     }
     return this.imagekit.getAuthenticationParameters();
+  }
+
+  private parseEnvInt(key: string, fallback: number): number {
+    const value = this.configService.get<string>(key);
+    if (!value) return fallback;
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? fallback : parsed;
+  }
+
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    label: string,
+  ): Promise<T> {
+    let timeoutId: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise<never>((_resolve, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+  }
+
+  private async withRetries<T>(
+    fn: () => Promise<T>,
+    retries: number,
+    delayMs: number,
+    label: string,
+  ): Promise<T> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt >= retries) throw error;
+        attempt += 1;
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
   }
 }

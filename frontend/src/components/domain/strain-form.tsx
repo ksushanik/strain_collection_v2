@@ -40,11 +40,14 @@ const strainSchema = z.object({
     // Dynamic Traits (may be present but unset in UI; unset entries are ignored on submit)
     phenotypes: z.array(
         z.object({
-            traitDefinitionId: z.number().optional().nullable(),
-            traitName: z.string().optional(),
+            traitDefinitionId: z.preprocess(
+                (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
+                z.number().nullable(),
+            ).optional(),
+            traitName: z.string().optional().nullable(),
             traitCode: z.string().optional().nullable(),
-            result: z.string().optional(),
-            method: z.string().optional(),
+            result: z.string().optional().nullable(),
+            method: z.string().optional().nullable(),
             dataType: z.nativeEnum(TraitDataType).optional(),
             options: z.array(z.string()).optional().nullable(),
             units: z.string().optional().nullable(),
@@ -135,8 +138,6 @@ export function StrainForm({
                         if (!result) return false
                         const hasTraitRef = (p.traitDefinitionId ?? null) !== null || !!(p.traitName ?? "").trim()
                         if (!hasTraitRef) return false
-                        // For boolean toggles we only persist explicit true
-                        if (result === "false") return false
                         const traitCode = p.traitCode ?? undefined
                         const traitName = (p.traitName ?? "").trim().toLowerCase()
                         const isKnownBooleanLegacy =

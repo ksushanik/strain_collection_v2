@@ -56,7 +56,7 @@ function normalizeResultForDisplay(p: PhenotypeFormValue, t: (k: string) => stri
   if (!p?.result || !String(p.result).trim()) return "-"
 
   if (dataType === TraitDataType.BOOLEAN) {
-    return p.result === "true" ? t("yes") : "-"
+    return p.result === "true" ? t("yes") : t("no")
   }
 
   if (dataType === TraitDataType.CATEGORICAL) {
@@ -70,11 +70,10 @@ function hasDefinedValue(p: PhenotypeFormValue, resolvedTrait?: TraitDefinition 
   const resultRaw = typeof p.result === "string" ? p.result.trim() : ""
   if (!resultRaw) return false
 
-  // Back-compat: older payloads may store boolean as "false" while we don't have dataType on the object.
-  if (resultRaw.toLowerCase() === "false") return false
-
   const dt = resolvedTrait?.dataType || getDataTypeFromPhenotype(p)
-  if (dt === TraitDataType.BOOLEAN) return resultRaw.toLowerCase() === "true"
+  if (dt === TraitDataType.BOOLEAN) {
+    return resultRaw.toLowerCase() === "true" || resultRaw.toLowerCase() === "false"
+  }
   return true
 }
 
@@ -100,6 +99,9 @@ function createEmptyValue(): PhenotypeFormValue {
 }
 
 function buildValueFromTrait(trait: TraitDefinition, existing?: PhenotypeFormValue): PhenotypeFormValue {
+  const existingResult = existing?.result ?? ""
+  const defaultBoolean = trait.dataType === TraitDataType.BOOLEAN && !existingResult ? "false" : existingResult
+
   return {
     ...(existing || {}),
     traitDefinitionId: trait.id,
@@ -109,7 +111,7 @@ function buildValueFromTrait(trait: TraitDefinition, existing?: PhenotypeFormVal
     options: (trait.options as unknown as string[] | null | undefined) ?? null,
     units: trait.units ?? null,
     method: existing?.method ?? trait.defaultMethod ?? "",
-    result: existing?.result ?? "",
+    result: defaultBoolean,
     traitDefinition: existing?.traitDefinition ?? null,
   }
 }
@@ -229,7 +231,7 @@ export function StrainPhenotypeTab() {
     // Treat empty as "unset": remove for custom traits; keep system traits row with empty value.
     const hasValue =
       dataType === TraitDataType.BOOLEAN
-        ? value.result === "true"
+        ? value.result === "true" || value.result === "false"
         : typeof value.result === "string" && value.result.trim().length > 0
 
     const index = editor.index
@@ -413,18 +415,18 @@ export function StrainPhenotypeTab() {
                 <Label>{t("traitResult")}</Label>
 
                 {editor.trait.dataType === TraitDataType.BOOLEAN ? (
-                  <div className="flex items-center gap-3 rounded-md border p-3">
-                    <Checkbox
-                      checked={editor.value.result === "true"}
-                      onCheckedChange={(checked) =>
-                        setEditor((s) => ({
-                          ...s,
-                          value: { ...s.value, result: checked === true ? "true" : "" },
-                        }))
-                      }
-                    />
-                    <div className="text-sm">{editor.value.result === "true" ? t("yes") : t("no")}</div>
-                  </div>
+                  <Select
+                    value={editor.value.result || "false"}
+                    onValueChange={(val) => setEditor((s) => ({ ...s, value: { ...s.value, result: val } }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("selectResult")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">{t("yes")}</SelectItem>
+                      <SelectItem value="false">{t("no")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 ) : editor.trait.dataType === TraitDataType.CATEGORICAL ? (
                   <Select
                     value={editor.value.result || ""}

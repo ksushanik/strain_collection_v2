@@ -37,9 +37,7 @@ services:
     environment:
       PORT: 3000
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/strain_collection_v2?schema=public"
-      ADMIN_SESSION_SECRET: "change_me_in_prod"
       REDIS_URL: "redis://redis:6379/0"
-      JWT_SECRET: ${JWT_SECRET:-dev_secret_key_do_not_use_in_prod}
     ports:
       - "3000:3000"
     command: >

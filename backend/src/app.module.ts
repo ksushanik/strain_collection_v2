@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -26,6 +28,29 @@ const includeAdmin = process.env.SKIP_ADMIN !== 'true';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const ttl = parseInt(
+          configService.get<string>('RATE_LIMIT_TTL') ?? '60',
+          10,
+        );
+        const limit = parseInt(
+          configService.get<string>('RATE_LIMIT_LIMIT') ?? '120',
+          10,
+        );
+
+        return {
+          throttlers: [
+            {
+              ttl,
+              limit,
+            },
+          ],
+        };
+      },
+      inject: [ConfigService],
+    }),
     PrismaModule,
     SettingsModule,
     StrainsModule,
@@ -43,6 +68,12 @@ const includeAdmin = process.env.SKIP_ADMIN !== 'true';
     ...(includeAdmin ? [AdminModule] : []),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
