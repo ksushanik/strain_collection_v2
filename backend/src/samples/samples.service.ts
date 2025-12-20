@@ -13,6 +13,53 @@ export class SamplesService {
     private imagekitService: ImageKitService,
   ) {}
 
+  private buildSubjectSlug(subject?: string | null) {
+    const trimmed = typeof subject === 'string' ? subject.trim() : '';
+    return trimmed ? trimmed.replace(/\s+/g, '-') : 'NoSubject';
+  }
+
+  private buildDisplayBase(sampleTypeSlug: string, subject?: string | null) {
+    return `${sampleTypeSlug}_${this.buildSubjectSlug(subject)}`;
+  }
+
+  private parseDisplaySuffix(display: string, base: string) {
+    if (display === base) return 0;
+    if (!display.startsWith(`${base}-`)) return null;
+    const raw = display.slice(base.length + 1);
+    if (!/^\d+$/.test(raw)) return null;
+    return Number.parseInt(raw, 10);
+  }
+
+  private async reserveDisplayCode(
+    tx: Prisma.TransactionClient,
+    sampleTypeId: number,
+    base: string,
+    excludeId?: number,
+  ) {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${base}))`;
+
+    const candidates = await tx.sample.findMany({
+      where: {
+        sampleTypeId,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+        code: { contains: `_${base}` },
+      },
+      select: { code: true },
+    });
+
+    let maxSuffix = -1;
+    for (const candidate of candidates) {
+      const display = candidate.code.replace(/^\d+_/, '');
+      const suffix = this.parseDisplaySuffix(display, base);
+      if (suffix !== null && suffix > maxSuffix) {
+        maxSuffix = suffix;
+      }
+    }
+
+    const nextSuffix = maxSuffix + 1;
+    return nextSuffix <= 0 ? base : `${base}-${nextSuffix}`;
+  }
+
   async findAll(query: SampleQueryDto) {
     const {
       sampleType,
@@ -149,6 +196,16 @@ export class SamplesService {
         );
       }
 
+      const base = this.buildDisplayBase(
+        sampleType.slug,
+        createSampleDto.subject,
+      );
+      const displayCode = await this.reserveDisplayCode(
+        tx,
+        sampleType.id,
+        base,
+      );
+
       // 2. Create Sample with a temporary code
       // We use a random string to satisfy the unique constraint temporarily
       const tempCode = `TEMP_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -163,11 +220,8 @@ export class SamplesService {
       });
 
       // 3. Generate the final code based on ID
-      // Format: ID_SLUG_SUBJECT
-      const subjectSlug = createSampleDto.subject
-        ? createSampleDto.subject.replace(/\s+/g, '-')
-        : 'NoSubject';
-      const finalCode = `${sample.id}_${sampleType.slug}_${subjectSlug}`;
+      // Format: ID_DISPLAY (display = type + subject + optional suffix)
+      const finalCode = `${sample.id}_${displayCode}`;
 
       // 4. Update the sample with the final code
       return tx.sample.update({
@@ -183,28 +237,73 @@ export class SamplesService {
   }
 
   async update(id: number, updateSampleDto: UpdateSampleDto) {
-    await this.findOne(id); // Check existence
-
-    const data: Prisma.SampleUpdateInput = { ...updateSampleDto };
-    if (updateSampleDto.collectedAt) {
-      data.collectedAt = new Date(updateSampleDto.collectedAt);
-    }
-
-    if (updateSampleDto.sampleTypeId !== undefined) {
-      const sampleType = await this.prisma.sampleTypeDictionary.findUnique({
-        where: { id: updateSampleDto.sampleTypeId },
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.sample.findUnique({
+        where: { id },
+        select: { sampleTypeId: true, subject: true },
       });
-      if (!sampleType) {
-        throw new NotFoundException(
-          `Sample Type with ID ${updateSampleDto.sampleTypeId} not found`,
-        );
+      if (!existing) {
+        throw new NotFoundException(`Sample with ID ${id} not found`);
       }
-      data.sampleType = sampleType.slug.toUpperCase() as SampleType;
-    }
 
-    return this.prisma.sample.update({
-      where: { id },
-      data,
+      const data: Prisma.SampleUpdateInput = { ...updateSampleDto };
+      if (updateSampleDto.collectedAt) {
+        data.collectedAt = new Date(updateSampleDto.collectedAt);
+      }
+
+      let sampleTypeId = existing.sampleTypeId ?? undefined;
+      let sampleTypeSlug: string | null = null;
+
+      if (updateSampleDto.sampleTypeId !== undefined) {
+        const sampleType = await tx.sampleTypeDictionary.findUnique({
+          where: { id: updateSampleDto.sampleTypeId },
+        });
+        if (!sampleType) {
+          throw new NotFoundException(
+            `Sample Type with ID ${updateSampleDto.sampleTypeId} not found`,
+          );
+        }
+        sampleTypeId = sampleType.id;
+        sampleTypeSlug = sampleType.slug;
+        data.sampleType = sampleType.slug.toUpperCase() as SampleType;
+      } else if (sampleTypeId) {
+        const sampleType = await tx.sampleTypeDictionary.findUnique({
+          where: { id: sampleTypeId },
+        });
+        if (sampleType) {
+          sampleTypeSlug = sampleType.slug;
+        }
+      }
+
+      const shouldRebuildCode =
+        updateSampleDto.subject !== undefined ||
+        updateSampleDto.sampleTypeId !== undefined;
+
+      if (shouldRebuildCode) {
+        if (!sampleTypeId || !sampleTypeSlug) {
+          throw new NotFoundException(
+            `Sample Type for Sample ${id} not found`,
+          );
+        }
+
+        const nextSubject =
+          updateSampleDto.subject !== undefined
+            ? updateSampleDto.subject
+            : existing.subject;
+        const base = this.buildDisplayBase(sampleTypeSlug, nextSubject);
+        const displayCode = await this.reserveDisplayCode(
+          tx,
+          sampleTypeId,
+          base,
+          id,
+        );
+        data.code = `${id}_${displayCode}`;
+      }
+
+      return tx.sample.update({
+        where: { id },
+        data,
+      });
     });
   }
 

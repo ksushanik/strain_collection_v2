@@ -4,6 +4,10 @@ describe('TraitsService', () => {
   const createPrismaMock = () => ({
     traitDefinition: {
       upsert: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
+    strainPhenotype: {
+      updateMany: jest.fn(),
     },
   });
 
