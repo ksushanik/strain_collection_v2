@@ -159,7 +159,11 @@ export function StrainForm({
             if (isEdit && initialData) {
                 await ApiService.updateStrain(initialData.id, payload)
                 toast.success(t('strainUpdated'))
-                router.back()
+                const basePath = `/strains/${initialData.id}`
+                const target = returnTo
+                    ? `${basePath}?returnTo=${encodeURIComponent(returnTo)}`
+                    : basePath
+                router.push(target)
                 router.refresh()
             } else {
                 await ApiService.createStrain(payload)

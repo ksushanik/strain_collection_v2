@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ApiService, Media, Strain } from "@/services/api"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Plus, Trash2 } from "lucide-react"
-import { useRouter } from "@/i18n/routing"
+import { routing, usePathname, useRouter } from "@/i18n/routing"
 import { useSearchParams } from "next/navigation"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -47,11 +47,29 @@ type BoxDetail = {
     }[];
 }
 
+function normalizeReturnPath(returnPath: string | null, pathname: string | null) {
+    if (!returnPath) return null
+    if (!returnPath.startsWith("/") || !pathname) return returnPath
+
+    const pathLocale = pathname.split("/")[1]
+    const baseLocale = returnPath.split("/")[1]
+    const hasPathLocale = routing.locales.includes(pathLocale)
+    const hasBaseLocale = routing.locales.includes(baseLocale)
+
+    if (hasPathLocale && !hasBaseLocale) {
+        return `/${pathLocale}${returnPath}`
+    }
+
+    return returnPath
+}
+
 function EditStrainContent({ id }: { id: string }) {
     const searchParams = useSearchParams()
     const router = useRouter()
+    const pathname = usePathname()
     const t = useTranslations('Strains')
     const returnTo = searchParams?.get("returnTo") || undefined
+    const normalizedReturnTo = normalizeReturnPath(returnTo ?? null, pathname) ?? undefined
     const { handleError } = useApiError()
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -241,7 +259,7 @@ function EditStrainContent({ id }: { id: string }) {
                     <StrainForm
                         initialData={strain}
                         isEdit
-                        returnTo={returnTo}
+                        returnTo={normalizedReturnTo}
                         formId="strain-form-edit"
                         showActions={false}
                         onSubmittingChange={setFormSubmitting}
@@ -447,8 +465,8 @@ function EditStrainContent({ id }: { id: string }) {
                     variant="outline"
                     type="button"
                     onClick={() => {
-                        if (returnTo) {
-                            router.push(returnTo)
+                        if (normalizedReturnTo) {
+                            router.push(normalizedReturnTo)
                         } else {
                             router.back()
                         }

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useFieldArray, useFormContext } from "react-hook-form"
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form"
 import { useTranslations } from "next-intl"
 import { Plus, Trash2 } from "lucide-react"
 
@@ -7,7 +7,6 @@ import { ApiService, TraitDataType } from "@/services/api"
 import type { TraitDefinition } from "@/services/api"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -121,14 +120,18 @@ type StrainFormValues = { phenotypes: PhenotypeFormValue[] }
 export function StrainPhenotypeTab() {
   const t = useTranslations("Strains")
   const tCommon = useTranslations("Common")
-  const { control, watch } = useFormContext<StrainFormValues>()
+  const { control } = useFormContext<StrainFormValues>()
 
   const { fields, append, update, remove } = useFieldArray({
     control,
     name: "phenotypes",
   })
 
-  const phenotypes = (watch("phenotypes") || []) as PhenotypeFormValue[]
+  const watchedPhenotypes = useWatch({ control, name: "phenotypes" })
+  const phenotypes = React.useMemo(
+    () => (watchedPhenotypes || []) as PhenotypeFormValue[],
+    [watchedPhenotypes],
+  )
 
   const [dictionary, setDictionary] = React.useState<TraitDefinition[]>([])
   const [editor, setEditor] = React.useState<EditorState>({

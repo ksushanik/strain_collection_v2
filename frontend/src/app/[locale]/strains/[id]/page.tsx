@@ -7,7 +7,7 @@ import { Loader2, ArrowLeft, Microscope, Dna, FlaskConical, Edit, Archive, Trash
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from "next/navigation"
-import { useRouter } from "@/i18n/routing"
+import { routing, usePathname, useRouter } from "@/i18n/routing"
 import { StrainPhotoUpload } from "@/components/domain/strain-photo-upload"
 import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
@@ -19,8 +19,24 @@ import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 type Phenotype = NonNullable<Strain["phenotypes"]>[number]
 
+function normalizeReturnPath(returnPath: string | null, pathname: string | null) {
+    if (!returnPath) return null
+    if (!returnPath.startsWith("/") || !pathname) return returnPath
+
+    const pathLocale = pathname.split("/")[1]
+    const baseLocale = returnPath.split("/")[1]
+    const hasPathLocale = routing.locales.includes(pathLocale)
+    const hasBaseLocale = routing.locales.includes(baseLocale)
+
+    if (hasPathLocale && !hasBaseLocale) {
+        return `/${pathLocale}${returnPath}`
+    }
+
+    return returnPath
+}
+
 // Standard Card-like Section Block
-function SectionBlock({ 
+function SectionBlock({
     title, 
     icon: Icon, 
     children, 
@@ -46,8 +62,10 @@ function SectionBlock({
 
 function StrainDetailContent({ id }: { id: string }) {
     const router = useRouter()
+    const pathname = usePathname()
     const searchParams = useSearchParams()
     const returnTo = searchParams?.get('returnTo')
+    const normalizedReturnTo = normalizeReturnPath(returnTo, pathname)
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
     const { handleError } = useApiError()
@@ -185,7 +203,7 @@ function StrainDetailContent({ id }: { id: string }) {
         setDeleting(true)
         try {
             await ApiService.deleteStrain(strain.id)
-            router.push(returnTo || '/strains')
+            router.push(normalizedReturnTo || '/strains')
         } catch (err) {
             handleError(err, t('deleteFailed'))
         } finally {
@@ -214,7 +232,7 @@ function StrainDetailContent({ id }: { id: string }) {
         <div className="p-8 space-y-6 max-w-7xl mx-auto">
             {/* Header Navigation & Actions */}
             <div className="flex items-center gap-4 mb-2">
-                <Button variant="ghost" size="sm" onClick={() => returnTo ? router.push(returnTo) : router.back()}>
+                <Button variant="ghost" size="sm" onClick={() => normalizedReturnTo ? router.push(normalizedReturnTo) : router.back()}>
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
                 </Button>
@@ -225,7 +243,7 @@ function StrainDetailContent({ id }: { id: string }) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
-                                    router.push(`/strains/${strain.id}/edit${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`)
+                                    router.push(`/strains/${strain.id}/edit${normalizedReturnTo ? `?returnTo=${encodeURIComponent(normalizedReturnTo)}` : ""}`)
                                 }
                             >
                                 <Edit className="h-4 w-4 mr-1" />

@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "@/i18n/routing"
+import { routing, usePathname, useRouter } from "@/i18n/routing"
+import { useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
     Select,
     SelectContent,
@@ -91,18 +91,44 @@ function getTaxonomyForList(strain: Strain): string | null {
     return ncbiScientificName || null
 }
 
+function getPageFromSearchParams(searchParams: ReturnType<typeof useSearchParams>) {
+    const rawPage = searchParams?.get("page")
+    const parsed = rawPage ? Number.parseInt(rawPage, 10) : 1
+    if (Number.isNaN(parsed) || parsed < 1) return 1
+    return parsed
+}
+
+function normalizeReturnPath(returnPath: string | undefined, pathname: string | null) {
+    const base = returnPath ?? pathname ?? "/strains"
+    if (!base.startsWith("/") || !pathname) return base
+
+    const pathLocale = pathname.split("/")[1]
+    const baseLocale = base.split("/")[1]
+    const hasPathLocale = routing.locales.includes(pathLocale)
+    const hasBaseLocale = routing.locales.includes(baseLocale)
+
+    if (hasPathLocale && !hasBaseLocale) {
+        return `/${pathLocale}${base}`
+    }
+
+    return base
+}
+
 export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainListProps) {
     const t = useTranslations('Strains')
     const tCommon = useTranslations('Common')
     const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
     const { user } = useAuth()
     const { handleError } = useApiError()
     const [strains, setStrains] = React.useState<Strain[]>([])
     const [meta, setMeta] = React.useState<{ total: number; page: number; limit: number; totalPages: number } | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [search, setSearch] = React.useState("")
-    const [page, setPage] = React.useState(1)
-    const sortStorageKey = `strainList.sort:${returnPath}`
+    const [page, setPage] = React.useState(() => getPageFromSearchParams(searchParams))
+    const normalizedReturnPath = normalizeReturnPath(returnPath, pathname)
+    const sortStorageKey = `strainList.sort:${normalizedReturnPath}`
     const [sortBy, setSortBy] = React.useState<StrainSortBy>(() => readSortPreference(sortStorageKey)?.sortBy ?? "createdAt")
     const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => readSortPreference(sortStorageKey)?.sortOrder ?? "desc")
     const [filtersOpen, setFiltersOpen] = React.useState(false)
@@ -136,7 +162,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         return undefined
     }
 
+    const requestIdRef = React.useRef(0)
+
     const loadStrains = React.useCallback(() => {
+        const requestId = requestIdRef.current + 1
+        requestIdRef.current = requestId
         setLoading(true)
         return ApiService.getStrains({
             search,
@@ -154,14 +184,42 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             page,
             limit: 10,
         }).then(res => {
+            if (requestIdRef.current !== requestId) return
             setStrains(res.data)
             setMeta(res.meta)
             setLoading(false)
         }).catch(err => {
+            if (requestIdRef.current !== requestId) return
             handleError(err, t('failedToLoadStrains'))
             setLoading(false)
         })
     }, [filters, handleError, page, search, sortBy, sortOrder, t])
+
+    const pageFromParams = React.useMemo(
+        () => getPageFromSearchParams(searchParams),
+        [searchParams],
+    )
+
+    React.useEffect(() => {
+        setPage((current) => (current === pageFromParams ? current : pageFromParams))
+    }, [pageFromParams])
+
+    React.useEffect(() => {
+        if (pageFromParams !== page) return
+        if (!pathname) return
+        const params = new URLSearchParams(searchParams?.toString() ?? "")
+        const desired = page > 1 ? String(page) : null
+        const current = params.get("page")
+        if ((desired ?? "") === (current ?? "")) return
+        if (desired) {
+            params.set("page", desired)
+        } else {
+            params.delete("page")
+        }
+        const qs = params.toString()
+        const target = qs ? `${pathname}?${qs}` : pathname
+        router.replace(target)
+    }, [page, pathname, router, searchParams])
 
     React.useEffect(() => {
         if (typeof window === "undefined") return
@@ -175,6 +233,22 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
+
+    const returnToPath = React.useMemo(() => {
+        const [path, query] = normalizedReturnPath.split("?")
+        const params = new URLSearchParams(query ?? "")
+        const samePath = pathname && path === pathname
+        const currentParams = samePath ? new URLSearchParams(searchParams?.toString() ?? "") : null
+        const targetParams = currentParams ?? params
+
+        if (page > 1) {
+            targetParams.set("page", String(page))
+        } else {
+            targetParams.delete("page")
+        }
+        const qs = targetParams.toString()
+        return qs ? `${path}?${qs}` : path
+    }, [normalizedReturnPath, page, pathname, searchParams])
 
     if (loading && !meta) {
         return (
@@ -371,7 +445,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                         <TableRow
                                             key={strain.id}
                                             className="cursor-pointer hover:bg-muted/50"
-                                            onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
+                                            onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnToPath)}`)}
                                         >
                                             <TableCell className="font-medium">
                                                 {strain.identifier}
@@ -450,7 +524,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 <div
                                     key={strain.id}
                                     className="rounded-lg border p-3 shadow-xs hover:bg-muted/50 transition-colors cursor-pointer"
-                                    onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnPath)}`)}
+                                    onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnToPath)}`)}
                                 >
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="font-semibold">{strain.identifier}</div>
