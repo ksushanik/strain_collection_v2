@@ -18,6 +18,11 @@ import { getTraitDisplayName } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 type Phenotype = NonNullable<Strain["phenotypes"]>[number]
+type RoutingLocale = (typeof routing.locales)[number]
+
+function isRoutingLocale(value: string | undefined): value is RoutingLocale {
+    return routing.locales.includes(value as RoutingLocale)
+}
 
 function normalizeReturnPath(returnPath: string | null, pathname: string | null) {
     if (!returnPath) return null
@@ -25,8 +30,8 @@ function normalizeReturnPath(returnPath: string | null, pathname: string | null)
 
     const pathLocale = pathname.split("/")[1]
     const baseLocale = returnPath.split("/")[1]
-    const hasPathLocale = routing.locales.includes(pathLocale)
-    const hasBaseLocale = routing.locales.includes(baseLocale)
+    const hasPathLocale = isRoutingLocale(pathLocale)
+    const hasBaseLocale = isRoutingLocale(baseLocale)
 
     if (hasPathLocale && !hasBaseLocale) {
         return `/${pathLocale}${returnPath}`

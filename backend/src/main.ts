@@ -40,6 +40,10 @@ async function bootstrap() {
     isProd ? 'app-bundle.production.js' : 'app-bundle.development.js',
   );
   const server: express.Express = express();
+  if (isProd) {
+    // Honor X-Forwarded-* headers from the reverse proxy for secure cookies.
+    server.set('trust proxy', 1);
+  }
 
   const resolveComponentsBundle = (): string | undefined => {
     const candidates = [

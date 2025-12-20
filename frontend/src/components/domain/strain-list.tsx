@@ -39,6 +39,11 @@ const STRAIN_SORT_BY_VALUES = ["createdAt", "identifier", "sampleCode", "taxonom
 type StrainSortBy = (typeof STRAIN_SORT_BY_VALUES)[number]
 type SortOrder = "asc" | "desc"
 type Phenotype = NonNullable<Strain["phenotypes"]>[number]
+type RoutingLocale = (typeof routing.locales)[number]
+
+function isRoutingLocale(value: string | undefined): value is RoutingLocale {
+    return routing.locales.includes(value as RoutingLocale)
+}
 
 function isStrainSortBy(value: unknown): value is StrainSortBy {
     return typeof value === "string" && (STRAIN_SORT_BY_VALUES as readonly string[]).includes(value)
@@ -104,8 +109,8 @@ function normalizeReturnPath(returnPath: string | undefined, pathname: string | 
 
     const pathLocale = pathname.split("/")[1]
     const baseLocale = base.split("/")[1]
-    const hasPathLocale = routing.locales.includes(pathLocale)
-    const hasBaseLocale = routing.locales.includes(baseLocale)
+    const hasPathLocale = isRoutingLocale(pathLocale)
+    const hasBaseLocale = isRoutingLocale(baseLocale)
 
     if (hasPathLocale && !hasBaseLocale) {
         return `/${pathLocale}${base}`
