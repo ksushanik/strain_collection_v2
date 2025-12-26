@@ -1,9 +1,12 @@
 "use client"
 
 import React from "react"
-import { Search } from "lucide-react"
+import { Loader2, Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/contexts/AuthContext"
+import { canRead } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 
 type IndexedDoc = {
   id: string
@@ -16,12 +19,20 @@ type IndexedDoc = {
 
 export default function DocsPage() {
   const t = useTranslations('Wiki')
+  const { user, isLoading: authLoading } = useAuth()
   const [docs, setDocs] = React.useState<IndexedDoc[]>([])
   const [query, setQuery] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(true)
 
+  const canReadPage = canRead(user, "Wiki")
+
   React.useEffect(() => {
+    if (!canReadPage) {
+      setLoading(false)
+      return
+    }
+    setLoading(true)
     const load = async () => {
       try {
         const res = await fetch("/wiki-api/docs-index")
@@ -36,13 +47,25 @@ export default function DocsPage() {
       }
     }
     void load()
-  }, [])
+  }, [canReadPage])
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return docs
     return docs.filter((d) => d.text.includes(q) || d.title.toLowerCase().includes(q))
   }, [query, docs])
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!canReadPage) {
+    return <AccessDenied />
+  }
 
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">

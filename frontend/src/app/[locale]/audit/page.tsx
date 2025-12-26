@@ -18,18 +18,24 @@ import { Loader2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { canRead } from '@/lib/permissions';
+import { AccessDenied } from '@/components/common/access-denied';
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 export default function AuditPage() {
     const t = useTranslations('Audit');
     const tCommon = useTranslations('Common');
+    const { user, isLoading: authLoading } = useAuth();
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         userId: '',
         entity: '',
     });
+
+    const canReadPage = canRead(user, 'AuditLog');
 
     const fetchLogs = useCallback(async () => {
         setLoading(true);
@@ -47,8 +53,24 @@ export default function AuditPage() {
     }, [filters.entity, filters.userId]);
 
     useEffect(() => {
+        if (!canReadPage) {
+            setLoading(false);
+            return;
+        }
         fetchLogs();
-    }, [fetchLogs]);
+    }, [fetchLogs, canReadPage]);
+
+    if (authLoading) {
+        return (
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    if (!canReadPage) {
+        return <AccessDenied />;
+    }
 
     const getActionStyle = (
         action: string,

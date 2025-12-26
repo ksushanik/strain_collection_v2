@@ -10,18 +10,28 @@ import { useAuth } from "@/contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useTranslations } from "next-intl"
+import { canRead, hasPermission } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 
 type EditableBinding = UiBinding & { enabledFieldPacks: string[] }
 
 export default function SettingsPage() {
   const t = useTranslations('Settings')
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const [bindings, setBindings] = React.useState<EditableBinding[]>([])
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [message, setMessage] = React.useState<string | null>(null)
 
+  const canReadPage = canRead(user, "Settings")
+  const canUpdate = hasPermission(user, "Settings", "update")
+
   React.useEffect(() => {
+    if (!canReadPage) {
+      setLoading(false)
+      return
+    }
+    setLoading(true)
     ApiService.getUiBindings()
       .then((data) => {
         setBindings(
@@ -34,7 +44,7 @@ export default function SettingsPage() {
         setMessage("Failed to load settings")
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [canReadPage])
 
   const updateBinding = (index: number, patch: Partial<EditableBinding>) => {
     setBindings((prev) => {
@@ -90,6 +100,18 @@ export default function SettingsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!canReadPage) {
+    return <AccessDenied />
   }
 
   return (
@@ -242,7 +264,7 @@ export default function SettingsPage() {
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm text-muted-foreground">{message}</div>
-              {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+              {canUpdate && (
                 <Button onClick={handleSave} disabled={saving || loading} className="w-full sm:w-auto">
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   Save order and labels

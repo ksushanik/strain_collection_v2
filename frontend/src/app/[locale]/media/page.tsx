@@ -14,13 +14,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { cn } from "@/lib/utils"
+import { canRead, hasPermission } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 
 const PAGE_SIZE = 10
 
 export default function MediaPage() {
   const t = useTranslations('Media')
   const tCommon = useTranslations('Common')
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   const nameInputRef = React.useRef<HTMLInputElement>(null)
   const [data, setData] = React.useState<PaginatedResponse<Media> | null>(null)
   const [search, setSearch] = React.useState("")
@@ -32,7 +34,10 @@ export default function MediaPage() {
   const [error, setError] = React.useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
 
-  const canDelete = user && (user.role === 'ADMIN' || user.role === 'MANAGER')
+  const canReadPage = canRead(user, "Media")
+  const canCreate = hasPermission(user, "Media", "create")
+  const canUpdate = hasPermission(user, "Media", "update")
+  const canDelete = hasPermission(user, "Media", "delete")
 
   const loadData = React.useCallback(() => {
     setLoading(true)
@@ -49,16 +54,22 @@ export default function MediaPage() {
   }, [search, page, t])
 
   React.useEffect(() => {
+    if (!canReadPage) {
+      setLoading(false)
+      return
+    }
     loadData()
-  }, [loadData])
+  }, [loadData, canReadPage])
 
   const handleCreate = () => {
+    if (!canCreate) return
     setFormData({ name: "", composition: "" })
     setEditingId(null)
     setIsDialogOpen(true)
   }
 
   const handleEdit = (media: Media) => {
+    if (!canUpdate) return
     setFormData({ name: media.name, composition: media.composition || "" })
     setEditingId(media.id)
     setIsDialogOpen(true)
@@ -66,6 +77,8 @@ export default function MediaPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (editingId && !canUpdate) return
+    if (!editingId && !canCreate) return
     const currentName = nameInputRef.current?.value ?? formData.name
     if (!currentName.trim()) return
     setSaving(true)
@@ -104,6 +117,18 @@ export default function MediaPage() {
 
   const filteredMedia = data?.data || []
 
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!canReadPage) {
+    return <AccessDenied />
+  }
+
   return (
     <div className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -111,12 +136,12 @@ export default function MediaPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        {(user) && (
-          <Button onClick={handleCreate} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            {t('addMedia')}
-          </Button>
-        )}
+          {canCreate && (
+            <Button onClick={handleCreate} className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('addMedia')}
+            </Button>
+          )}
       </div>
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -150,8 +175,8 @@ export default function MediaPage() {
           filteredMedia.map((item) => (
             <Card
               key={item.id}
-              onClick={user ? () => handleEdit(item) : undefined}
-              className={cn(user && "cursor-pointer hover:bg-muted/30")}
+              onClick={canUpdate ? () => handleEdit(item) : undefined}
+              className={cn(canUpdate && "cursor-pointer hover:bg-muted/30")}
             >
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">{item.name}</CardTitle>
@@ -189,8 +214,8 @@ export default function MediaPage() {
               filteredMedia.map((item) => (
                 <TableRow
                   key={item.id}
-                  onClick={user ? () => handleEdit(item) : undefined}
-                  className={cn(user && "cursor-pointer hover:bg-muted/30")}
+                  onClick={canUpdate ? () => handleEdit(item) : undefined}
+                  className={cn(canUpdate && "cursor-pointer hover:bg-muted/30")}
                 >
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell>

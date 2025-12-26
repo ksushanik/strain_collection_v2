@@ -30,6 +30,8 @@
         "next": "Вперед",
         "pageNotFound": "Страница не найдена",
         "pageNotFoundDescription": "Запрошенный раздел не существует в текущей конфигурации.",
+        "accessDeniedTitle": "Доступ запрещен",
+        "accessDeniedDescription": "Недостаточно прав для просмотра этого раздела.",
         "profile": "Профиль",
         "name": "Название",
         "description": "Описание",

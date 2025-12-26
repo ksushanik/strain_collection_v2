@@ -31,6 +31,8 @@
         "next": "Next",
         "pageNotFound": "Page Not Found",
         "pageNotFoundDescription": "The requested section does not exist in the current configuration.",
+        "accessDeniedTitle": "Access denied",
+        "accessDeniedDescription": "You do not have permission to view this section.",
         "profile": "Profile",
         "name": "Name",
         "description": "Description",

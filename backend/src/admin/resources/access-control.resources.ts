@@ -9,6 +9,40 @@ import {
 import { normalizePermissionsBefore } from '../helpers/permissions';
 import { logAudit } from '../helpers/audit';
 
+const normalizeUserRelationsBefore = (request: any) => {
+  if (request?.method !== 'post' || !request?.payload) return request;
+  const payload = { ...request.payload };
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'roleId')) {
+    const rawRoleId = payload.roleId;
+    if (rawRoleId === '' || rawRoleId === null || rawRoleId === undefined) {
+      delete payload.roleId;
+    } else if (typeof rawRoleId === 'string') {
+      const parsed = Number(rawRoleId);
+      if (Number.isFinite(parsed)) {
+        payload.roleId = parsed;
+      }
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'groupId')) {
+    const rawGroupId = payload.groupId;
+    if (rawGroupId === '' || rawGroupId === null || rawGroupId === undefined) {
+      payload.groupId = null;
+    } else if (typeof rawGroupId === 'string') {
+      const parsed = Number(rawGroupId);
+      if (Number.isFinite(parsed)) {
+        payload.groupId = parsed;
+      }
+    }
+  }
+
+  return { ...request, payload };
+};
+
+const normalizeUserBefore = async (request: any) =>
+  normalizeUserRelationsBefore(await hashPasswordBefore(request));
+
 type GetModelByName = (modelName: string) => any;
 
 export interface AccessControlResourcesDeps {
@@ -81,7 +115,7 @@ export const buildAccessControlResources = ({
       },
       actions: {
         new: {
-          before: hashPasswordBefore,
+          before: normalizeUserBefore,
           after: async (response: any, request: any, context: any) => {
             stripPasswordFromResponse(response);
             const id = response?.record?.params?.id;
@@ -105,7 +139,7 @@ export const buildAccessControlResources = ({
           },
         },
         edit: {
-          before: hashPasswordBefore,
+          before: normalizeUserBefore,
           after: async (response: any, request: any, context: any) => {
             stripPasswordFromResponse(response);
             const id =

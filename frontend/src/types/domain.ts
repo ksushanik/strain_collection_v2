@@ -66,4 +66,5 @@ export interface User {
     name?: string;
     role: Role;
     groupId?: number;
+    permissions?: Record<string, string[]>;
 }

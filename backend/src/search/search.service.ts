@@ -104,8 +104,8 @@ export class SearchService {
     if (ability.can('read', 'Legend')) {
       tasks.legend = this.searchLegend(q);
     }
-    // Wiki is internal docs; gate it by Settings read (available to same roles as other read-only UI)
-    if (ability.can('read', 'Settings')) {
+    // Wiki is internal docs; gate it by explicit Wiki read permission
+    if (ability.can('read', 'Wiki')) {
       tasks.wiki = this.searchWiki(q, perSection);
     }
 

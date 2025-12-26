@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
 import { translateDynamic } from "@/lib/translate-dynamic"
+import { canRead } from "@/lib/permissions"
 
 type SidebarProps = {
     isMobile?: boolean
@@ -88,6 +89,16 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
 
     const widthClass = isMobile ? "w-full" : (isCollapsed ? "w-16" : "w-64")
 
+    const canReadStrains = canRead(user, "Strain")
+    const canReadSamples = canRead(user, "Sample")
+    const canReadStorage = canRead(user, "Storage")
+    const canReadMedia = canRead(user, "Media")
+    const canReadMethods = canRead(user, "TraitDefinition")
+    const canReadLegend = canRead(user, "Legend")
+    const canReadWiki = canRead(user, "Wiki")
+    const canReadAudit = canRead(user, "AuditLog")
+    const canReadSettings = canRead(user, "Settings")
+
     return (
         <div className={cn(
             "flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300",
@@ -123,44 +134,50 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                         {!isCollapsed && <span>{t('dashboard')}</span>}
                     </Link>
 
-                    <Link
-                        href="/strains"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/strains" || pathname.startsWith("/strains/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <Microscope className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('strains')}</span>}
-                    </Link>
+                    {canReadStrains && (
+                        <Link
+                            href="/strains"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/strains" || pathname.startsWith("/strains/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <Microscope className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('strains')}</span>}
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/samples"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/samples" || pathname.startsWith("/samples/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <Leaf className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('samples')}</span>}
-                    </Link>
+                    {canReadSamples && (
+                        <Link
+                            href="/samples"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/samples" || pathname.startsWith("/samples/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <Leaf className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('samples')}</span>}
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/storage"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/storage" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <Box className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('storage')}</span>}
-                    </Link>
+                    {canReadStorage && (
+                        <Link
+                            href="/storage"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/storage" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <Box className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('storage')}</span>}
+                        </Link>
+                    )}
                     {loading ? (
                         <div className="flex justify-center py-4">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -191,59 +208,67 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             })
                     )}
 
-    <Link
-        href="/media"
-        onClick={handleNavigate}
-        className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-            pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-            isCollapsed && "justify-center px-2"
-        )}
-    >
-        <FlaskConical className="h-4 w-4" />
-        {!isCollapsed && <span>{t('media')}</span>}
-    </Link>
+                    {canReadMedia && (
+                        <Link
+                            href="/media"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <FlaskConical className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('media')}</span>}
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/methods"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/methods" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <Wrench className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('methods')}</span>}
-                    </Link>
+                    {canReadMethods && (
+                        <Link
+                            href="/methods"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/methods" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <Wrench className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('methods')}</span>}
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/legend"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/legend" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <BookOpen className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('legend')}</span>}
-                    </Link>
+                    {canReadLegend && (
+                        <Link
+                            href="/legend"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/legend" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <BookOpen className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('legend')}</span>}
+                        </Link>
+                    )}
 
-                    <Link
-                        href="/docs"
-                        onClick={handleNavigate}
-                        className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/docs" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
-                            isCollapsed && "justify-center px-2"
-                        )}
-                    >
-                        <BookOpen className="h-4 w-4" />
-                        {!isCollapsed && <span>{t('wiki')}</span>}
-                    </Link>
+                    {canReadWiki && (
+                        <Link
+                            href="/docs"
+                            onClick={handleNavigate}
+                            className={cn(
+                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/docs" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <BookOpen className="h-4 w-4" />
+                            {!isCollapsed && <span>{t('wiki')}</span>}
+                        </Link>
+                    )}
 
-                    {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                    {canReadAudit && (
                         <Link
                             href="/audit"
                             onClick={handleNavigate}
@@ -263,18 +288,20 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             <div className="border-t">
                 {user ? (
                     <>
-                        <Link
-                            href="/settings"
-                            onClick={handleNavigate}
-                            className={cn(
-                                "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
-                                isCollapsed && "justify-center px-2"
-                            )}
-                        >
-                            <Settings className="h-4 w-4" />
-                            {!isCollapsed && <span>{t('settings')}</span>}
-                        </Link>
+                        {canReadSettings && (
+                            <Link
+                                href="/settings"
+                                onClick={handleNavigate}
+                                className={cn(
+                                    "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                            >
+                                <Settings className="h-4 w-4" />
+                                {!isCollapsed && <span>{t('settings')}</span>}
+                            </Link>
+                        )}
 
                         <Separator />
 

@@ -12,6 +12,7 @@ export type Subjects =
   | 'Method'
   | 'Settings'
   | 'Legend'
+  | 'Wiki'
   | 'Analytics'
   | 'User'
   | 'Group'
@@ -22,7 +23,7 @@ export type Subjects =
 
 export type AppAbility = Ability<[Actions, Subjects]>;
 
-type PermissionMap = Partial<Record<Subjects, Actions[]>>;
+export type PermissionMap = Partial<Record<Subjects, Actions[]>>;
 
 const VALID_ACTIONS: Actions[] = [
   'manage',
@@ -40,6 +41,7 @@ const VALID_SUBJECTS: Subjects[] = [
   'TraitDefinition',
   'Settings',
   'Legend',
+  'Wiki',
   'Analytics',
   'User',
   'Group',
@@ -62,6 +64,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     TraitDefinition: ['read', 'create', 'update', 'delete'],
     Settings: ['read'],
     Legend: ['read'],
+    Wiki: ['read'],
     Analytics: ['read'],
     User: ['read'],
     Group: ['read'],
@@ -77,6 +80,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],
+    Wiki: ['read'],
   },
   // Explicit GUEST role definition (read-only)
   GUEST: {
@@ -90,6 +94,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<RoleKey | 'GUEST', PermissionMap> = {
     Analytics: ['read'],
     Legend: ['read'],
     Settings: ['read'],
+    Wiki: ['read'],
   },
 };
 
@@ -106,13 +111,26 @@ export class CaslAbilityFactory {
       Ability as AbilityClass<AppAbility>,
     );
 
+    const permissions = this.getPermissionsForUser(user);
+
+    this.applyPermissions(can, permissions);
+
+    return build();
+  }
+
+  getPermissionsForUser(
+    user: Partial<User> & {
+      role?: { key?: string; permissions?: PermissionMap | null } | string;
+      roleId?: number;
+      group?: { permissions?: PermissionMap | null } | null;
+    },
+  ): PermissionMap {
     const roleKey =
       (typeof user.role === 'object' && user.role?.key) ||
       (typeof user.role === 'string' ? user.role : null);
 
     if (roleKey === 'ADMIN') {
-      can('manage', 'all');
-      return build();
+      return { all: ['manage'] };
     }
 
     const groupPermissionsRaw =
@@ -140,16 +158,12 @@ export class CaslAbilityFactory {
       normalizedRolePermissions !== null &&
       Object.keys(normalizedRolePermissions).length > 0;
 
-    const permissions: PermissionMap = useGroupPermissions
+    return useGroupPermissions
       ? normalizedGroupPermissions
       : useRolePermissions
         ? normalizedRolePermissions
         : DEFAULT_ROLE_PERMISSIONS[(roleKey as RoleKey) ?? 'GUEST'] ||
           DEFAULT_ROLE_PERMISSIONS.GUEST;
-
-    this.applyPermissions(can, permissions);
-
-    return build();
   }
 
   private normalizePermissions(

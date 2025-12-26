@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { slugify } from "@/lib/utils"
 import { getTraitDisplayName } from "@/lib/trait-labels"
+import { hasPermission, canRead } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 
 const initialFormData = {
   name: "",
@@ -30,7 +32,7 @@ export default function MethodsPage() {
   const t = useTranslations("Methods")
   const tCommon = useTranslations("Common")
   const tStrains = useTranslations("Strains")
-  const { user } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   
   const [data, setData] = React.useState<TraitDefinition[]>([])
   const [search, setSearch] = React.useState("")
@@ -45,7 +47,10 @@ export default function MethodsPage() {
   // Options management for CATEGORICAL type
   const [optionInput, setOptionInput] = React.useState("")
 
-  const canEdit = user && (user.role === "ADMIN" || user.role === "MANAGER")
+  const canReadPage = canRead(user, "TraitDefinition")
+  const canCreate = hasPermission(user, "TraitDefinition", "create")
+  const canUpdate = hasPermission(user, "TraitDefinition", "update")
+  const canDelete = hasPermission(user, "TraitDefinition", "delete")
 
   const loadData = React.useCallback(() => {
     setLoading(true)
@@ -62,10 +67,15 @@ export default function MethodsPage() {
   }, [search, t])
 
   React.useEffect(() => {
+    if (!canReadPage) {
+      setLoading(false)
+      return
+    }
     loadData()
-  }, [loadData])
+  }, [loadData, canReadPage])
 
   const handleCreate = () => {
+    if (!canCreate) return
     setFormData(initialFormData)
     setEditingId(null)
     setIsSystem(false)
@@ -73,6 +83,7 @@ export default function MethodsPage() {
   }
 
   const handleEdit = (trait: TraitDefinition) => {
+    if (!canUpdate) return
     setFormData({
       name: trait.name,
       code: trait.code,
@@ -106,6 +117,8 @@ export default function MethodsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (editingId && !canUpdate) return
+    if (!editingId && !canCreate) return
     if (!formData.name.trim() || !formData.code.trim()) return
 
     const codeRegex = /^[a-z0-9_]+$/
@@ -167,6 +180,18 @@ export default function MethodsPage() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!canReadPage) {
+    return <AccessDenied />
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -174,7 +199,7 @@ export default function MethodsPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
-        {canEdit && (
+        {canCreate && (
           <Button onClick={handleCreate}>
             <Plus className="mr-2 h-4 w-4" />
             {t("create")}
@@ -225,8 +250,8 @@ export default function MethodsPage() {
               data.map((trait) => (
                 <TableRow 
                   key={trait.id} 
-                  onClick={() => canEdit && handleEdit(trait)}
-                  className={canEdit ? "cursor-pointer hover:bg-muted/50" : ""}
+                  onClick={() => canUpdate && handleEdit(trait)}
+                  className={canUpdate ? "cursor-pointer hover:bg-muted/50" : ""}
                 >
                   <TableCell className="font-medium">
                     {getTraitDisplayName(trait.code, trait.name, tStrains)}
@@ -396,10 +421,10 @@ export default function MethodsPage() {
             </div>
 
             <DialogFooter className="flex justify-between sm:justify-between">
-              {editingId && (
-                <Button 
-                  type="button" 
-                  variant="destructive" 
+              {editingId && canDelete && (
+                <Button
+                  type="button"
+                  variant="destructive"
                   onClick={async () => {
                     if (await handleDelete(editingId)) {
                       setIsDialogOpen(false)
