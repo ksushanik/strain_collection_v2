@@ -14,6 +14,7 @@ import type { ApiError } from './http';
 
 import type {
   AnalyticsOverview,
+  IndexerEntry,
   Media,
   Method,
   PaginatedResponse,
@@ -57,6 +58,7 @@ export {
 
 export type {
   AnalyticsOverview,
+  IndexerEntry,
   Media,
   Method,
   PaginatedResponse,

@@ -182,6 +182,18 @@ export class StrainsService {
               },
             },
           },
+          photos: {
+            orderBy: [{ isPrimary: 'desc' }, { createdAt: 'desc' }],
+            take: 1,
+            select: {
+              id: true,
+              strainId: true,
+              url: true,
+              meta: true,
+              createdAt: true,
+              isPrimary: true,
+            },
+          },
         },
         skip: (page - 1) * limit,
         take: limit,
@@ -228,7 +240,9 @@ export class StrainsService {
             },
           },
         },
-        photos: true,
+        photos: {
+          orderBy: [{ isPrimary: 'desc' }, { createdAt: 'desc' }],
+        },
         phenotypes: {
           include: {
             traitDefinition: true,
@@ -439,6 +453,10 @@ export class StrainsService {
     await this.findOne(strainId); // Check strain exists
 
     try {
+      const hasPrimary = await this.prisma.strainPhoto.findFirst({
+        where: { strainId, isPrimary: true },
+        select: { id: true },
+      });
       const result = await this.imagekitService.uploadImage(
         file.buffer,
         file.originalname,
@@ -449,6 +467,7 @@ export class StrainsService {
         data: {
           strainId,
           url: result.url,
+          isPrimary: !hasPrimary,
           meta: {
             originalName: file.originalname,
             size: result.size,
@@ -489,7 +508,85 @@ export class StrainsService {
       where: { id: photoId },
     });
 
+    if (photo.isPrimary) {
+      const nextPrimary = await this.prisma.strainPhoto.findFirst({
+        where: { strainId: photo.strainId },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+      });
+      if (nextPrimary) {
+        await this.prisma.strainPhoto.update({
+          where: { id: nextPrimary.id },
+          data: { isPrimary: true },
+        });
+      }
+    }
+
     return { message: 'Photo deleted successfully' };
+  }
+
+  async updatePhoto(
+    photoId: number,
+    payload: { name?: string; isPrimary?: boolean },
+  ) {
+    const photo = await this.prisma.strainPhoto.findUnique({
+      where: { id: photoId },
+    });
+
+    if (!photo) {
+      throw new NotFoundException(`Photo with ID ${photoId} not found`);
+    }
+
+    const trimmedName = payload.name?.trim();
+    if (payload.name !== undefined && !trimmedName) {
+      throw new BadRequestException('Photo name is required');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      if (payload.isPrimary === true) {
+        await tx.strainPhoto.updateMany({
+          where: { strainId: photo.strainId, isPrimary: true },
+          data: { isPrimary: false },
+        });
+      }
+
+      if (payload.isPrimary === false && photo.isPrimary) {
+        await tx.strainPhoto.update({
+          where: { id: photoId },
+          data: { isPrimary: false },
+        });
+
+        const nextPrimary = await tx.strainPhoto.findFirst({
+          where: { strainId: photo.strainId, id: { not: photoId } },
+          orderBy: { createdAt: 'desc' },
+          select: { id: true },
+        });
+
+        if (nextPrimary) {
+          await tx.strainPhoto.update({
+            where: { id: nextPrimary.id },
+            data: { isPrimary: true },
+          });
+        }
+      }
+
+      const meta = (photo.meta ?? {}) as Prisma.JsonObject;
+      const nextMeta: Prisma.InputJsonValue =
+        trimmedName !== undefined ? { ...meta, originalName: trimmedName } : meta;
+
+      return tx.strainPhoto.update({
+        where: { id: photoId },
+        data: {
+          meta: nextMeta,
+          isPrimary:
+            payload.isPrimary === true
+              ? true
+              : payload.isPrimary === false
+                ? false
+                : photo.isPrimary,
+        },
+      });
+    });
   }
 
   private async validateTaxonomy(dto: CreateStrainDto | UpdateStrainDto) {

@@ -126,3 +126,16 @@ export async function deleteStrainPhoto(photoId: number): Promise<void> {
   });
   await assertOk(response, 'Failed to delete strain photo');
 }
+
+export async function updateStrainPhoto(
+  photoId: number,
+  payload: { name?: string; isPrimary?: boolean },
+): Promise<StrainPhoto> {
+  const response = await request(`/api/v1/strains/photos/${photoId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await assertOk(response, 'Failed to update strain photo');
+  return response.json();
+}

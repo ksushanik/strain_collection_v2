@@ -2,11 +2,20 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash } from "lucide-react"
+import { Upload, X, Loader2, ImageIcon, ZoomIn, ChevronLeft, ChevronRight, Trash, Pencil, Star } from "lucide-react"
 import { ApiService, StrainPhoto } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,6 +44,10 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
     const fileInputRef = React.useRef<HTMLInputElement>(null)
     const [loadedPreview, setLoadedPreview] = React.useState<Record<number, boolean>>({})
     const [fullLoaded, setFullLoaded] = React.useState(false)
+    const [photoToRename, setPhotoToRename] = React.useState<StrainPhoto | null>(null)
+    const [renameValue, setRenameValue] = React.useState("")
+    const [savingRename, setSavingRename] = React.useState(false)
+    const [settingPrimary, setSettingPrimary] = React.useState<number | null>(null)
 
     React.useEffect(() => {
         setPhotos(existingPhotos)
@@ -128,7 +141,15 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             )
 
             const newPhotos = await Promise.all(uploadPromises)
-            setPhotos(prev => [...prev, ...newPhotos])
+            setPhotos(prev => {
+                const combined = [...prev, ...newPhotos]
+                const primary = combined.find((photo) => photo.isPrimary) ?? combined[0]
+                if (!primary) return combined
+                return combined.map((photo) => ({
+                    ...photo,
+                    isPrimary: photo.id === primary.id,
+                }))
+            })
             setSelectedFiles([])
             onPhotosChange?.()
         } catch (error) {
@@ -180,6 +201,60 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
         }
     }
 
+    const openRenameDialog = (photo: StrainPhoto, e: React.MouseEvent) => {
+        if (readOnly) return
+        e.stopPropagation()
+        setPhotoToRename(photo)
+        setRenameValue(photo.meta?.originalName || "")
+    }
+
+    const closeRenameDialog = () => {
+        setPhotoToRename(null)
+        setRenameValue("")
+    }
+
+    const confirmRename = async () => {
+        if (!photoToRename) return
+        const trimmed = renameValue.trim()
+        if (!trimmed) return
+        setSavingRename(true)
+        try {
+            const updated = await ApiService.updateStrainPhoto(photoToRename.id, { name: trimmed })
+            setPhotos((prev) =>
+                prev.map((p) =>
+                    p.id === updated.id ? { ...p, meta: updated.meta } : p
+                )
+            )
+            onPhotosChange?.()
+            closeRenameDialog()
+        } catch (error) {
+            console.error('Failed to rename photo:', error)
+            alert('Failed to rename photo. Please try again.')
+        } finally {
+            setSavingRename(false)
+        }
+    }
+
+    const handleSetPrimary = async (photoId: number, e: React.MouseEvent) => {
+        if (readOnly) return
+        e.stopPropagation()
+        setSettingPrimary(photoId)
+        try {
+            const updated = await ApiService.updateStrainPhoto(photoId, { isPrimary: true })
+            setPhotos((prev) =>
+                prev.map((p) =>
+                    p.id === updated.id ? { ...p, isPrimary: true, meta: updated.meta } : { ...p, isPrimary: false }
+                )
+            )
+            onPhotosChange?.()
+        } catch (error) {
+            console.error('Failed to set avatar:', error)
+            alert('Failed to set avatar. Please try again.')
+        } finally {
+            setSettingPrimary(null)
+        }
+    }
+
     const getThumbnailUrl = (url: string) => {
         return `${url}?tr=w-300,h-300,fo-auto,q-80`
     }
@@ -199,6 +274,12 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
     const openLightbox = (index: number) => {
         setSelectedPhotoIndex(index)
         setFullLoaded(false)
+    }
+
+    const handleOpenLightbox = (index: number, e: React.MouseEvent) => {
+        const target = e.target as HTMLElement
+        if (target.closest('[data-photo-action]')) return
+        openLightbox(index)
     }
 
     const closeLightbox = () => {
@@ -303,7 +384,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                             <div
                                 key={photo.id}
                                 className="relative group cursor-pointer"
-                                onClick={() => openLightbox(index)}
+                                onClick={(e) => handleOpenLightbox(index, e)}
                             >
                                 <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
                                     <div
@@ -323,8 +404,28 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         }}
                                     />
                                 </div>
+                                <div className="absolute top-2 left-2 flex gap-2">
+                                    {!readOnly && (
+                                        <Button
+                                            data-photo-action
+                                            variant={photo.isPrimary ? "default" : "secondary"}
+                                            size="icon"
+                                            onClick={(e) => handleSetPrimary(photo.id, e)}
+                                            className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
+                                            title={photo.isPrimary ? "Avatar" : "Make avatar"}
+                                            disabled={settingPrimary === photo.id}
+                                        >
+                                            {settingPrimary === photo.id ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Star className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
                                 {!readOnly && (
                                     <Button
+                                        data-photo-action
                                         variant="destructive"
                                         size="icon"
                                         onClick={(e) => handleDeleteClick(photo.id, e)}
@@ -334,11 +435,32 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         <Trash className="h-4 w-4" />
                                     </Button>
                                 )}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                                {!readOnly && (
+                                    <Button
+                                        data-photo-action
+                                        variant="secondary"
+                                        size="icon"
+                                        onClick={(e) => openRenameDialog(photo, e)}
+                                        className="absolute bottom-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
+                                        title="Rename photo"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                )}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 pointer-events-none">
                                     <ZoomIn className="h-8 w-8 text-white" />
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {photo.meta?.originalName}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="truncate">
+                                            {photo.meta?.originalName}
+                                        </span>
+                                        {photo.isPrimary && (
+                                            <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
+                                                Avatar
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -445,6 +567,32 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+            )}
+            {!readOnly && (
+                <Dialog open={!!photoToRename} onOpenChange={(open) => !open && closeRenameDialog()}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Rename photo</DialogTitle>
+                            <DialogDescription>
+                                Update the display name for this photo.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Input
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            placeholder="Photo name"
+                        />
+                        <DialogFooter>
+                            <Button variant="outline" onClick={closeRenameDialog} disabled={savingRename}>
+                                Cancel
+                            </Button>
+                            <Button onClick={confirmRename} disabled={savingRename || !renameValue.trim()}>
+                                {savingRename && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     )

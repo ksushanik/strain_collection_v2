@@ -73,6 +73,7 @@ export interface CreateTraitPayload {
   options?: string[];
   units?: string;
   description?: string;
+  materials?: string;
 }
 
 export async function createTrait(payload: CreateTraitPayload): Promise<TraitDefinition> {

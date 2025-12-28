@@ -200,6 +200,8 @@
         "indexing": "Индексирование",
         "indexingDesc": "Кто каталогизировал этот штамм",
         "indexer": "Индексатор",
+        "selectIndexer": "Выберите индексатора",
+        "noIndexer": "Не выбран",
         "indexerPlaceholder": "например, АБ, ИИ",
         "indexerInitials": "Инициалы индексатора",
         "indexerInitialsPlaceholder": "например, AB, JS",
@@ -397,6 +399,7 @@
         "editSubtitle": "Обновите данные метода.",
         "addSubtitle": "Создайте новый метод.",
         "descriptionPlaceholder": "Описание...",
+        "materialsPlaceholder": "Перечень реактивов и посуды...",
         "save": "Сохранить",
         "deleteConfirm": "Удалить этот метод?",
         "failedToLoad": "Не удалось загрузить список методов",
@@ -422,14 +425,26 @@
             "defaultMethod": "Метод по умолчанию",
             "options": "Опции",
             "units": "Единицы измерения",
-            "description": "Описание"
+            "description": "Описание",
+            "materials": "Реактивы/посуда"
         }
     },
     "Legend": {
         "title": "Легенда",
         "saveChanges": "Сохранить изменения",
-        "content": "Содержимое легенды",
-        "placeholder": "# Markdown содержимое здесь..."
+        "indexersTitle": "Индексаторы",
+        "addRow": "Добавить строку",
+        "index": "Индекс",
+        "indexPlaceholder": "например, АБ-01",
+        "fullName": "Имя и фамилия",
+        "fullNamePlaceholder": "например, Анна Б. Иванова",
+        "empty": "Пока нет индексаторов. Добавьте первую запись.",
+        "indexRequired": "Заполните поле Индекс.",
+        "fullNameRequired": "Заполните поле Имя и фамилия.",
+        "indexUnique": "Индекс должен быть уникальным.",
+        "saveSuccess": "Сохранено.",
+        "saveError": "Не удалось сохранить изменения.",
+        "loadError": "Не удалось загрузить индексаторов."
     },
     "Wiki": {
         "title": "Вики",

@@ -15,3 +15,9 @@ export interface LegendContent {
   id: number;
   content: string;
 }
+
+export interface IndexerEntry {
+  id: number;
+  index: string;
+  fullName: string;
+}

@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -22,6 +23,7 @@ import { CreateStrainDto } from './dto/create-strain.dto';
 import { UpdateStrainDto } from './dto/update-strain.dto';
 import { StrainQueryDto } from './dto/strain-query.dto';
 import { CreateStrainPhenotypeDto } from './dto/create-strain-phenotype.dto';
+import { UpdateStrainPhotoDto } from './dto/update-strain-photo.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
@@ -147,5 +149,14 @@ export class StrainsController {
   @CheckPolicies((ability) => ability.can('update', 'Strain'))
   deletePhoto(@Param('photoId', ParseIntPipe) photoId: number) {
     return this.strainsService.deletePhoto(photoId);
+  }
+
+  @Patch('photos/:photoId')
+  @CheckPolicies((ability) => ability.can('update', 'Strain'))
+  updatePhoto(
+    @Param('photoId', ParseIntPipe) photoId: number,
+    @Body(new ValidationPipe({ transform: true })) dto: UpdateStrainPhotoDto,
+  ) {
+    return this.strainsService.updatePhoto(photoId, dto);
   }
 }

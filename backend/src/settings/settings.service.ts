@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProfileKey } from '@prisma/client';
 
@@ -64,6 +64,12 @@ export class SettingsService {
     return legend;
   }
 
+  async getIndexers() {
+    return this.prisma.indexer.findMany({
+      orderBy: { index: 'asc' },
+    });
+  }
+
   async updateLegend(payload: { content: string }) {
     const existing = await this.prisma.legendContent.findFirst({
       orderBy: { id: 'asc' },
@@ -80,6 +86,46 @@ export class SettingsService {
       where: { id: existing.id },
       data: { content: payload.content },
     });
+  }
+
+  async updateIndexers(payload: { index: string; fullName: string }[]) {
+    const trimmed = payload.map((item) => ({
+      index: (item.index ?? '').trim(),
+      fullName: (item.fullName ?? '').trim(),
+    }));
+
+    const nonEmpty = trimmed.filter((item) => item.index || item.fullName);
+    for (const item of nonEmpty) {
+      if (!item.index) {
+        throw new BadRequestException('Indexer index is required');
+      }
+      if (!item.fullName) {
+        throw new BadRequestException('Indexer full name is required');
+      }
+    }
+
+    const seen = new Set<string>();
+    for (const item of nonEmpty) {
+      if (seen.has(item.index)) {
+        throw new BadRequestException('Indexer index must be unique');
+      }
+      seen.add(item.index);
+    }
+
+    await this.prisma.indexer.deleteMany();
+
+    if (nonEmpty.length === 0) {
+      return { updated: 0 };
+    }
+
+    const created = await this.prisma.indexer.createMany({
+      data: nonEmpty.map((item) => ({
+        index: item.index,
+        fullName: item.fullName,
+      })),
+    });
+
+    return { updated: created.count };
   }
 
   async createUiBinding(binding: {

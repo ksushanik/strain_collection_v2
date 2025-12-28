@@ -200,6 +200,7 @@ export class TraitsService {
         // @ts-ignore: Prisma Client needs regeneration
         category: true,
         defaultMethod: true,
+        materials: true,
         // @ts-ignore: Prisma Client needs regeneration
         isSystem: true,
       },

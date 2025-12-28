@@ -39,4 +39,8 @@ export class CreateTraitDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  materials?: string;
 }

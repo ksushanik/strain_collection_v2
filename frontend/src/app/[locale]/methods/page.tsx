@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { Loader2, Plus, Search, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
@@ -26,6 +29,7 @@ const initialFormData = {
   options: [] as string[],
   units: "",
   description: "",
+  materials: "",
 }
 
 export default function MethodsPage() {
@@ -93,6 +97,7 @@ export default function MethodsPage() {
       options: trait.options || [],
       units: trait.units || "",
       description: trait.description || "",
+      materials: trait.materials || "",
     })
     setEditingId(trait.id)
     setIsSystem(!!trait.isSystem)
@@ -254,9 +259,18 @@ export default function MethodsPage() {
                   className={canUpdate ? "cursor-pointer hover:bg-muted/50" : ""}
                 >
                   <TableCell className="font-medium">
-                    {getTraitDisplayName(trait.code, trait.name, tStrains)}
+                    {getTraitDisplayName(trait.code, trait.name, tStrains)}     
                     {trait.description && (
-                      <div className="text-xs text-muted-foreground mt-0.5">{trait.description}</div>
+                      <RichTextDisplay
+                        content={trait.description}
+                        className="text-xs text-muted-foreground mt-0.5"        
+                      />
+                    )}
+                    {trait.materials && (
+                      <div className="text-xs text-muted-foreground mt-1 whitespace-pre-line">
+                        <span className="font-medium">{t("fields.materials")}:</span>{" "}
+                        {trait.materials}
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">{trait.code}</TableCell>
@@ -281,7 +295,7 @@ export default function MethodsPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? t("editTitle") : t("createTitle")}</DialogTitle>
             <DialogDescription>
@@ -411,11 +425,20 @@ export default function MethodsPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="description">{t("fields.description")}</Label>
-              <Input
-                id="description"
+              <Label htmlFor="materials">{t("fields.materials")}</Label>
+              <Textarea
+                id="materials"
+                value={formData.materials}
+                onChange={(e) => setFormData({ ...formData, materials: e.target.value })}
+                placeholder={t("materialsPlaceholder")}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">{t("fields.description")}</Label>    
+              <RichTextEditor
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(value) => setFormData({ ...formData, description: value })}
                 placeholder="Instructions for lab technician..."
               />
             </div>

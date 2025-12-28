@@ -1,5 +1,5 @@
 import { assertOk, request } from './http';
-import { LegendContent, UiBinding } from '../types/api';
+import { IndexerEntry, LegendContent, UiBinding } from '../types/api';
 
 export async function getUiBindings(): Promise<UiBinding[]> {
   const response = await request(`/api/v1/settings/ui-bindings`);
@@ -38,5 +38,23 @@ export async function updateLegend(content: string): Promise<LegendContent> {
     body: JSON.stringify({ content }),
   });
   await assertOk(response, 'Failed to update legend');
+  return response.json();
+}
+
+export async function getIndexers(): Promise<IndexerEntry[]> {
+  const response = await request(`/api/v1/settings/indexers`);
+  await assertOk(response, 'Failed to fetch indexers');
+  return response.json();
+}
+
+export async function updateIndexers(
+  indexers: { index: string; fullName: string }[],
+): Promise<{ updated: number }> {
+  const response = await request(`/api/v1/settings/indexers`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(indexers),
+  });
+  await assertOk(response, 'Failed to update indexers');
   return response.json();
 }

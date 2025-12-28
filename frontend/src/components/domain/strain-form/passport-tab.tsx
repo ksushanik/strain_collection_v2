@@ -3,6 +3,8 @@
 import * as React from "react"
 import { useFormContext } from "react-hook-form"
 import { useTranslations } from "next-intl"
+import { ApiService } from "@/services/api"
+import type { IndexerEntry } from "@/services/api"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,12 +17,21 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor"
 export function StrainPassportTab() {
   const t = useTranslations('Strains')
   const { control, setValue, watch, register } = useFormContext()
-  
+  const [indexers, setIndexers] = React.useState<IndexerEntry[]>([])
+
   const biosafetyLevel = watch("biosafetyLevel")
 
   React.useEffect(() => {
     register("ncbiTaxonomyId")
   }, [register])
+
+  React.useEffect(() => {
+    ApiService.getIndexers()
+      .then((res) => setIndexers(res))
+      .catch((err) => {
+        console.error("Failed to load indexers", err)
+      })
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -195,9 +206,24 @@ export function StrainPassportTab() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('indexer')}</FormLabel>
-                            <FormControl>
-                                <Input placeholder={t('indexerPlaceholder')} {...field} />
-                            </FormControl>
+                            <Select
+                                value={field.value ? field.value : "__none__"}
+                                onValueChange={(val) => field.onChange(val === "__none__" ? "" : val)}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={t('selectIndexer')} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="__none__">{t('noIndexer')}</SelectItem>
+                                    {indexers.map((indexer) => (
+                                        <SelectItem key={indexer.id} value={indexer.index}>
+                                            {indexer.index} - {indexer.fullName}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}

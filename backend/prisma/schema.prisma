@@ -58,6 +58,7 @@ model StrainPhoto {
   id        Int      @id @default(autoincrement())
   strainId  Int      @map("strain_id")
   url       String
+  isPrimary Boolean  @default(false) @map("is_primary")
   meta      Json?
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -220,6 +221,15 @@ model LegendContent {
   uiBindings UiBinding[]
 
   @@map("legend_content")
+}
+
+model Indexer {
+  id        Int      @id @default(autoincrement())
+  index     String   @unique
+  fullName  String   @map("full_name")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("indexers")
 }
 
 // --- Authentication & RBAC ---
@@ -413,10 +423,11 @@ model TraitDefinition {
   category    String?       // e.g. MORPHOLOGY, BIOCHEMISTRY
   defaultMethod String?     @map("default_method")
   isSystem    Boolean       @default(false) @map("is_system")
-  options     Json?         // Array of strings for CATEGORICAL
-  units       String?
-  description String?
-  createdAt   DateTime      @default(now()) @map("created_at")
+    options     Json?         // Array of strings for CATEGORICAL
+    units       String?
+    description String?
+    materials   String?
+    createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   // Relation to actual values

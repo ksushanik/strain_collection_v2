@@ -48,4 +48,18 @@ export class SettingsController {
   async updateLegend(@Body() payload: { content: string }) {
     return this.settingsService.updateLegend(payload);
   }
+
+  @Get('indexers')
+  @CheckPolicies((ability) => ability.can('read', 'Legend'))
+  async getIndexers() {
+    return this.settingsService.getIndexers();
+  }
+
+  @Put('indexers')
+  @CheckPolicies((ability) => ability.can('update', 'Legend'))
+  async updateIndexers(
+    @Body() payload: { index: string; fullName: string }[],
+  ) {
+    return this.settingsService.updateIndexers(payload);
+  }
 }

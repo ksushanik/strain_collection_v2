@@ -36,6 +36,7 @@ export interface StrainPhoto {
   id: number;
   strainId: number;
   url: string;
+  isPrimary?: boolean;
   meta?: StrainPhotoMeta;
   createdAt: string;
 }

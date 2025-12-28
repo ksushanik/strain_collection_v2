@@ -206,6 +206,8 @@
         "indexing": "Indexing",
         "indexingDesc": "Who cataloged this strain",
         "indexer": "Indexer",
+        "selectIndexer": "Select indexer",
+        "noIndexer": "None",
         "indexerPlaceholder": "e.g. AB, JS",
         "indexerInitials": "Indexer Initials",
         "indexerInitialsPlaceholder": "e.g. AB, JS",
@@ -395,6 +397,7 @@
         "editSubtitle": "Update method details.",
         "addSubtitle": "Create a new method.",
         "descriptionPlaceholder": "Description...",
+        "materialsPlaceholder": "Reagents and labware list...",
         "save": "Save",
         "deleteConfirm": "Delete this method?",
         "failedToLoad": "Failed to load methods",
@@ -420,14 +423,26 @@
             "defaultMethod": "Default Method",
             "options": "Options",
             "units": "Units",
-            "description": "Description"
+            "description": "Description",
+            "materials": "Reagents/Labware"
         }
     },
     "Legend": {
         "title": "Legend",
         "saveChanges": "Save Changes",
-        "content": "Legend Content",
-        "placeholder": "# Markdown content here..."
+        "indexersTitle": "Indexers",
+        "addRow": "Add row",
+        "index": "Index",
+        "indexPlaceholder": "e.g. AB-01",
+        "fullName": "Full name",
+        "fullNamePlaceholder": "e.g. Anna B. Ivanova",
+        "empty": "No indexers yet. Add the first entry.",
+        "indexRequired": "Index is required.",
+        "fullNameRequired": "Full name is required.",
+        "indexUnique": "Index must be unique.",
+        "saveSuccess": "Saved.",
+        "saveError": "Failed to save changes.",
+        "loadError": "Failed to load indexers."
     },
     "Wiki": {
         "title": "Wiki",

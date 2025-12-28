@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { ApiService, Strain } from "@/services/api"
-import { Loader2, Search, Filter, Plus } from "lucide-react"
+import { Loader2, Search, Filter, Plus, ImageIcon } from "lucide-react"
 import {
     Table,
     TableBody,
@@ -94,6 +95,14 @@ function getTaxonomyForList(strain: Strain): string | null {
     if (taxonomy16s) return taxonomy16s
     const ncbiScientificName = (strain.ncbiScientificName ?? "").trim()
     return ncbiScientificName || null
+}
+
+function getPrimaryPhoto(strain: Strain) {
+    return strain.photos?.find((photo) => photo.isPrimary) ?? strain.photos?.[0] ?? null
+}
+
+function getAvatarUrl(url: string) {
+    return `${url}?tr=w-80,h-80,fo-auto,q-70`
 }
 
 function getPageFromSearchParams(searchParams: ReturnType<typeof useSearchParams>) {
@@ -445,6 +454,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                 {strains.map((strain) => {
                                     const storageSummary = getStorageSummary(strain.storage)
                                     const taxonomyForList = getTaxonomyForList(strain)
+                                    const primaryPhoto = getPrimaryPhoto(strain)
 
                                     return (
                                         <TableRow
@@ -452,11 +462,32 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                             className="cursor-pointer hover:bg-muted/50"
                                             onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnToPath)}`)}
                                         >
-                                            <TableCell className="font-medium">
-                                                {strain.identifier}
-                                                {strain.genetics?.wgsStatus && strain.genetics.wgsStatus !== 'NONE' && (
-                                                    <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
-                                                )}
+                                            <TableCell>
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                                                        {primaryPhoto ? (
+                                                            <Image
+                                                                src={getAvatarUrl(primaryPhoto.url)}
+                                                                alt={primaryPhoto.meta?.originalName || 'Strain avatar'}
+                                                                width={36}
+                                                                height={36}
+                                                                className="h-full w-full object-cover"
+                                                                sizes="36px"
+                                                                loading="lazy"
+                                                            />
+                                                        ) : (
+                                                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="font-medium truncate">
+                                                            {strain.identifier}
+                                                            {strain.genetics?.wgsStatus && strain.genetics.wgsStatus !== 'NONE' && (
+                                                                <Badge variant="secondary" className="ml-2 text-[10px]">{t('seqBadge')}</Badge>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </TableCell>
                                             <TableCell>{strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : '-'}</TableCell>
                                             <TableCell>
@@ -524,6 +555,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         {strains.map((strain) => {
                             const storageSummary = getStorageSummary(strain.storage)
                             const taxonomyForList = getTaxonomyForList(strain)
+                            const primaryPhoto = getPrimaryPhoto(strain)
 
                             return (
                                 <div
@@ -531,16 +563,35 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     className="rounded-lg border p-3 shadow-xs hover:bg-muted/50 transition-colors cursor-pointer"
                                     onClick={() => router.push(`/strains/${strain.id}?returnTo=${encodeURIComponent(returnToPath)}`)}
                                 >
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="font-semibold">{strain.identifier}</div>
-                                        <div className="flex items-center gap-1">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                                                {primaryPhoto ? (
+                                                    <Image
+                                                        src={getAvatarUrl(primaryPhoto.url)}
+                                                        alt={primaryPhoto.meta?.originalName || 'Strain avatar'}
+                                                        width={40}
+                                                        height={40}
+                                                        className="h-full w-full object-cover"
+                                                        sizes="40px"
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="font-semibold truncate">{strain.identifier}</div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    {t('sample')}: {strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : '-'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0">
                                             {strain.genetics?.wgsStatus && strain.genetics.wgsStatus !== 'NONE' && <Badge variant="secondary" className="text-[10px]">{t('seqBadge')}</Badge>}
                                             {isPositiveLike(strain.phenotypes?.find((p) => matchesTrait(p, 'gram_stain', 'Gram Stain'))?.result) && <Badge variant="outline" className="text-[10px]">{t('gramPosBadge')}</Badge>}
                                             {isNegativeLike(strain.phenotypes?.find((p) => matchesTrait(p, 'gram_stain', 'Gram Stain'))?.result) && <Badge variant="outline" className="text-[10px]">{t('gramNegBadge')}</Badge>}
                                         </div>
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        {t('sample')}: {strain.sample?.code ? formatSampleCodeForDisplay(strain.sample.code) : '-'}
                                     </div>
                                     <div className="text-sm text-muted-foreground">
                                         {t('storage')}: {storageSummary.first ? (

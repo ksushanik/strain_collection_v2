@@ -23,6 +23,7 @@ export interface TraitDefinition {
   options?: string[] | null;
   units?: string | null;
   description?: string | null;
+  materials?: string | null;
   createdAt: string;
   updatedAt: string;
 }
