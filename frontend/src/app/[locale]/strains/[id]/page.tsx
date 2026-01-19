@@ -491,7 +491,12 @@ function StrainDetailContent({ id }: { id: string }) {
                          <StrainPhotoUpload
                             strainId={strain.id}
                             existingPhotos={strain.photos || []}
-                            readOnly
+                            readOnly={!canEdit}
+                            onPhotosChange={
+                                canEdit
+                                    ? () => ApiService.getStrain(strain.id).then(setStrain).catch(console.error)
+                                    : undefined
+                            }
                         />
                     </SectionBlock>
                 </div>

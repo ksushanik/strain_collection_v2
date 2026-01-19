@@ -283,6 +283,8 @@
         "strainPhotos": "Фотографии штамма",
         "cell": "Ячейка",
         "primary": "Основной",
+        "avatar": "Аватар",
+        "makeAvatar": "Сделать аватаром",
         "unknown": "Неизвестно",
         "editTitle": "Редактирование штамма",
         "editSubtitle": "Обновите данные штамма.",
@@ -311,7 +313,13 @@
         "failedToLoadStrain": "Не удалось загрузить данные штамма",
         "failedToLinkMedia": "Не удалось привязать среду",
         "failedToUnlinkMedia": "Не удалось отвязать среду",
-        "failedToUnallocate": "Не удалось удалить размещение"
+        "failedToUnallocate": "Не удалось удалить размещение",
+        "strainPhotoAlt": "Фото штамма",
+        "renamePhotoTitle": "Переименовать фото",
+        "renamePhotoDescription": "Обновите отображаемое имя этого фото.",
+        "photoNamePlaceholder": "Название фото",
+        "renamePhotoFailed": "Не удалось переименовать фото. Попробуйте еще раз.",
+        "setAvatarFailed": "Не удалось установить аватар. Попробуйте еще раз."
     },
     "Samples": {
         "title": "Образцы",

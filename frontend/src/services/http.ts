@@ -42,24 +42,25 @@ export async function request(path: string, options: RequestInit = {}) {
   return response;
 }
 
-async function parseJsonSafe(response: Response) {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
-
 export async function assertOk(response: Response, fallback: string) {
   if (!response.ok) {
-    const json = await parseJsonSafe(response);
+    const text = await response.text();
+    let json: unknown = null;
+    if (text) {
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = null;
+      }
+    }
     const errorLike = (json ?? {}) as { message?: string; error?: string };
     const message =
       errorLike.message ||
       errorLike.error ||
+      text ||
       response.statusText ||
       fallback;
-    throw toApiError(json ?? message, fallback, response.status);
+    throw { message, status: response.status, details: json ?? text };
   }
   return response;
 }

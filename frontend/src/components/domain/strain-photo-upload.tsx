@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
+import { useTranslations } from "next-intl"
 import {
     Dialog,
     DialogContent,
@@ -35,6 +36,8 @@ interface StrainPhotoUploadProps {
 }
 
 export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChange, readOnly = false }: StrainPhotoUploadProps) {
+    const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const [photos, setPhotos] = React.useState<StrainPhoto[]>(existingPhotos)
     const [uploading, setUploading] = React.useState(false)
     const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
@@ -119,7 +122,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
         // Validate file sizes (5MB limit)
         const validFiles = files.filter(file => {
             if (file.size > 5 * 1024 * 1024) {
-                alert(`File ${file.name} is too large. Maximum size is 5MB.`)
+                alert(tCommon('fileTooLarge', { name: file.name }))
                 return false
             }
             return true
@@ -154,7 +157,11 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             onPhotosChange?.()
         } catch (error) {
             console.error('Failed to upload photos:', error)
-            alert('Failed to upload photos. Please try again.')
+            const message =
+                typeof error === 'object' && error !== null && 'message' in error
+                    ? String((error as { message?: string }).message || '')
+                    : ''
+            alert(message || tCommon('uploadFailed'))
         } finally {
             setUploading(false)
         }
@@ -196,7 +203,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             setPhotoToDelete(null)
         } catch (error) {
             console.error('Failed to delete photo:', error)
-            alert('Failed to delete photo. Please try again.')
+            alert(tCommon('deleteFailed'))
             setPhotoToDelete(null)
         }
     }
@@ -229,7 +236,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             closeRenameDialog()
         } catch (error) {
             console.error('Failed to rename photo:', error)
-            alert('Failed to rename photo. Please try again.')
+            alert(t('renamePhotoFailed'))
         } finally {
             setSavingRename(false)
         }
@@ -249,7 +256,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             onPhotosChange?.()
         } catch (error) {
             console.error('Failed to set avatar:', error)
-            alert('Failed to set avatar. Please try again.')
+            alert(t('setAvatarFailed'))
         } finally {
             setSettingPrimary(null)
         }
@@ -310,10 +317,10 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                             <div className="space-y-2">
                                 <p className="text-sm font-medium">
-                                    Drag and drop images here, or click to browse
+                                    {tCommon('dragDrop')}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    JPEG, PNG, GIF, WebP up to 5MB
+                                    {tCommon('fileTypes')}
                                 </p>
                             </div>
                             <input
@@ -331,7 +338,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={uploading}
                             >
-                                Select Images
+                                {tCommon('selectImages')}
                             </Button>
                         </div>
 
@@ -340,7 +347,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                             <div className="mt-4 space-y-2">
                                 <div className="flex items-center justify-between">
                                     <p className="text-sm font-medium">
-                                        {selectedFiles.length} file(s) selected
+                                        {selectedFiles.length} {tCommon('filesSelected')}
                                     </p>
                                     <Button
                                         onClick={uploadPhotos}
@@ -348,7 +355,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         size="sm"
                                     >
                                         {uploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Upload
+                                        {tCommon('upload')}
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-4 gap-2">
@@ -377,7 +384,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             {photos.length > 0 && (
                 <div>
                     <h3 className="text-lg font-semibold mb-4">
-                        Photos ({photos.length})
+                        {tCommon('photos')} ({photos.length})
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {photos.map((photo, index) => (
@@ -394,7 +401,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                     />
                                     <Image
                                         src={getThumbnailUrl(photo.url)}
-                                        alt={photo.meta?.originalName || 'Strain photo'}
+                                        alt={photo.meta?.originalName || t('strainPhotoAlt')}
                                         fill
                                         className="object-cover transition-transform group-hover:scale-105 opacity-0"
                                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -412,7 +419,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                             size="icon"
                                             onClick={(e) => handleSetPrimary(photo.id, e)}
                                             className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                                            title={photo.isPrimary ? "Avatar" : "Make avatar"}
+                                            title={photo.isPrimary ? t('avatar') : t('makeAvatar')}
                                             disabled={settingPrimary === photo.id}
                                         >
                                             {settingPrimary === photo.id ? (
@@ -422,6 +429,11 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                             )}
                                         </Button>
                                     )}
+                                    {!readOnly && (
+                                        <span className="pointer-events-none rounded bg-black/60 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                            {photo.isPrimary ? t('avatar') : t('makeAvatar')}
+                                        </span>
+                                    )}
                                 </div>
                                 {!readOnly && (
                                     <Button
@@ -430,7 +442,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         size="icon"
                                         onClick={(e) => handleDeleteClick(photo.id, e)}
                                         className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                                        title="Delete photo"
+                                        title={tCommon('deletePhoto')}
                                     >
                                         <Trash className="h-4 w-4" />
                                     </Button>
@@ -442,7 +454,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         size="icon"
                                         onClick={(e) => openRenameDialog(photo, e)}
                                         className="absolute bottom-2 right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
-                                        title="Rename photo"
+                                        title={t('renamePhotoTitle')}
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </Button>
@@ -457,7 +469,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                                         </span>
                                         {photo.isPrimary && (
                                             <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
-                                                Avatar
+                                                {t('avatar')}
                                             </span>
                                         )}
                                     </div>
@@ -471,7 +483,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
             {photos.length === 0 && selectedFiles.length === 0 && (
                 <div className="text-center text-muted-foreground py-8">
                     <ImageIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                    <p>No photos uploaded yet</p>
+                    <p>{tCommon('noPhotos')}</p>
                 </div>
             )}
 
@@ -516,7 +528,7 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                         />
                         <Image
                             src={getFullSizeUrl(currentPhoto.url)}
-                            alt={currentPhoto.meta?.originalName || 'Strain photo'}
+                            alt={currentPhoto.meta?.originalName || t('strainPhotoAlt')}
                             fill
                             className="object-contain rounded-lg opacity-0"
                             sizes="100vw"
@@ -554,15 +566,15 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                 <AlertDialog open={!!photoToDelete} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{tCommon('areYouSure')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the photo.
+                                {tCommon('deletePhotoConfirm')}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-white hover:bg-destructive/90">
-                                Delete
+                                {tCommon('delete')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -572,23 +584,23 @@ export function StrainPhotoUpload({ strainId, existingPhotos = [], onPhotosChang
                 <Dialog open={!!photoToRename} onOpenChange={(open) => !open && closeRenameDialog()}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Rename photo</DialogTitle>
+                            <DialogTitle>{t('renamePhotoTitle')}</DialogTitle>
                             <DialogDescription>
-                                Update the display name for this photo.
+                                {t('renamePhotoDescription')}
                             </DialogDescription>
                         </DialogHeader>
                         <Input
                             value={renameValue}
                             onChange={(e) => setRenameValue(e.target.value)}
-                            placeholder="Photo name"
+                            placeholder={t('photoNamePlaceholder')}
                         />
                         <DialogFooter>
                             <Button variant="outline" onClick={closeRenameDialog} disabled={savingRename}>
-                                Cancel
+                                {tCommon('cancel')}
                             </Button>
                             <Button onClick={confirmRename} disabled={savingRename || !renameValue.trim()}>
                                 {savingRename && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save
+                                {tCommon('save')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

@@ -287,6 +287,8 @@
         "strainPhotos": "Strain Photos",
         "cell": "Cell",
         "primary": "Primary",
+        "avatar": "Avatar",
+        "makeAvatar": "Make avatar",
         "unknown": "Unknown",
         "mediaNotes": "Notes",
         "remove": "Remove",
@@ -309,7 +311,13 @@
         "failedToLoadStrain": "Failed to load strain data",
         "failedToLinkMedia": "Failed to link media",
         "failedToUnlinkMedia": "Failed to unlink media",
-        "failedToUnallocate": "Failed to unallocate cell"
+        "failedToUnallocate": "Failed to unallocate cell",
+        "strainPhotoAlt": "Strain photo",
+        "renamePhotoTitle": "Rename photo",
+        "renamePhotoDescription": "Update the display name for this photo.",
+        "photoNamePlaceholder": "Photo name",
+        "renamePhotoFailed": "Failed to rename photo. Please try again.",
+        "setAvatarFailed": "Failed to set avatar. Please try again."
     },
     "Samples": {
         "title": "Samples",

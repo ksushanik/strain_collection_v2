@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import DOMPurify from "isomorphic-dompurify"
 
 interface RichTextDisplayProps {
     content?: string | null
@@ -21,6 +22,8 @@ export function RichTextDisplay({ content, className }: RichTextDisplayProps) {
         )
     }
 
+    const sanitizedContent = DOMPurify.sanitize(content)
+
     return (
         <div
             className={cn(
@@ -29,7 +32,7 @@ export function RichTextDisplay({ content, className }: RichTextDisplayProps) {
                 "[&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4",
                 className
             )}
-            dangerouslySetInnerHTML={{ __html: content }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
     )
 }
