@@ -16,6 +16,8 @@ import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
+import { ExportButton } from "@/components/export-button"
+import { CsvColumn } from "@/lib/export-data"
 
 const SAMPLE_SORT_BY_VALUES = ["siteName", "createdAt", "collectedAt", "code"] as const
 type SampleSortBy = (typeof SAMPLE_SORT_BY_VALUES)[number]
@@ -100,6 +102,32 @@ export function SampleList() {
         loadSamples()
     }, [loadSamples])
 
+    // --- Export ---
+    const sampleExportColumns = React.useMemo<CsvColumn<Sample>[]>(() => [
+        { header: "Code", accessor: "code" },
+        { header: "Sample Type", accessor: "sampleType" },
+        { header: "Site Name", accessor: "siteName" },
+        { header: "Subject", accessor: (s) => s.subject ?? "" },
+        { header: "Latitude", accessor: (s) => s.lat ?? "" },
+        { header: "Longitude", accessor: (s) => s.lng ?? "" },
+        { header: "Collected At", accessor: (s) => s.collectedAt ? new Date(s.collectedAt).toLocaleDateString() : "" },
+        { header: "Description", accessor: (s) => s.description?.replace(/<[^>]*>/g, "") ?? "" },
+        { header: "Strains Count", accessor: (s) => s._count?.strains ?? "" },
+    ], [])
+
+    const fetchAllSamples = React.useCallback(() => {
+        return ApiService.getSamples({
+            search,
+            site: filters.site || undefined,
+            dateFrom: filters.dateFrom || undefined,
+            dateTo: filters.dateTo || undefined,
+            sampleType: filters.sampleType || undefined,
+            sortBy,
+            sortOrder,
+            limit: 10000,
+        }).then((res) => res.data)
+    }, [filters, search, sortBy, sortOrder])
+
     if (loading && !meta) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -145,6 +173,11 @@ export function SampleList() {
                             {sortOrder === 'asc' ? t('ascSort') : t('descSort')}
                         </Button>
                     </div>
+                    <ExportButton
+                        fetchData={fetchAllSamples}
+                        columns={sampleExportColumns}
+                        filenamePrefix="samples"
+                    />
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}

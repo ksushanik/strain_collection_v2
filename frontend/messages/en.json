@@ -62,7 +62,11 @@
         "deleteFailed": "Failed to delete photo. Please try again.",
         "deletePhoto": "Delete photo",
         "save": "Save",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "export": "Export",
+        "exportCsv": "CSV",
+        "exportJson": "JSON",
+        "exporting": "Exporting..."
     },
     "DynamicPages": {
         "myCollection": "My Collection",

@@ -62,7 +62,11 @@
         "deleteFailed": "Не удалось удалить фотографию. Пожалуйста, попробуйте снова.",
         "deletePhoto": "Удалить фотографию",
         "save": "Сохранить",
-        "loading": "Загрузка..."
+        "loading": "Загрузка...",
+        "export": "Экспорт",
+        "exportCsv": "CSV",
+        "exportJson": "JSON",
+        "exporting": "Экспорт..."
     },
     "DynamicPages": {
         "myCollection": "Моя коллекция",

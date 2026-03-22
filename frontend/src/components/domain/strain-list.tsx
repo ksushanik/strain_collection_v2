@@ -30,6 +30,8 @@ import { useApiError } from "@/hooks/use-api-error"
 import { useAuth } from "@/contexts/AuthContext"
 import { isPositiveLike } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
+import { ExportButton } from "@/components/export-button"
+import { CsvColumn } from "@/lib/export-data"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -244,6 +246,39 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         loadStrains()
     }, [loadStrains])
 
+    // --- Export ---
+    const strainExportColumns = React.useMemo<CsvColumn<Strain>[]>(() => [
+        { header: "Identifier", accessor: "identifier" },
+        { header: "Sample Code", accessor: (s) => s.sample?.code ?? "" },
+        { header: "Taxonomy 16S", accessor: (s) => s.taxonomy16s ?? "" },
+        { header: "NCBI Scientific Name", accessor: (s) => s.ncbiScientificName ?? "" },
+        { header: "Gram Stain", accessor: (s) => s.gramStainLabel ?? "" },
+        { header: "Isolation Region", accessor: (s) => s.isolationRegion ?? "" },
+        { header: "Storage", accessor: (s) => (s.storage ?? []).map((st) => `${st.cell.box.displayName}: ${st.cell.cellCode}`).join("; ") },
+        { header: "Phenotypes", accessor: (s) => (s.phenotypes ?? []).map((p) => `${p.traitName}: ${p.result}`).join("; ") },
+        { header: "WGS Status", accessor: (s) => s.genetics?.wgsStatus ?? "" },
+        { header: "Features", accessor: (s) => s.features ?? "" },
+        { header: "Comments", accessor: (s) => s.comments ?? "" },
+    ], [])
+
+    const fetchAllStrains = React.useCallback(() => {
+        return ApiService.getStrains({
+            search,
+            sampleCode: filters.sampleCode || undefined,
+            taxonomy: filters.taxonomy || undefined,
+            isolationRegion: filters.isolationRegion || undefined,
+            hasGenome: resolveBoolFilter(filters.hasGenome),
+            gramStain: filters.gramStain === "any" ? undefined : (filters.gramStain as "positive" | "negative"),
+            amylase: resolveBoolFilter(filters.amylase),
+            phosphateSolubilization: resolveBoolFilter(filters.phosphates),
+            siderophoreProduction: resolveBoolFilter(filters.siderophores),
+            pigmentSecretion: resolveBoolFilter(filters.pigment),
+            sortBy,
+            sortOrder,
+            limit: 10000,
+        }).then((res) => res.data)
+    }, [filters, search, sortBy, sortOrder])
+
     // --- Field Pack Logic ---
     const showTaxonomy = enabledPacks.includes("taxonomy")
     const showGrowth = enabledPacks.includes("growth_characteristics")
@@ -309,6 +344,11 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                             {sortOrder === 'asc' ? `${t('asc')} ↑` : `${t('desc')} ↓`}
                         </Button>
                     </div>
+                    <ExportButton
+                        fetchData={fetchAllStrains}
+                        columns={strainExportColumns}
+                        filenamePrefix="strains"
+                    />
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
