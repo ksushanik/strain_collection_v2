@@ -8,6 +8,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import { GlobalSearch } from "@/components/domain/global-search/global-search"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
@@ -36,12 +37,14 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                             <div className="flex items-center gap-2">
                                 <GlobalSearch trigger="icon" />
+                                <ThemeToggle />
                                 <LanguageSwitcher />
                             </div>
                         </div>
                         <div className="hidden items-center gap-3 border-b bg-card px-4 py-3 md:flex">
                             <GlobalSearch />
-                            <div className="ml-auto">
+                            <div className="ml-auto flex items-center gap-2">
+                                <ThemeToggle />
                                 <LanguageSwitcher />
                             </div>
                         </div>

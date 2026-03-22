@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -52,16 +53,18 @@ export default async function RootLayout({
             defer
           />
         ) : null}
-        <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <ErrorBoundary>
-              <MainLayout>
-                {children}
-              </MainLayout>
-            </ErrorBoundary>
-            <Toaster />
-          </AuthProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NextIntlClientProvider messages={messages}>
+            <AuthProvider>
+              <ErrorBoundary>
+                <MainLayout>
+                  {children}
+                </MainLayout>
+              </ErrorBoundary>
+              <Toaster />
+            </AuthProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
