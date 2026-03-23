@@ -193,73 +193,75 @@ export default function AuditPage() {
                 )}
             </div>
 
-            <div className="hidden overflow-x-auto rounded-md border bg-white md:block">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>{t('date')}</TableHead>
-                            <TableHead>{t('user')}</TableHead>
-                            <TableHead>{t('action')}</TableHead>
-                            <TableHead>{t('entity')}</TableHead>
-                            <TableHead>{t('entityId')}</TableHead>
-                            <TableHead>{t('comment')}</TableHead>
-                            <TableHead>{t('details')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {loading ? (
+            <div className="rounded-md border overflow-hidden">
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
-                                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
-                                </TableCell>
+                                <TableHead className="w-[150px] whitespace-nowrap">{t('date')}</TableHead>
+                                <TableHead className="min-w-[140px]">{t('user')}</TableHead>
+                                <TableHead className="w-[110px]">{t('action')}</TableHead>
+                                <TableHead className="w-[100px]">{t('entity')}</TableHead>
+                                <TableHead className="w-[80px]">{t('entityId')}</TableHead>
+                                <TableHead className="min-w-[120px]">{t('comment')}</TableHead>
+                                <TableHead className="min-w-[200px]">{t('details')}</TableHead>
                             </TableRow>
-                        ) : logs.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                    {t('noLogs')}
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            logs.map((log) => (
-                                <TableRow key={log.id}>
-                                    <TableCell className="whitespace-nowrap">
-                                        {format(new Date(log.createdAt), 'yyyy-MM-dd HH:mm:ss')}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">
-                                                {log.user?.name || log.user?.email || `User #${log.userId}`}
-                                            </span>
-                                            {log.user?.email && log.user?.name && (
-                                                <span className="text-xs text-muted-foreground">{log.user.email}</span>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {(() => {
-                                            const { variant, className } = getActionStyle(log.action);
-                                            return (
-                                                <Badge variant={variant} className={cn('px-3 py-1 font-semibold', className)}>
-                                                    {log.action}
-                                                </Badge>
-                                            );
-                                        })()}
-                                    </TableCell>
-                                    <TableCell className="break-words">{log.entity}</TableCell>
-                                    <TableCell className="font-mono text-xs break-words">{log.entityId}</TableCell>
-                                    <TableCell className="max-w-[200px] text-xs break-words">
-                                        {log.comment || '-'}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="max-w-[300px] text-xs text-muted-foreground break-words" title={JSON.stringify(log.changes, null, 2)}>
-                                            {log.changes ? JSON.stringify(log.changes) : '-'}
-                                        </div>
+                        </TableHeader>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-24 text-center">
+                                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                            ) : logs.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                        {t('noLogs')}
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                logs.map((log) => (
+                                    <TableRow key={log.id}>
+                                        <TableCell className="whitespace-nowrap text-sm text-foreground">
+                                            {format(new Date(log.createdAt), 'dd.MM.yyyy HH:mm')}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-sm text-foreground">
+                                                    {log.user?.name || log.user?.email || `User #${log.userId}`}
+                                                </span>
+                                                {log.user?.email && log.user?.name && (
+                                                    <span className="text-xs text-muted-foreground">{log.user.email}</span>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {(() => {
+                                                const { variant, className } = getActionStyle(log.action);
+                                                return (
+                                                    <Badge variant={variant} className={cn('px-2 py-0.5 text-xs font-semibold', className)}>
+                                                        {log.action}
+                                                    </Badge>
+                                                );
+                                            })()}
+                                        </TableCell>
+                                        <TableCell className="text-sm text-foreground">{log.entity}</TableCell>
+                                        <TableCell className="font-mono text-xs text-foreground">{log.entityId}</TableCell>
+                                        <TableCell className="text-xs text-foreground max-w-[160px] truncate">
+                                            {log.comment || '-'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="max-w-[240px] truncate text-xs text-muted-foreground" title={JSON.stringify(log.changes, null, 2)}>
+                                                {log.changes ? JSON.stringify(log.changes) : '-'}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
         </div>
     );
