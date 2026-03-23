@@ -17,6 +17,9 @@ import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
+import { useDebounce } from "@/hooks/use-debounce"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ChevronsUpDown } from "lucide-react"
 type BoxSummary = {
   id: number;
   displayName: string;
@@ -87,7 +90,12 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
   const [selectedCellCode, setSelectedCellCode] = React.useState<string | null>(null)
   const [pendingHighlight, setPendingHighlight] = React.useState<{ boxId?: number; cell?: string } | null>(null)
-  const [strains, setStrains] = React.useState<Strain[]>([])
+  const [strainSearchTerm, setStrainSearchTerm] = React.useState("")
+  const [strainResults, setStrainResults] = React.useState<Strain[]>([])
+  const [strainSearchLoading, setStrainSearchLoading] = React.useState(false)
+  const [strainPopoverOpen, setStrainPopoverOpen] = React.useState(false)
+  const [selectedStrain, setSelectedStrain] = React.useState<Strain | null>(null)
+  const debouncedStrainSearch = useDebounce(strainSearchTerm, 300)
   const [allocating, setAllocating] = React.useState(false)
   const [allocForm, setAllocForm] = React.useState<{ strainId?: number; isPrimary?: boolean }>({})
   const [loading, setLoading] = React.useState(true)
@@ -171,13 +179,15 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
     loadBoxes()
   }, [authLoading, user, loadBoxes])
 
-  // Fetch strains for allocation
+  // Search strains for allocation (debounced)
   React.useEffect(() => {
-    if (authLoading) return
-    ApiService.getStrains({ limit: 500 })
-      .then(res => setStrains(res.data))
-      .catch(err => handleError(err, t('failedToLoadStrains')))
-  }, [authLoading, user, handleError, t])
+    if (!strainPopoverOpen && !debouncedStrainSearch) return
+    setStrainSearchLoading(true)
+    ApiService.getStrains({ search: debouncedStrainSearch, limit: 20 })
+      .then(res => setStrainResults(res.data))
+      .catch(err => { handleError(err, t('failedToLoadStrains')); setStrainResults([]) })
+      .finally(() => setStrainSearchLoading(false))
+  }, [debouncedStrainSearch, strainPopoverOpen, handleError, t])
 
   // Fetch Box details when selection changes
   React.useEffect(() => {
@@ -241,12 +251,16 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
 
   React.useEffect(() => {
     if (selectedCell?.status === 'OCCUPIED' && selectedCell.strain?.strain?.id) {
+      const strainId = selectedCell.strain.strain.id
+      const identifier = selectedCell.strain.strain.identifier
       setAllocForm({
-        strainId: selectedCell.strain.strain.id,
+        strainId,
         isPrimary: selectedCell.strain.isPrimary ?? false,
       });
+      setSelectedStrain({ id: strainId, identifier, seq: selectedCell.strain.strain.seq } as unknown as Strain)
     } else if (selectedCell?.status === 'FREE') {
       setAllocForm({ strainId: undefined, isPrimary: false });
+      setSelectedStrain(null)
     }
   }, [selectedCell]);
 
@@ -657,23 +671,60 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                         <p className="text-sm font-medium">
                           {selectedCell.status === 'OCCUPIED' ? t('reassignStrain') : t('assignStrain')}
                         </p>
-                        <Select
-                          value={allocForm.strainId ? allocForm.strainId.toString() : undefined}
-                          onValueChange={(val) =>
-                            setAllocForm((prev) => ({ ...prev, strainId: parseInt(val) }))
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('selectStrain')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {strains.map((s) => (
-                              <SelectItem key={s.id} value={s.id.toString()}>
-                                {s.identifier} {s.sample?.code ? `(${formatSampleCodeForDisplay(s.sample.code)})` : ""}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={strainPopoverOpen} onOpenChange={setStrainPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              role="combobox"
+                              aria-expanded={strainPopoverOpen}
+                              className="w-full justify-between font-normal"
+                            >
+                              {selectedStrain
+                                ? `${selectedStrain.identifier}${selectedStrain.sample?.code ? ` (${formatSampleCodeForDisplay(selectedStrain.sample.code)})` : ''}`
+                                : t('selectStrain')}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[340px] p-0" align="start">
+                            <div className="flex flex-col">
+                              <div className="flex items-center border-b px-3">
+                                <Input
+                                  placeholder={t('selectStrain')}
+                                  value={strainSearchTerm}
+                                  onChange={(e) => setStrainSearchTerm(e.target.value)}
+                                  className="border-0 focus-visible:ring-0 px-0"
+                                />
+                                {strainSearchLoading && <Loader2 className="h-4 w-4 animate-spin opacity-50" />}
+                              </div>
+                              <div className="max-h-[260px] overflow-y-auto p-1">
+                                {strainResults.length === 0 && !strainSearchLoading && strainSearchTerm && (
+                                  <div className="py-6 text-center text-sm text-muted-foreground">{t('noResults')}</div>
+                                )}
+                                {strainResults.length === 0 && !strainSearchTerm && !strainSearchLoading && (
+                                  <div className="py-6 text-center text-sm text-muted-foreground">{t('selectStrain')}</div>
+                                )}
+                                {strainResults.map((s) => (
+                                  <div
+                                    key={s.id}
+                                    className={cn(
+                                      "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                                      allocForm.strainId === s.id && "bg-accent text-accent-foreground"
+                                    )}
+                                    onClick={() => {
+                                      setAllocForm((prev) => ({ ...prev, strainId: s.id }))
+                                      setSelectedStrain(s)
+                                      setStrainPopoverOpen(false)
+                                    }}
+                                  >
+                                    <Check className={cn("mr-2 h-4 w-4", allocForm.strainId === s.id ? "opacity-100" : "opacity-0")} />
+                                    <span>{s.identifier}{s.sample?.code ? ` (${formatSampleCodeForDisplay(s.sample.code)})` : ''}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       </div>
 
                       <div className="flex items-center space-x-2">
