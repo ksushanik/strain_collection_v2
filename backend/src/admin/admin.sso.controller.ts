@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import {
   Controller,
   Post,
@@ -59,7 +60,7 @@ export class AdminSsoController {
       (typeof user.role === 'object' && user.role?.key) ||
       (typeof user.role === 'string' ? user.role : null);
     if (roleKey !== 'ADMIN') throw new UnauthorizedException('Not admin');
-    const nonce = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const nonce = randomBytes(32).toString('hex');
     AdminSsoController.nonces.set(nonce, {
       email: user.email || '',
       role: roleKey,
@@ -70,7 +71,6 @@ export class AdminSsoController {
 
   @Get('sso/complete')
   @CheckPolicies((ability) => ability.can('manage', 'all'))
-  @Public()
   async ssoComplete(@Req() req: Request, @Res() res: Response) {
     const nonce = (req.query['nonce'] as string) || '';
     const record = AdminSsoController.nonces.get(nonce);
