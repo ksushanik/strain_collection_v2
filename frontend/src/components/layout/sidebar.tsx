@@ -101,22 +101,34 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
 
     return (
         <div className={cn(
-            "flex flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-300",
+            "flex flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 rounded-xl shadow-sm h-full",
             widthClass,
             className
         )}>
-            <div className="flex h-14 items-center border-b px-4">
+            <div className="flex h-14 items-center border-b border-sidebar-border px-4 gap-2">
                 {!isMobile && (
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="mr-2"
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
                     >
                         <Menu className="h-4 w-4" />
                     </Button>
                 )}
-                {!isCollapsed && <span className="font-semibold">BioCollection</span>}
+                {!isCollapsed && (
+                    <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary shrink-0">
+                            <Microscope className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                        <span className="font-semibold text-sm tracking-tight truncate">BioCollection</span>
+                    </div>
+                )}
+                {isCollapsed && (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary mx-auto">
+                        <Microscope className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 overflow-auto py-4">
@@ -125,8 +137,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                         href="/"
                         onClick={handleNavigate}
                         className={cn(
-                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                            pathname === "/" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                            "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                            "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === "/"
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                : "text-muted-foreground",
                             isCollapsed && "justify-center px-2"
                         )}
                     >
@@ -139,8 +154,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/strains"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/strains" || pathname.startsWith("/strains/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/strains" || pathname.startsWith("/strains/")
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -154,8 +172,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/samples"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/samples" || pathname.startsWith("/samples/") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/samples" || pathname.startsWith("/samples/")
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -169,8 +190,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/storage"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/storage" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/storage"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -196,8 +220,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                                         href={href}
                                         onClick={handleNavigate}
                                         className={cn(
-                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                            isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                            "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                            "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            isActive
+                                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                                : "text-muted-foreground",
                                             isCollapsed && "justify-center px-2"
                                         )}
                                     >
@@ -213,8 +240,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/media"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/media" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/media"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -228,8 +258,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/methods"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/methods" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/methods"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -243,8 +276,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/legend"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/legend" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/legend"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -258,8 +294,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/docs"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/docs" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/docs"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -273,8 +312,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             href="/audit"
                             onClick={handleNavigate}
                             className={cn(
-                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                pathname === "/audit" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground",
+                                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150",
+                                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                pathname === "/audit"
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                    : "text-muted-foreground",
                                 isCollapsed && "justify-center px-2"
                             )}
                         >
@@ -293,8 +335,11 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                                 href="/settings"
                                 onClick={handleNavigate}
                                 className={cn(
-                                    "flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    pathname === "/settings" && "bg-sidebar-accent text-sidebar-accent-foreground",
+                                    "relative flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-150",
+                                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    pathname === "/settings"
+                                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-1 before:rounded-r-full before:bg-sidebar-primary"
+                                        : "text-muted-foreground",
                                     isCollapsed && "justify-center px-2"
                                 )}
                             >
