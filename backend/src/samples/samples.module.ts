@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { SamplesController } from './samples.controller';
 import { SamplesService } from './samples.service';
-import { ImageKitService } from '../services/imagekit.service';
+import { ImageKitModule } from '../services/imagekit.module';
 import { CaslModule } from '../casl/casl.module';
 import { AuditModule } from '../audit/audit.module';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  imports: [ConfigModule, CaslModule, AuditModule, PrismaModule],
+  imports: [CaslModule, AuditModule, PrismaModule, ImageKitModule],
   controllers: [SamplesController],
-  providers: [SamplesService, ImageKitService],
+  providers: [SamplesService],
   exports: [SamplesService],
 })
 export class SamplesModule {}
