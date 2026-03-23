@@ -4,7 +4,7 @@ API_URL       ?= https://culturedb.elcity.ru
 BACKEND_IMAGE := $(REGISTRY)/strain-collection-v2-backend:$(TAG)
 FRONTEND_IMAGE:= $(REGISTRY)/strain-collection-v2-frontend:$(TAG)
 
-.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod deploy-local update-prod-env update-prod-env-win
+.PHONY: build-backend build-frontend push-backend push-frontend push-all deploy-prod deploy-local update-prod-env update-prod-env-win backup-prod backup-prod-win backup-download backup-download-win
 
 build-backend:
 	docker build -t $(BACKEND_IMAGE) -f backend/Dockerfile backend
@@ -57,11 +57,11 @@ update-prod-env-win:
 
 # Очистка неиспользуемых Docker ресурсов на production
 clean-prod:
-	ssh 4feb "docker system prune -af --volumes"
+	ssh 4feb "docker system prune -af"
 
 # Для Windows
 clean-prod-win:
-	powershell -Command "ssh 4feb \"docker system prune -af --volumes\""
+	powershell -Command "ssh 4feb \"docker system prune -af\""
 
 # Проверка использования диска на production
 disk-usage-prod:
@@ -88,6 +88,22 @@ dev-frontend:
 # Sync wiki (docs/wiki -> frontend/public/wiki)
 sync-wiki:
 	node sync-wiki.mjs
+
+# Ручной бэкап PostgreSQL на production
+backup-prod:
+	ssh 4feb "/home/user/backups/pg_backup.sh"
+
+# Для Windows
+backup-prod-win:
+	powershell -Command "ssh 4feb \"/home/user/backups/pg_backup.sh\""
+
+# Скачать последний бэкап с production
+backup-download:
+	scp "user@4feb:/home/user/backups/$$(ssh 4feb 'ls -t /home/user/backups/*.sql.gz | head -1')" .
+
+# Для Windows
+backup-download-win:
+	powershell -Command "$$latest = ssh 4feb 'ls -t /home/user/backups/*.sql.gz | head -1'; scp \"user@4feb:$$latest\" ."
 
 # Загрузить seed данные в production
 # Использует скомпилированный seed.js (см. backend/Dockerfile)
