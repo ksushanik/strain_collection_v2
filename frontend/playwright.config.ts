@@ -16,6 +16,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
+    locale: 'ru-RU',
   },
   webServer: {
     command: `npm run dev -- --hostname 0.0.0.0 --port ${port}`,

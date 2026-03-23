@@ -24,6 +24,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/strain_collection_v2?schema=public
       SKIP_ADMIN: "true"
+      JWT_SECRET: "ci-test-secret"
+      ADMIN_SESSION_SECRET: "ci-test-admin-secret"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
