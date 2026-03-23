@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { routing } from '@/i18n/routing';
 
@@ -17,6 +18,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!isLoading && isAuthenticated && isLoginPage) {
             router.replace(`/${locale}`);
+        }
+        if (!isLoading && !isAuthenticated && !isLoginPage) {
+            router.replace('/login');
         }
     }, [isLoading, isAuthenticated, isLoginPage, locale, router]);
 
