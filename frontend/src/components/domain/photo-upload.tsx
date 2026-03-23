@@ -319,7 +319,8 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                         fill
                                         className="object-cover transition-transform group-hover:scale-105 opacity-0"
                                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                        onLoadingComplete={(img) => {
+                                        onLoad={(e) => {
+                                            const img = e.currentTarget
                                             img.classList.remove('opacity-0')
                                             setLoadedPreview((prev) => ({ ...prev, [photo.id]: true }))
                                         }}
@@ -394,7 +395,8 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                             fill
                             className="object-contain rounded-lg opacity-0"
                             sizes="100vw"
-                            onLoadingComplete={(img) => {
+                            onLoad={(e) => {
+                                const img = e.currentTarget
                                 img.classList.remove('opacity-0')
                                 setFullLoaded(true)
                             }}
