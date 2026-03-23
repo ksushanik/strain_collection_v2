@@ -248,7 +248,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
-          } as any,
+          },
         },
         genetics: true,
       },
@@ -263,7 +263,7 @@ export class StrainsService {
 
   async create(createStrainDto: CreateStrainDto) {
     await this.validateTaxonomy(createStrainDto);
-    let { phenotypes, genetics, ...strainData } = createStrainDto;
+    const { phenotypes, genetics, ...strainData } = createStrainDto;
 
     // Auto-enrich based on taxonomy if needed
     const rule = this.getTaxonomyRule(createStrainDto.ncbiScientificName);
@@ -310,7 +310,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
-          } as any,
+          },
         },
         genetics: true,
       },
@@ -352,7 +352,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
-          } as any,
+          },
         },
         genetics: true,
       },
@@ -437,7 +437,7 @@ export class StrainsService {
       data: {
         strainId,
         ...dto,
-      } as any,
+      },
     });
   }
 
@@ -447,7 +447,7 @@ export class StrainsService {
       where: { strainId },
       include: {
         traitDefinition: true,
-      } as any,
+      },
     });
   }
 

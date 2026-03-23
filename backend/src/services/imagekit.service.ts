@@ -98,7 +98,6 @@ export class ImageKitService {
             ),
           this.maxRetries,
           this.retryDelayMs,
-          'ImageKit upload',
         );
 
         return {
@@ -134,7 +133,6 @@ export class ImageKitService {
             ),
           this.maxRetries,
           this.retryDelayMs,
-          'ImageKit delete',
         );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -184,7 +182,6 @@ export class ImageKitService {
     fn: () => Promise<T>,
     retries: number,
     delayMs: number,
-    _label: string,
   ): Promise<T> {
     let attempt = 0;
     while (true) {

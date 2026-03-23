@@ -1,7 +1,6 @@
 import {
   IsString,
   IsInt,
-  IsBoolean,
   IsOptional,
   IsEnum,
   ValidateNested,
@@ -23,7 +22,7 @@ export class CreateStrainDto {
   // --- Refactoring v2 Fields ---
   @IsOptional()
   @IsInt()
-  @Transform(({ value }) => (value === null || value === undefined ? value : Number(value)))
+  @Transform(({ value }: { value: unknown }): number | null | undefined => (value === null || value === undefined ? value : Number(value as string | number)))
   ncbiTaxonomyId?: number | null;
 
   @IsOptional()
