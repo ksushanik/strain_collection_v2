@@ -2,9 +2,14 @@
 
 import React from "react";
 import { Toaster, toast } from "@/components/ui/sonner";
+import { useTranslations } from "next-intl";
 
 type ErrorBoundaryProps = {
   children: React.ReactNode;
+  somethingWentWrong: string;
+  unknownError: string;
+  reloadPage: string;
+  toastError: string;
 };
 
 type ErrorBoundaryState = {
@@ -12,7 +17,7 @@ type ErrorBoundaryState = {
   message?: string;
 };
 
-export class ErrorBoundary extends React.Component<
+class ErrorBoundaryClass extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
@@ -27,7 +32,7 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error) {
     console.error("UI error boundary caught:", error);
-    toast.error("Произошла ошибка. Попробуйте обновить страницу.");
+    toast.error(this.props.toastError);
   }
 
   render() {
@@ -35,15 +40,15 @@ export class ErrorBoundary extends React.Component<
       return (
         <div className="flex min-h-screen items-center justify-center p-6">
           <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-lg font-semibold mb-2">Что-то пошло не так</h2>
+            <h2 className="text-lg font-semibold mb-2">{this.props.somethingWentWrong}</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {this.state.message || "Неизвестная ошибка"}
+              {this.state.message || this.props.unknownError}
             </p>
             <button
               className="text-sm text-primary underline"
               onClick={() => window.location.reload()}
             >
-              Обновить страницу
+              {this.props.reloadPage}
             </button>
           </div>
           <Toaster />
@@ -53,4 +58,18 @@ export class ErrorBoundary extends React.Component<
 
     return this.props.children;
   }
+}
+
+export function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("Errors");
+  return (
+    <ErrorBoundaryClass
+      somethingWentWrong={t("somethingWentWrong")}
+      unknownError={t("unknownError")}
+      reloadPage={t("reloadPage")}
+      toastError={t("toastError")}
+    >
+      {children}
+    </ErrorBoundaryClass>
+  );
 }
