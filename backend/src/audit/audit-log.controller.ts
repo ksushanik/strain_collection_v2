@@ -19,13 +19,19 @@ export class AuditLogController {
     @Query('entity') entity?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.auditLogService.findAll({
-      userId: userId ? parseInt(userId) : undefined,
-      entity,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
-    });
+    return this.auditLogService.findAll(
+      {
+        userId: userId ? parseInt(userId) : undefined,
+        entity,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+      },
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 50,
+    );
   }
 
   @Get('by-entity')

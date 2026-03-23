@@ -65,29 +65,43 @@ export class AuditLogService {
     }
   }
 
-  async findAll(filters?: {
-    userId?: number;
-    entity?: string;
-    startDate?: Date;
-    endDate?: Date;
-  }) {
-    return this.prisma.auditLog.findMany({
-      where: {
-        userId: filters?.userId,
-        entity: filters?.entity,
-        createdAt: {
-          gte: filters?.startDate,
-          lte: filters?.endDate,
-        },
+  async findAll(
+    filters?: {
+      userId?: number;
+      entity?: string;
+      startDate?: Date;
+      endDate?: Date;
+    },
+    page = 1,
+    limit = 50,
+  ) {
+    const skip = (page - 1) * limit;
+    const where = {
+      userId: filters?.userId,
+      entity: filters?.entity,
+      createdAt: {
+        gte: filters?.startDate,
+        lte: filters?.endDate,
       },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true, role: true },
+    };
+    const [data, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, role: true },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 1000, // Лимит для производительности
-    });
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.auditLog.count({ where }),
+    ]);
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   async findByUser(userId: number, limit = 100) {
