@@ -58,3 +58,8 @@ coverage/
 
 # AdminJS
 .adminjs
+screenshots/
+doc*.json
+docs/
+.claude/
+progress.md
