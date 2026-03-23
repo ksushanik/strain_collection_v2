@@ -7,6 +7,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { ApiBody, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { LocalAuthGuard } from './local-auth.guard';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
@@ -23,6 +24,7 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiBody({
@@ -39,6 +41,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   @ApiBody({ type: RegisterUserDto })
   async register(@Body() createUserDto: RegisterUserDto) {

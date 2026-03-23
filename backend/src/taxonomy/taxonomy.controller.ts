@@ -1,10 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TaxonomyService } from './taxonomy.service';
 import { TaxonomyResultDto } from './dto/taxonomy-result.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('api/v1/taxonomy')
 @ApiTags('Taxonomy')
+@UseGuards(JwtAuthGuard)
 export class TaxonomyController {
   constructor(private readonly taxonomyService: TaxonomyService) {}
 

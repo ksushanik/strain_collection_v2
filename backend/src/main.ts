@@ -189,16 +189,18 @@ async function bootstrap() {
   );
 
   // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('Strain Collection API')
-    .setDescription(
-      'API documentation for microbiological strain collection system',
-    )
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Strain Collection API')
+      .setDescription(
+        'API documentation for microbiological strain collection system',
+      )
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }
