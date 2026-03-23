@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTraitDto } from './dto/create-trait.dto';
 import { UpdateTraitDto } from './dto/update-trait.dto';
 import { Prisma, TraitDataType } from '@prisma/client';
 
 @Injectable()
-export class TraitsService {
+export class TraitsService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async findAll(search?: string) {
@@ -40,13 +40,12 @@ export class TraitsService {
   async update(id: number, dto: UpdateTraitDto) {
     const existing = await this.ensureExists(id);
     
-    // @ts-ignore: Prisma Client needs regeneration
-    if (existing.isSystem) {
+    if ((existing as any).isSystem) {
       if (dto.code && dto.code !== existing.code) {
-        throw new NotFoundException(`Cannot change code for system trait`); // Using NotFound as generic client error, ideally BadRequest
+        throw new BadRequestException(`Cannot change code for system trait`);
       }
       if (dto.dataType && dto.dataType !== existing.dataType) {
-        throw new NotFoundException(`Cannot change dataType for system trait`);
+        throw new BadRequestException(`Cannot change dataType for system trait`);
       }
     }
 
@@ -58,9 +57,8 @@ export class TraitsService {
 
   async remove(id: number) {
     const existing = await this.ensureExists(id);
-    // @ts-ignore: Prisma Client needs regeneration
-    if (existing.isSystem) {
-      throw new NotFoundException(`Cannot delete system trait`);
+    if ((existing as any).isSystem) {
+      throw new BadRequestException(`Cannot delete system trait`);
     }
     return this.prisma.traitDefinition.delete({ where: { id } });
   }
@@ -152,7 +150,6 @@ export class TraitsService {
 
   private async linkLegacyPhenotypesToSystemTraits() {
     const system = await this.prisma.traitDefinition.findMany({
-      // @ts-ignore: Prisma Client needs regeneration
       where: { isSystem: true },
       select: { id: true, name: true, code: true },
     });
@@ -197,11 +194,9 @@ export class TraitsService {
         dataType: true,
         options: true,
         units: true,
-        // @ts-ignore: Prisma Client needs regeneration
         category: true,
         defaultMethod: true,
         materials: true,
-        // @ts-ignore: Prisma Client needs regeneration
         isSystem: true,
       },
       orderBy: { name: 'asc' },

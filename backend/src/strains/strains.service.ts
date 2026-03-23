@@ -50,11 +50,12 @@ export class StrainsService {
       where.genetics = hasGenome ? { isNot: null } : null;
     }
     if (taxonomy) {
-      where.OR = [
-        ...(where.OR || []),
-        { taxonomy16s: { contains: taxonomy, mode: 'insensitive' } },
-        { ncbiScientificName: { contains: taxonomy, mode: 'insensitive' } },
-      ];
+      andFilters.push({
+        OR: [
+          { taxonomy16s: { contains: taxonomy, mode: 'insensitive' } },
+          { ncbiScientificName: { contains: taxonomy, mode: 'insensitive' } },
+        ],
+      });
     }
     if (sampleCode) {
       where.sample = {
@@ -63,14 +64,15 @@ export class StrainsService {
     }
 
     if (search) {
-      where.OR = [
-        ...(where.OR || []),
-        { identifier: { contains: search, mode: 'insensitive' } },
-        { features: { contains: search, mode: 'insensitive' } },
-        { comments: { contains: search, mode: 'insensitive' } },
-        { ncbiScientificName: { contains: search, mode: 'insensitive' } },
-        { taxonomy16s: { contains: search, mode: 'insensitive' } },
-      ];
+      andFilters.push({
+        OR: [
+          { identifier: { contains: search, mode: 'insensitive' } },
+          { features: { contains: search, mode: 'insensitive' } },
+          { comments: { contains: search, mode: 'insensitive' } },
+          { ncbiScientificName: { contains: search, mode: 'insensitive' } },
+          { taxonomy16s: { contains: search, mode: 'insensitive' } },
+        ],
+      });
     }
 
     if (gramStain) {

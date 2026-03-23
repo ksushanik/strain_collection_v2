@@ -220,19 +220,95 @@ export class StorageService {
 
   async bulkAllocate(dto: BulkAllocateStrainDto) {
     const { boxId, allocations } = dto;
-    const results = [];
+    const allocationIds: number[] = [];
 
-    for (const alloc of allocations) {
-      const allocation = await this.allocateStrain({
-        boxId,
-        cellCode: alloc.cellCode,
-        strainId: alloc.strainId,
-        isPrimary: alloc.isPrimary,
-      });
-      results.push(allocation);
-    }
+    await this.prisma.$transaction(async (tx) => {
+      for (const alloc of allocations) {
+        const { cellCode, strainId, isPrimary = false } = alloc;
 
-    return results;
+        const cell = await tx.storageCell.findFirst({
+          where: { boxId, cellCode },
+          include: { strain: true, box: true },
+        });
+
+        if (!cell) {
+          throw new NotFoundException(
+            `Storage cell ${cellCode} in box ${boxId} not found`,
+          );
+        }
+
+        const strain = await tx.strain.findUnique({ where: { id: strainId } });
+        if (!strain) {
+          throw new NotFoundException(`Strain with ID ${strainId} not found`);
+        }
+
+        const existingAllocations = await tx.strainStorage.findMany({
+          where: { strainId },
+          select: { id: true, isPrimary: true },
+        });
+        const currentPrimary = existingAllocations.find((a) => a.isPrimary);
+        const targetShouldBePrimary = isPrimary === true || !currentPrimary;
+
+        const existingInCell = await tx.strainStorage.findUnique({
+          where: { cellId: cell.id },
+        });
+
+        let savedId: number;
+
+        if (existingInCell && existingInCell.strainId === strainId) {
+          const updated = await tx.strainStorage.update({
+            where: { id: existingInCell.id },
+            data: { isPrimary: targetShouldBePrimary },
+          });
+          if (targetShouldBePrimary && currentPrimary && currentPrimary.id !== updated.id) {
+            await tx.strainStorage.update({
+              where: { id: currentPrimary.id },
+              data: { isPrimary: false },
+            });
+          }
+          savedId = updated.id;
+        } else {
+          if (existingInCell) {
+            await tx.strainStorage.delete({ where: { id: existingInCell.id } });
+          }
+
+          await tx.storageCell.update({
+            where: { id: cell.id },
+            data: { status: 'OCCUPIED' },
+          });
+
+          const created = await tx.strainStorage.create({
+            data: { strainId, cellId: cell.id, isPrimary: targetShouldBePrimary },
+          });
+
+          if (targetShouldBePrimary && currentPrimary && currentPrimary.id !== created.id) {
+            await tx.strainStorage.update({
+              where: { id: currentPrimary.id },
+              data: { isPrimary: false },
+            });
+          }
+          savedId = created.id;
+        }
+
+        allocationIds.push(savedId);
+      }
+    });
+
+    return Promise.all(
+      allocationIds.map((id) =>
+        this.prisma.strainStorage.findUnique({
+          where: { id },
+          include: {
+            strain: { select: { id: true, identifier: true } },
+            cell: {
+              include: {
+                box: { select: { id: true, displayName: true } },
+              },
+            },
+          },
+        }),
+      ),
+    );
   }
 
   async deallocateStrain(boxId: number, cellCode: string) {
@@ -256,14 +332,15 @@ export class StorageService {
       );
     }
 
-    // Update cell status to FREE
-    await this.prisma.storageCell.update({
-      where: { id: cell.id },
-      data: { status: 'FREE' },
-    });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.storageCell.update({
+        where: { id: cell.id },
+        data: { status: 'FREE' },
+      });
 
-    await this.prisma.strainStorage.delete({
-      where: { id: allocation.id },
+      await tx.strainStorage.delete({
+        where: { id: allocation.id },
+      });
     });
 
     return { message: `Strain deallocated successfully` };

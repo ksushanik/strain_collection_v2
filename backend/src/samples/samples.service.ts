@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, SampleType } from '@prisma/client';
 import { CreateSampleDto } from './dto/create-sample.dto';
@@ -7,11 +7,31 @@ import { SampleQueryDto } from './dto/sample-query.dto';
 import { ImageKitService } from '../services/imagekit.service';
 
 @Injectable()
-export class SamplesService {
+export class SamplesService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private imagekitService: ImageKitService,
   ) {}
+
+  async onModuleInit() {
+    const defaults = [
+      { name: 'Plant', slug: 'plant' },
+      { name: 'Animal', slug: 'animal' },
+      { name: 'Water', slug: 'water' },
+      { name: 'Soil', slug: 'soil' },
+      { name: 'Other', slug: 'other' },
+    ];
+
+    await this.prisma.$transaction(
+      defaults.map((type) =>
+        this.prisma.sampleTypeDictionary.upsert({
+          where: { slug: type.slug },
+          update: {},
+          create: type,
+        }),
+      ),
+    );
+  }
 
   private buildSubjectSlug(subject?: string | null) {
     const trimmed = typeof subject === 'string' ? subject.trim() : '';
@@ -372,24 +392,6 @@ export class SamplesService {
   }
 
   async getSampleTypes() {
-    const defaults = [
-      { name: 'Plant', slug: 'plant' },
-      { name: 'Animal', slug: 'animal' },
-      { name: 'Water', slug: 'water' },
-      { name: 'Soil', slug: 'soil' },
-      { name: 'Other', slug: 'other' },
-    ];
-
-    await this.prisma.$transaction(
-      defaults.map((type) =>
-        this.prisma.sampleTypeDictionary.upsert({
-          where: { slug: type.slug },
-          update: {},
-          create: type,
-        }),
-      ),
-    );
-
     return this.prisma.sampleTypeDictionary.findMany({
       orderBy: { name: 'asc' },
     });
