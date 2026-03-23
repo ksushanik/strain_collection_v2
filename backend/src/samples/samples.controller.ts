@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/policies.guard';
 import { CheckPolicies } from '../casl/check-policies.decorator';
 import { AuditLogInterceptor } from '../audit/audit-log.interceptor';
+import { validateImageBuffer } from '../common/validate-image';
 
 @Controller('api/v1/samples')
 @ApiTags('Samples')
@@ -104,12 +105,16 @@ export class SamplesController {
       },
     }),
   )
-  uploadPhoto(
+  async uploadPhoto(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
       throw new BadRequestException('File is required');
+    }
+    const detectedMime = await validateImageBuffer(file.buffer);
+    if (!detectedMime) {
+      throw new BadRequestException('Invalid image file');
     }
     return this.samplesService.uploadPhoto(id, file);
   }
