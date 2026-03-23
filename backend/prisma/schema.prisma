@@ -29,6 +29,8 @@ model Sample {
   strains        Strain[]
   sampleTypeDict SampleTypeDictionary? @relation(fields: [sampleTypeId], references: [id])
 
+  @@index([collectedAt])
+  @@index([sampleTypeId])
   @@map("samples")
 }
 
@@ -49,7 +51,7 @@ model SamplePhoto {
   meta      Json?
   createdAt DateTime @default(now()) @map("created_at")
 
-  sample Sample @relation(fields: [sampleId], references: [id])
+  sample Sample @relation(fields: [sampleId], references: [id], onDelete: Cascade)
 
   @@map("sample_photos")
 }
@@ -102,7 +104,7 @@ model Strain {
   customFields Json?    @map("custom_fields")
 
   // Relations
-  sample   Sample          @relation(fields: [sampleId], references: [id])
+  sample   Sample          @relation(fields: [sampleId], references: [id], onDelete: Cascade)
   isolator User?           @relation("StrainIsolator", fields: [isolatorId], references: [id])
   media    StrainMedia[]
   storage  StrainStorage[]
@@ -112,6 +114,10 @@ model Strain {
   phenotypes StrainPhenotype[]
   genetics   StrainGenetics?
 
+  @@index([sampleId])
+  @@index([isolationRegion])
+  @@index([status])
+  @@index([createdAt])
   @@map("strains")
 }
 
@@ -140,7 +146,7 @@ model StrainMedia {
   mediaId  Int     @map("media_id")
   notes    String?
 
-  strain Strain @relation(fields: [strainId], references: [id])
+  strain Strain @relation(fields: [strainId], references: [id], onDelete: Cascade)
   media  Media  @relation(fields: [mediaId], references: [id])
 
   @@id([strainId, mediaId])
@@ -189,7 +195,7 @@ model StrainStorage {
   isPrimary      Boolean    @default(false) @map("is_primary")
   allocatedAt    DateTime   @default(now()) @map("allocated_at")
 
-  strain Strain      @relation(fields: [strainId], references: [id])
+  strain Strain      @relation(fields: [strainId], references: [id], onDelete: Cascade)
   cell   StorageCell @relation(fields: [cellId], references: [id])
 
   @@map("strain_storage")
@@ -361,6 +367,9 @@ model StrainPhenotype {
   strain          Strain           @relation(fields: [strainId], references: [id], onDelete: Cascade)
   traitDefinition TraitDefinition? @relation(fields: [traitDefinitionId], references: [id])
 
+  @@unique([strainId, traitDefinitionId])
+  @@index([strainId])
+  @@index([traitDefinitionId])
   @@map("strain_phenotypes")
 }
 
