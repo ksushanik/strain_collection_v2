@@ -10,6 +10,7 @@
     "^file-type$": "<rootDir>/__mocks__/file-type.js",
     "^adminjs$": "<rootDir>/__mocks__/adminjs.js",
     "^@adminjs/nestjs$": "<rootDir>/__mocks__/@adminjs-nestjs.js",
-    "^@adminjs/prisma$": "<rootDir>/__mocks__/@adminjs-prisma.js"
+    "^@adminjs/prisma$": "<rootDir>/__mocks__/@adminjs-prisma.js",
+    "^.+/admin/admin\\.module$": "<rootDir>/__mocks__/admin-module.js"
   }
 }
