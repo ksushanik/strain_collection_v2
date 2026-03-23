@@ -17,6 +17,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+    Dialog,
+    DialogPortal,
+    DialogOverlay,
+    DialogClose,
+} from "@/components/ui/dialog"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { useTranslations } from "next-intl"
 
 interface PhotoUploadProps {
@@ -67,8 +74,6 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             } else if (e.key === 'ArrowRight') {
                 e.preventDefault()
                 goToNext()
-            } else if (e.key === 'Escape') {
-                closeLightbox()
             }
         }
 
@@ -351,80 +356,88 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
             )}
 
             {/* Lightbox Modal */}
-            {currentPhoto && (
-                <div
-                    className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
-                    onClick={closeLightbox}
-                >
-                    {/* Close button */}
-                    <button
-                        onClick={closeLightbox}
-                        className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
+            <Dialog open={selectedPhotoIndex !== null} onOpenChange={(open) => { if (!open) closeLightbox() }}>
+                <DialogPortal>
+                    <DialogOverlay className="bg-black/90" />
+                    <DialogPrimitive.Content
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 focus:outline-none"
+                        aria-label={currentPhoto?.meta?.originalName || 'Photo viewer'}
                     >
-                        <X className="h-6 w-6" />
-                    </button>
+                        {currentPhoto && (
+                            <>
+                                {/* Close button */}
+                                <DialogClose
+                                    aria-label="Close photo"
+                                    className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
+                                >
+                                    <X className="h-6 w-6" />
+                                </DialogClose>
 
-                    {/* Photo counter */}
-                    <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                        {selectedPhotoIndex! + 1} / {photos.length}
-                    </div>
+                                {/* Photo counter */}
+                                <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                                    {selectedPhotoIndex! + 1} / {photos.length}
+                                </div>
 
-                    {/* Previous button */}
-                    {photos.length > 1 && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                goToPrevious()
-                            }}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
-                        >
-                            <ChevronLeft className="h-8 w-8" />
-                        </button>
-                    )}
+                                {/* Previous button */}
+                                {photos.length > 1 && (
+                                    <button
+                                        aria-label="Previous photo"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            goToPrevious()
+                                        }}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
+                                    >
+                                        <ChevronLeft className="h-8 w-8" />
+                                    </button>
+                                )}
 
-                    {/* Image */}
-                    <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
-                        <div
-                            className={`absolute inset-0 bg-center bg-contain bg-no-repeat filter blur-md scale-105 transition-opacity ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
-                            style={{ backgroundImage: `url(${getBlurFullUrl(currentPhoto.url)})` }}
-                            aria-hidden
-                        />
-                        <Image
-                            src={getFullSizeUrl(currentPhoto.url)}
-                            alt={currentPhoto.meta?.originalName || 'Sample photo'}
-                            fill
-                            className="object-contain rounded-lg opacity-0"
-                            sizes="100vw"
-                            onLoad={(e) => {
-                                const img = e.currentTarget
-                                img.classList.remove('opacity-0')
-                                setFullLoaded(true)
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                    </div>
+                                {/* Image */}
+                                <div className="relative max-w-7xl max-h-[90vh] w-full h-full">
+                                    <div
+                                        className={`absolute inset-0 bg-center bg-contain bg-no-repeat filter blur-md scale-105 transition-opacity ${fullLoaded ? 'opacity-0' : 'opacity-100'}`}
+                                        style={{ backgroundImage: `url(${getBlurFullUrl(currentPhoto.url)})` }}
+                                        aria-hidden
+                                    />
+                                    <Image
+                                        src={getFullSizeUrl(currentPhoto.url)}
+                                        alt={currentPhoto.meta?.originalName || 'Sample photo'}
+                                        fill
+                                        className="object-contain rounded-lg opacity-0"
+                                        sizes="100vw"
+                                        onLoad={(e) => {
+                                            const img = e.currentTarget
+                                            img.classList.remove('opacity-0')
+                                            setFullLoaded(true)
+                                        }}
+                                    />
+                                </div>
 
-                    {/* Next button */}
-                    {photos.length > 1 && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                goToNext()
-                            }}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
-                        >
-                            <ChevronRight className="h-8 w-8" />
-                        </button>
-                    )}
+                                {/* Next button */}
+                                {photos.length > 1 && (
+                                    <button
+                                        aria-label="Next photo"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            goToNext()
+                                        }}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
+                                    >
+                                        <ChevronRight className="h-8 w-8" />
+                                    </button>
+                                )}
 
-                    {/* Filename */}
-                    {currentPhoto.meta?.originalName && (
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
-                            {currentPhoto.meta.originalName}
-                        </div>
-                    )}
-                </div>
-            )}
+                                {/* Filename */}
+                                {currentPhoto.meta?.originalName && (
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
+                                        {currentPhoto.meta.originalName}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </DialogPrimitive.Content>
+                </DialogPortal>
+            </Dialog>
 
             {!readOnly && (
                 <AlertDialog open={!!photoToDelete} onOpenChange={(open) => !open && setPhotoToDelete(null)}>
