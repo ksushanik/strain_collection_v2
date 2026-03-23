@@ -53,25 +53,12 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
 
     // Update selected sample display if value changes externally or initially
     React.useEffect(() => {
-        if (value) {
-            if (!selectedSample || selectedSample.id.toString() !== value) {
-                if (initialSample && initialSample.id.toString() === value) {
-                    setSelectedSample(initialSample)
-                } else {
-                    // Fetch the sample details
-                    ApiService.getSample(parseInt(value))
-                        .then((sample) => {
-                            setSelectedSample(sample)
-                        })
-                        .catch((err) => {
-                            console.error("Failed to fetch sample details", err)
-                        })
-                }
-            }
-        } else if (selectedSample) {
-            setSelectedSample(undefined)
+        if (!value) { setSelectedSample(undefined); return; }
+        if (initialSample && initialSample.id.toString() === value) {
+            setSelectedSample(initialSample); return;
         }
-    }, [value, initialSample, selectedSample])
+        ApiService.getSample(parseInt(value)).then(setSelectedSample).catch(console.error);
+    }, [value, initialSample])
 
 
     const displayValue = selectedSample
