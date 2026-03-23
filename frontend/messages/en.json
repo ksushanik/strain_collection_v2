@@ -534,6 +534,22 @@
         "allocate": "Allocate",
         "unallocate": "Unallocate"
     },
+    "Login": {
+        "signIn": "Sign In",
+        "enterCredentials": "Enter your credentials to access the collection",
+        "email": "Email",
+        "password": "Password",
+        "signingIn": "Signing in...",
+        "invalidCredentials": "Failed to login. Please check your email and password.",
+        "or": "Or",
+        "continueAsGuest": "Continue as Guest"
+    },
+    "Errors": {
+        "somethingWentWrong": "Something went wrong",
+        "unknownError": "Unknown error",
+        "reloadPage": "Reload page",
+        "toastError": "An error occurred. Please reload the page."
+    },
     "GlobalSearch": {
         "placeholder": "Search everything...",
         "shortcut": "Ctrl/⌘K",

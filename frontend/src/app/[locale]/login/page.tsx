@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010';
 
@@ -20,6 +21,7 @@ function LoginForm() {
     const { login, logout } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const t = useTranslations('Login');
 
     const from = searchParams?.get('from') || '/';
 
@@ -43,7 +45,7 @@ function LoginForm() {
             login(data.access_token, data.user);
             router.push(from);
         } catch {
-            setError('Failed to login. Please check your email and password.');
+            setError(t('invalidCredentials'));
         } finally {
             setLoading(false);
         }
@@ -52,9 +54,9 @@ function LoginForm() {
     return (
         <Card className="w-full max-w-md">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+                <CardTitle className="text-2xl font-bold text-center">{t('signIn')}</CardTitle>
                 <CardDescription className="text-center">
-                    Enter your credentials to access the collection
+                    {t('enterCredentials')}
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleSubmit}>
@@ -66,7 +68,7 @@ function LoginForm() {
                         </Alert>
                     )}
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">{t('email')}</Label>
                         <Input
                             id="email"
                             type="email"
@@ -77,7 +79,7 @@ function LoginForm() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">{t('password')}</Label>
                         <Input
                             id="password"
                             type="password"
@@ -89,14 +91,14 @@ function LoginForm() {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
                     <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? 'Signing in...' : 'Sign In'}
+                        {loading ? t('signingIn') : t('signIn')}
                     </Button>
                     <div className="relative w-full">
                         <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Or</span>
+                            <span className="bg-background px-2 text-muted-foreground">{t('or')}</span>
                         </div>
                     </div>
                     <Button
@@ -108,7 +110,7 @@ function LoginForm() {
                             router.push('/');
                         }}
                     >
-                        Continue as Guest
+                        {t('continueAsGuest')}
                     </Button>
                 </CardFooter>
             </form>

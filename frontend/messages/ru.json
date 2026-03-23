@@ -536,6 +536,22 @@
         "allocate": "Назначить",
         "unallocate": "Освободить"
     },
+    "Login": {
+        "signIn": "Войти",
+        "enterCredentials": "Введите данные для доступа к коллекции",
+        "email": "Email",
+        "password": "Пароль",
+        "signingIn": "Вход...",
+        "invalidCredentials": "Не удалось войти. Проверьте email и пароль.",
+        "or": "Или",
+        "continueAsGuest": "Продолжить как гость"
+    },
+    "Errors": {
+        "somethingWentWrong": "Что-то пошло не так",
+        "unknownError": "Неизвестная ошибка",
+        "reloadPage": "Обновить страницу",
+        "toastError": "Произошла ошибка. Попробуйте обновить страницу."
+    },
     "GlobalSearch": {
         "placeholder": "Поиск по всему…",
         "shortcut": "Ctrl/⌘K",
