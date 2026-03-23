@@ -20,7 +20,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             router.replace(`/${locale}`);
         }
         if (!isLoading && !isAuthenticated && !isLoginPage) {
-            router.replace('/login');
+            router.replace(`/${locale}/login`);
         }
     }, [isLoading, isAuthenticated, isLoginPage, locale, router]);
 
