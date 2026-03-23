@@ -105,7 +105,10 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             widthClass,
             className
         )}>
-            <div className="flex h-14 items-center border-b border-sidebar-border px-4 gap-2">
+            <div className={cn(
+                "flex h-14 items-center border-b border-sidebar-border",
+                isCollapsed ? "justify-center px-0" : "px-4 gap-2"
+            )}>
                 {!isMobile && (
                     <Button
                         variant="ghost"
@@ -122,11 +125,6 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                             <Microscope className="h-4 w-4 text-primary-foreground" />
                         </div>
                         <span className="font-semibold text-sm tracking-tight truncate">BioCollection</span>
-                    </div>
-                )}
-                {isCollapsed && (
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary mx-auto">
-                        <Microscope className="h-4 w-4 text-primary-foreground" />
                     </div>
                 )}
             </div>
