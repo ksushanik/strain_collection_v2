@@ -70,7 +70,7 @@ export class AdminSsoController {
   }
 
   @Get('sso/complete')
-  @CheckPolicies((ability) => ability.can('manage', 'all'))
+  @Public()
   async ssoComplete(@Req() req: Request, @Res() res: Response) {
     const nonce = (req.query['nonce'] as string) || '';
     const record = AdminSsoController.nonces.get(nonce);
