@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { ApiService } from "@/services/api"
 import { useDebounce } from "@/hooks/use-debounce"
+import { useTranslations } from "next-intl"
 
 interface TaxonomyAutocompleteProps {
     value?: string
@@ -20,7 +21,8 @@ interface TaxonomyAutocompleteProps {
     placeholder?: string
 }
 
-export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = "Search taxonomy..." }: TaxonomyAutocompleteProps) {
+export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder }: TaxonomyAutocompleteProps) {
+    const t = useTranslations("Taxonomy")
     const [open, setOpen] = React.useState(false)
     const [searchTerm, setSearchTerm] = React.useState("")
     const [results, setResults] = React.useState<Array<{ taxId: string; name: string; rank: string }>>([])
@@ -62,7 +64,7 @@ export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = 
                         !value && "text-muted-foreground font-normal"
                     )}
                 >
-                    {value || placeholder}
+                    {value || placeholder || t("typeToSearch")}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
@@ -70,7 +72,7 @@ export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = 
                 <div className="flex flex-col">
                     <div className="flex items-center border-b px-3">
                         <Input
-                            placeholder="Type to search..."
+                            placeholder={t("typeToSearch")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="border-0 focus-visible:ring-0 px-0"
@@ -88,17 +90,17 @@ export function TaxonomyAutocomplete({ value, onChange, onSelect, placeholder = 
                                     setOpen(false)
                                 }}
                             >
-                                Clear selection
+                                {t("clearSelection")}
                             </div>
                         )}
                         {results.length === 0 && !loading && searchTerm && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                No results found.
+                                {t("noResultsFound")}
                             </div>
                         )}
                         {results.length === 0 && !searchTerm && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                Start typing to search NCBI Taxonomy.
+                                {t("startTyping")}
                             </div>
                         )}
                         {results.map((item) => (

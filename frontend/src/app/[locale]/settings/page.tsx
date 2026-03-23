@@ -41,7 +41,7 @@ export default function SettingsPage() {
       })
       .catch((err) => {
         console.error("Failed to load ui bindings", err)
-        setMessage("Failed to load settings")
+        setMessage(t("failedToLoadSettings"))
       })
       .finally(() => setLoading(false))
   }, [canReadPage])
@@ -93,10 +93,10 @@ export default function SettingsPage() {
           order: index,
         })) as UiBinding[]
       )
-      setMessage("Saved")
+      setMessage(t("saved"))
     } catch (err) {
       console.error("Failed to save ui bindings", err)
-      setMessage("Save failed")
+      setMessage(t("saveFailed"))
     } finally {
       setSaving(false)
     }
@@ -267,7 +267,7 @@ export default function SettingsPage() {
               {canUpdate && (
                 <Button onClick={handleSave} disabled={saving || loading} className="w-full sm:w-auto">
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                  Save order and labels
+                  {t('saveOrderAndLabels')}
                 </Button>
               )}
             </div>

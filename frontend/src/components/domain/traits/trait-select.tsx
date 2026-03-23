@@ -29,6 +29,7 @@ interface TraitSelectProps {
 
 export function TraitSelect({ value, onSelect, disabled, className }: TraitSelectProps) {
   const tStrains = useTranslations("Strains")
+  const t = useTranslations("TraitSelect")
   const [open, setOpen] = React.useState(false)
   const [traits, setTraits] = React.useState<TraitDefinition[]>([])
   const [loading, setLoading] = React.useState(false)
@@ -71,15 +72,15 @@ export function TraitSelect({ value, onSelect, disabled, className }: TraitSelec
         >
           {selectedTrait
             ? getTraitDisplayName(selectedTrait.code, selectedTrait.name, tStrains)
-            : "Select trait..."}
+            : t("selectTrait")}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
         <Command>
-          <CommandInput placeholder="Search traits..." />
+          <CommandInput placeholder={t("searchTraits")} />
           <CommandList>
-            <CommandEmpty>No traits found.</CommandEmpty>
+            <CommandEmpty>{t("noTraitsFound")}</CommandEmpty>
             {groupedTraits.map(([category, items]) => (
               <CommandGroup key={category} heading={category}>
                 {items.map((trait) => (

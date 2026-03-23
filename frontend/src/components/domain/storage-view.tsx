@@ -563,7 +563,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                   </div>
                   {selectedBox && (
                     <span className="text-sm font-normal text-muted-foreground">
-                      Grid: {selectedBox.rows} × {selectedBox.cols}
+                      {t('grid')} {selectedBox.rows} × {selectedBox.cols}
                     </span>
                   )}
                 </>

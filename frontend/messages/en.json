@@ -66,7 +66,8 @@
         "export": "Export",
         "exportCsv": "CSV",
         "exportJson": "JSON",
-        "exporting": "Exporting..."
+        "exporting": "Exporting...",
+        "anErrorOccurred": "An error occurred"
     },
     "DynamicPages": {
         "myCollection": "My Collection",
@@ -482,7 +483,11 @@
         "routeSlugPlaceholder": "route-slug",
         "enabledPacksPlaceholder": "enabled field packs (comma separated)",
         "legendOverridePlaceholder": "Legend override (optional)",
-        "up": "Up"
+        "up": "Up",
+        "saveOrderAndLabels": "Save order and labels",
+        "saved": "Saved",
+        "saveFailed": "Save failed",
+        "failedToLoadSettings": "Failed to load settings"
     },
     "Storage": {
         "pageTitle": "Storage",
@@ -532,7 +537,8 @@
         "deselect": "Deselect",
         "reassign": "Reassign",
         "allocate": "Allocate",
-        "unallocate": "Unallocate"
+        "unallocate": "Unallocate",
+        "grid": "Grid:"
     },
     "Login": {
         "signIn": "Sign In",
@@ -549,6 +555,23 @@
         "unknownError": "Unknown error",
         "reloadPage": "Reload page",
         "toastError": "An error occurred. Please reload the page."
+    },
+    "Taxonomy": {
+        "typeToSearch": "Type to search...",
+        "clearSelection": "Clear selection",
+        "noResultsFound": "No results found.",
+        "startTyping": "Start typing to search NCBI Taxonomy."
+    },
+    "SampleAutocomplete": {
+        "typeToSearch": "Type to search...",
+        "noResultsFound": "No results found.",
+        "startTyping": "Start typing to search samples.",
+        "loading": "Loading..."
+    },
+    "TraitSelect": {
+        "selectTrait": "Select trait...",
+        "searchTraits": "Search traits...",
+        "noTraitsFound": "No traits found."
     },
     "GlobalSearch": {
         "placeholder": "Search everything...",

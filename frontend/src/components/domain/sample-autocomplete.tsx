@@ -14,6 +14,7 @@ import { ApiService } from "@/services/api"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Sample } from "@/types/api"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
+import { useTranslations } from "next-intl"
 
 interface SampleAutocompleteProps {
     value?: string
@@ -22,7 +23,8 @@ interface SampleAutocompleteProps {
     initialSample?: Pick<Sample, "id" | "code"> & Partial<Sample>
 }
 
-export function SampleAutocomplete({ value, onChange, placeholder = "Search sample...", initialSample }: SampleAutocompleteProps) {
+export function SampleAutocomplete({ value, onChange, placeholder, initialSample }: SampleAutocompleteProps) {
+    const t = useTranslations("SampleAutocomplete")
     const [open, setOpen] = React.useState(false)
     const [searchTerm, setSearchTerm] = React.useState("")
     const [results, setResults] = React.useState<Sample[]>([])
@@ -64,8 +66,8 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
     const displayValue = selectedSample
         ? `${formatSampleCodeForDisplay(selectedSample.code)} ${selectedSample.siteName ? `(${selectedSample.siteName})` : ""}`
         : value
-            ? "Loading..." // Or some other placeholder if we have ID but no details yet
-            : placeholder
+            ? t("loading")
+            : placeholder ?? t("typeToSearch")
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -88,7 +90,7 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
                 <div className="flex flex-col">
                     <div className="flex items-center border-b px-3">
                         <Input
-                            placeholder="Type to search..."
+                            placeholder={t("typeToSearch")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="border-0 focus-visible:ring-0 px-0"
@@ -98,12 +100,12 @@ export function SampleAutocomplete({ value, onChange, placeholder = "Search samp
                     <div className="max-h-[300px] overflow-y-auto p-1">
                         {results.length === 0 && !loading && searchTerm && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                No results found.
+                                {t("noResultsFound")}
                             </div>
                         )}
                         {results.length === 0 && !searchTerm && !loading && (
                             <div className="py-6 text-center text-sm text-muted-foreground">
-                                Start typing to search samples.
+                                {t("startTyping")}
                             </div>
                         )}
                         {results.map((item) => (

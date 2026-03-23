@@ -66,7 +66,8 @@
         "export": "Экспорт",
         "exportCsv": "CSV",
         "exportJson": "JSON",
-        "exporting": "Экспорт..."
+        "exporting": "Экспорт...",
+        "anErrorOccurred": "Произошла ошибка"
     },
     "DynamicPages": {
         "myCollection": "Моя коллекция",
@@ -484,7 +485,11 @@
         "routeSlugPlaceholder": "route-slug",
         "enabledPacksPlaceholder": "включенные пакеты полей (через запятую)",
         "legendOverridePlaceholder": "Переопределение легенды (необязательно)",
-        "up": "Вверх"
+        "up": "Вверх",
+        "saveOrderAndLabels": "Сохранить порядок и метки",
+        "saved": "Сохранено",
+        "saveFailed": "Не удалось сохранить",
+        "failedToLoadSettings": "Не удалось загрузить настройки"
     },
     "Storage": {
         "pageTitle": "Хранилище",
@@ -534,7 +539,8 @@
         "deselect": "Снять выбор",
         "reassign": "Переназначить",
         "allocate": "Назначить",
-        "unallocate": "Освободить"
+        "unallocate": "Освободить",
+        "grid": "Сетка:"
     },
     "Login": {
         "signIn": "Войти",
@@ -551,6 +557,23 @@
         "unknownError": "Неизвестная ошибка",
         "reloadPage": "Обновить страницу",
         "toastError": "Произошла ошибка. Попробуйте обновить страницу."
+    },
+    "Taxonomy": {
+        "typeToSearch": "Введите для поиска...",
+        "clearSelection": "Очистить выбор",
+        "noResultsFound": "Ничего не найдено.",
+        "startTyping": "Начните вводить текст для поиска в таксономии NCBI."
+    },
+    "SampleAutocomplete": {
+        "typeToSearch": "Введите для поиска...",
+        "noResultsFound": "Ничего не найдено.",
+        "startTyping": "Начните вводить для поиска образцов.",
+        "loading": "Загрузка..."
+    },
+    "TraitSelect": {
+        "selectTrait": "Выберите признак...",
+        "searchTraits": "Поиск признаков...",
+        "noTraitsFound": "Признаки не найдены."
     },
     "GlobalSearch": {
         "placeholder": "Поиск по всему…",

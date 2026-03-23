@@ -1,5 +1,6 @@
 import { useCallback } from "react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 function getErrorMessage(err: unknown): string | null {
   if (!err) return null
@@ -12,11 +13,13 @@ function getErrorMessage(err: unknown): string | null {
 }
 
 export function useApiError() {
-  const handleError = useCallback((err: unknown, fallback = "Произошла ошибка") => {
-    const message = getErrorMessage(err) || fallback
+  const tCommon = useTranslations("Common")
+
+  const handleError = useCallback((err: unknown, fallback?: string) => {
+    const message = getErrorMessage(err) || fallback || tCommon("anErrorOccurred")
     toast.error(message)
     console.error(message, err)
-  }, [])
+  }, [tCommon])
 
   return { handleError }
 }
