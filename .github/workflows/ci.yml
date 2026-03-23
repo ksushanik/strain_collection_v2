@@ -26,7 +26,6 @@ jobs:
       SKIP_ADMIN: "true"
       JWT_SECRET: "ci-test-secret"
       ADMIN_SESSION_SECRET: "ci-test-admin-secret"
-      NODE_OPTIONS: "--experimental-vm-modules"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -66,5 +66,5 @@ test('strains page renders for authenticated user', async ({ page }) => {
 
   // Wait for network idle so data has a chance to load, then check data
   await page.waitForLoadState('networkidle');
-  await expect(page.getByText('STR-001')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText('STR-001').first()).toBeVisible({ timeout: 10000 });
 });
