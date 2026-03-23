@@ -184,7 +184,7 @@ export class ImageKitService {
     fn: () => Promise<T>,
     retries: number,
     delayMs: number,
-    label: string,
+    _label: string,
   ): Promise<T> {
     let attempt = 0;
     while (true) {

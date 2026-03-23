@@ -5,7 +5,6 @@ import { SettingsService } from '../settings/settings.service';
 import { GlobalSearchResponse, SearchHit, SearchSection } from './search.types';
 import fs from 'fs/promises';
 import path from 'path';
-import type { User } from '@prisma/client';
 
 type SearchInput = {
   user?: Parameters<CaslAbilityFactory['createForUser']>[0];

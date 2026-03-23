@@ -24,9 +24,9 @@ test('login page renders form', async ({ page }) => {
   );
 
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /войти/i })).toBeVisible();
   await expect(page.getByLabel(/email/i)).toBeVisible();
-  await expect(page.getByLabel(/password/i)).toBeVisible();
+  await expect(page.getByLabel(/пароль/i)).toBeVisible();
 });
 
 test('strains page shows mocked table', async ({ page }) => {
@@ -65,7 +65,7 @@ test('strains page shows mocked table', async ({ page }) => {
 
   await page.goto('/strains');
 
-  await expect(page.getByRole('heading', { name: /all strains/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /штаммы/i })).toBeVisible();
   await expect(page.getByText('STR-001')).toBeVisible();
   await expect(page.getByText('S-001')).toBeVisible();
 });

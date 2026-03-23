@@ -9,13 +9,14 @@ export class TraitsService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async findAll(search?: string) {
-    const where: any = {};
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-      ];
-    }
+    const where: Prisma.TraitDefinitionWhereInput = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { code: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
 
     return this.prisma.traitDefinition.findMany({
       where,
@@ -40,11 +41,11 @@ export class TraitsService implements OnModuleInit {
   async update(id: number, dto: UpdateTraitDto) {
     const existing = await this.ensureExists(id);
     
-    if ((existing as any).isSystem) {
+    if (existing.isSystem) {
       if (dto.code && dto.code !== existing.code) {
         throw new BadRequestException(`Cannot change code for system trait`);
       }
-      if (dto.dataType && dto.dataType !== existing.dataType) {
+      if (dto.dataType && (dto.dataType as string) !== (existing.dataType as string)) {
         throw new BadRequestException(`Cannot change dataType for system trait`);
       }
     }
@@ -57,7 +58,7 @@ export class TraitsService implements OnModuleInit {
 
   async remove(id: number) {
     const existing = await this.ensureExists(id);
-    if ((existing as any).isSystem) {
+    if (existing.isSystem) {
       throw new BadRequestException(`Cannot delete system trait`);
     }
     return this.prisma.traitDefinition.delete({ where: { id } });
