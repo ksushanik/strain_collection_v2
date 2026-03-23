@@ -33,15 +33,17 @@ export const AuditService = {
         if (params?.entity) query.set('entity', params.entity);
         if (params?.startDate) query.set('startDate', params.startDate);
         if (params?.endDate) query.set('endDate', params.endDate);
+        if (params?.page) query.set('page', params.page.toString());
+        if (params?.limit) query.set('limit', params.limit.toString());
 
-        // Note: The backend currently returns an array, not a paginated response object with meta.
-        // If pagination is added later, this will need to be updated.
         const qs = query.toString();
         const response = await request(`/api/v1/audit-logs${qs ? `?${qs}` : ''}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch audit logs: ${response.statusText}`);
         }
-        return response.json();
+        const result = await response.json();
+        // Backend returns paginated { data, meta } — extract data array
+        return Array.isArray(result) ? result : (result.data ?? []);
     },
 
     async getLogsByEntity(entity: string, entityId: number): Promise<AuditLog[]> {
