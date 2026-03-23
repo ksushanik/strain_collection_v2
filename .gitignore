@@ -63,3 +63,8 @@ doc*.json
 docs/
 .claude/
 progress.md
+
+# IDE / AI tool configs
+.gemini/
+.kilocode/
+.kilocodemodes

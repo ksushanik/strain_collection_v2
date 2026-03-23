@@ -1,1 +1,0 @@
-{"mcpServers":{"playwright":{"command":"npx","args":["-y","@playwright/mcp@0.0.38"]},"shadcn":{"command":"npx","args":["shadcn@latest","mcp"]},"Ref":{"command":"npx","args":["ref-tools-mcp@latest"],"env":{"REF_API_KEY":"ref-529fe01d9e82cb548f77"},"alwaysAllow":["ref_search_documentation","ref_read_url"]}}}
