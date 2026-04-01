@@ -18,6 +18,13 @@ export async function getMethods(params?: {
   return response.json();
 }
 
+export async function getMethodsList(): Promise<Method[]> {
+  const response = await request(`/api/v1/methods?limit=1000`);
+  await assertOk(response, 'Failed to fetch methods list');
+  const result = await response.json();
+  return result.data;
+}
+
 export async function createMethod(payload: { name: string; description?: string }): Promise<Method> {
   const response = await request(`/api/v1/methods`, {
     method: 'POST',

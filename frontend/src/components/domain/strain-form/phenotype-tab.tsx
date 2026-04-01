@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl"
 import { Plus, Trash2 } from "lucide-react"
 
 import { ApiService, TraitDataType } from "@/services/api"
-import type { TraitDefinition } from "@/services/api"
+import type { TraitDefinition, Method } from "@/services/api"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -22,6 +22,7 @@ type PhenotypeFormValue = {
   traitName?: string
   result: string
   method?: string
+  methodId?: number | null
   traitCode?: string | null
   dataType?: TraitDataType
   options?: string[] | null
@@ -94,6 +95,7 @@ function createEmptyValue(): PhenotypeFormValue {
     units: null,
     result: "",
     method: "",
+    methodId: null,
   }
 }
 
@@ -110,6 +112,7 @@ function buildValueFromTrait(trait: TraitDefinition, existing?: PhenotypeFormVal
     options: (trait.options as unknown as string[] | null | undefined) ?? null,
     units: trait.units ?? null,
     method: existing?.method ?? trait.defaultMethod ?? "",
+    methodId: existing?.methodId ?? null,
     result: defaultBoolean,
     traitDefinition: existing?.traitDefinition ?? null,
   }
@@ -134,6 +137,14 @@ export function StrainPhenotypeTab() {
   )
 
   const [dictionary, setDictionary] = React.useState<TraitDefinition[]>([])
+  const [methods, setMethods] = React.useState<Method[]>([])
+
+  React.useEffect(() => {
+    ApiService.getMethodsList()
+      .then(setMethods)
+      .catch(() => setMethods([]))
+  }, [])
+
   const [editor, setEditor] = React.useState<EditorState>({
     open: false,
     mode: "add",
@@ -407,11 +418,32 @@ export function StrainPhenotypeTab() {
 
               <div className="grid gap-2">
                 <Label>{t("traitMethod")}</Label>
-                <Input
-                  value={editor.value.method || ""}
-                  onChange={(e) => setEditor((s) => ({ ...s, value: { ...s.value, method: e.target.value } }))}
-                  placeholder={t("methodPlaceholder") || "e.g. Microscopy"}
-                />
+                <Select
+                  value={editor.value.methodId?.toString() ?? ""}
+                  onValueChange={(val) => {
+                    const id = val ? Number(val) : null
+                    const found = methods.find((m) => m.id === id)
+                    setEditor((s) => ({
+                      ...s,
+                      value: {
+                        ...s.value,
+                        methodId: id,
+                        method: found?.name ?? "",
+                      },
+                    }))
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("methodPlaceholder") || "Select method..."} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {methods.map((m) => (
+                      <SelectItem key={m.id} value={m.id.toString()}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">
