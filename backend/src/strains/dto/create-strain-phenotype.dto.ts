@@ -1,8 +1,8 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsInt } from 'class-validator';
 
 export class CreateStrainPhenotypeDto {
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   traitDefinitionId?: number;
 
   @IsOptional()
@@ -17,7 +17,7 @@ export class CreateStrainPhenotypeDto {
   method?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   methodId?: number;
 
   @IsOptional()

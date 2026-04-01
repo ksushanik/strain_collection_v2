@@ -36,8 +36,13 @@ export interface StrainPhenotype {
     traitCode?: string | null
     result: string
     method?: string
+    methodId?: number | null
     traitDefinition?: {
       code: string
+    } | null
+    methodRef?: {
+      id: number
+      name: string
     } | null
 }
 

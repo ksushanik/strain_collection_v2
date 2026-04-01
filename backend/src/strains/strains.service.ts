@@ -445,6 +445,10 @@ export class StrainsService {
         strainId,
         ...dto,
       },
+      include: {
+        traitDefinition: true,
+        methodRef: true,
+      },
     });
   }
 
