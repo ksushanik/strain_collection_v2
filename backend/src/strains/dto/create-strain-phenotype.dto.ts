@@ -17,5 +17,9 @@ export class CreateStrainPhenotypeDto {
   method?: string;
 
   @IsOptional()
+  @IsNumber()
+  methodId?: number;
+
+  @IsOptional()
   conditions?: any; // JSON object
 }

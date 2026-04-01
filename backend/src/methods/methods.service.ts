@@ -60,7 +60,16 @@ export class MethodsService {
 
   async remove(id: number) {
     await this.ensureExists(id);
-    return this.prisma.method.delete({ where: { id } });
+    const usageCount = await this.prisma.strainPhenotype.count({
+      where: { methodId: id },
+    });
+    const deleted = await this.prisma.method.delete({ where: { id } });
+    return {
+      ...deleted,
+      _meta: usageCount > 0
+        ? { warning: `${usageCount} phenotype(s) had their method reference cleared.` }
+        : undefined,
+    };
   }
 
   private async ensureExists(id: number) {

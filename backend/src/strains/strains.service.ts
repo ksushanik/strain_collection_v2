@@ -248,6 +248,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
+            methodRef: true,
           },
         },
         genetics: true,
@@ -263,7 +264,7 @@ export class StrainsService {
 
   async create(createStrainDto: CreateStrainDto) {
     await this.validateTaxonomy(createStrainDto);
-    const { phenotypes, genetics, ...strainData } = createStrainDto;
+    let { phenotypes, genetics, ...strainData } = createStrainDto;
 
     // Auto-enrich based on taxonomy if needed
     const rule = this.getTaxonomyRule(createStrainDto.ncbiScientificName);
@@ -276,12 +277,16 @@ export class StrainsService {
         gramTrait?.id,
       );
       if (!hasGramStain) {
+        const autoMethod = await this.prisma.method.findUnique({
+          where: { name: 'Taxonomy Rule (Auto)' },
+        });
         phenotypes = phenotypes || [];
         phenotypes.push({
           traitDefinitionId: gramTrait?.id,
           traitName: gramTrait?.name ?? 'Gram Stain',
           result: '-',
           method: 'Taxonomy Rule (Auto)',
+          methodId: autoMethod?.id ?? undefined,
         });
       }
     }
@@ -310,6 +315,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
+            methodRef: true,
           },
         },
         genetics: true,
@@ -352,6 +358,7 @@ export class StrainsService {
         phenotypes: {
           include: {
             traitDefinition: true,
+            methodRef: true,
           },
         },
         genetics: true,
@@ -447,6 +454,7 @@ export class StrainsService {
       where: { strainId },
       include: {
         traitDefinition: true,
+        methodRef: true,
       },
     });
   }
