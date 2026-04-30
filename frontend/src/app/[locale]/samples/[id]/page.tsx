@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 
 // Dynamic import for map to avoid SSR issues
@@ -50,6 +51,11 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
     const [sample, setSample] = React.useState<SampleWithStrains | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [deleting, setDeleting] = React.useState(false)
+    const canUpdateSample = hasPermission(user, "Sample", "update")
+    const canDeleteSample = hasPermission(user, "Sample", "delete")
+    const canManageSamplePhotos =
+        hasPermission(user, "Photo", "create") ||
+        hasPermission(user, "Photo", "delete")
 
     const loadSample = React.useCallback(() => {
         if (!id) return;
@@ -100,8 +106,6 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
         )
     }
 
-    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
-
     return (
         <div className="p-4 md:p-8 space-y-6 max-w-6xl mx-auto">
             {/* Header */}
@@ -110,12 +114,15 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     {tCommon('back')}
                 </Button>
-                {canEdit && (
+                {canUpdateSample || canDeleteSample ? (
                     <>
+                        {canUpdateSample ? (
                         <Button variant="default" size="sm" onClick={() => router.push(`/samples/${sample.id}/edit`)}>
                             <Edit className="h-4 w-4 mr-1" />
                             {t('editSample')}
                         </Button>
+                        ) : null}
+                        {canDeleteSample ? (
                         <Button
                             variant="destructive"
                             size="sm"
@@ -129,8 +136,9 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
                             )}
                             {tCommon('delete')}
                         </Button>
+                        ) : null}
                     </>
-                )}
+                ) : null}
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -230,7 +238,12 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
                             <PhotoUpload
                                 sampleId={sample.id}
                                 existingPhotos={sample.photos || []}
-                                readOnly
+                                readOnly={!canManageSamplePhotos}
+                                onPhotosChange={
+                                    canManageSamplePhotos
+                                        ? () => ApiService.getSample(sample.id).then((data) => setSample(data as SampleWithStrains)).catch(console.error)
+                                        : undefined
+                                }
                             />
                         </CardContent>
                     </Card>

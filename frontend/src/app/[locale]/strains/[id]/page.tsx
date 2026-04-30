@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
 import { TraitDataType } from "@/services/api"
 import { getTraitDisplayName } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
@@ -79,8 +80,8 @@ function StrainDetailContent({ id }: { id: string }) {
     const [strain, setStrain] = React.useState<Strain | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [deleting, setDeleting] = React.useState(false)
-
-    const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+    const canUpdateStrain = hasPermission(user, "Strain", "update")
+    const canDeleteStrain = hasPermission(user, "Strain", "delete")
 
     const getTraitCode = React.useCallback((p: Phenotype | null | undefined) => {
         return p?.traitCode || p?.traitDefinition?.code || null
@@ -242,8 +243,9 @@ function StrainDetailContent({ id }: { id: string }) {
                     {tCommon('back')}
                 </Button>
                 <div className="ml-auto flex gap-2">
-                    {canEdit && (
+                    {canUpdateStrain || canDeleteStrain ? (
                         <>
+                            {canUpdateStrain ? (
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -254,6 +256,8 @@ function StrainDetailContent({ id }: { id: string }) {
                                 <Edit className="h-4 w-4 mr-1" />
                                 {t('editStrain')}
                             </Button>
+                            ) : null}
+                            {canDeleteStrain ? (
                             <Button
                                 variant="destructive"
                                 size="sm"
@@ -267,8 +271,9 @@ function StrainDetailContent({ id }: { id: string }) {
                                 )}
                                 {tCommon('delete')}
                             </Button>
+                            ) : null}
                         </>
-                    )}
+                    ) : null}
                 </div>
             </div>
 
@@ -491,9 +496,9 @@ function StrainDetailContent({ id }: { id: string }) {
                          <StrainPhotoUpload
                             strainId={strain.id}
                             existingPhotos={strain.photos || []}
-                            readOnly={!canEdit}
+                            readOnly={!canUpdateStrain}
                             onPhotosChange={
-                                canEdit
+                                canUpdateStrain
                                     ? () => ApiService.getStrain(strain.id).then(setStrain).catch(console.error)
                                     : undefined
                             }

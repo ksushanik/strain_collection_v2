@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ApiService, UiBinding } from "@/services/api"
+import { ApiService, UiBinding, getApiUrl } from "@/services/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,6 +25,7 @@ export default function SettingsPage() {
 
   const canReadPage = canRead(user, "Settings")
   const canUpdate = hasPermission(user, "Settings", "update")
+  const isAdmin = user?.role === 'ADMIN'
 
   React.useEffect(() => {
     if (!canReadPage) {
@@ -122,7 +123,7 @@ export default function SettingsPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
             <p className="text-muted-foreground">{t('uiBindingsDescription')}</p>
           </div>
-          {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+          {canUpdate && (
             <Button variant="outline" onClick={handleAdd} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               {t('addSection')}
@@ -130,7 +131,7 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {user?.role === 'ADMIN' && (
+        {isAdmin && (
           <Card>
             <CardHeader>
               <CardTitle>{t('adminPanel')}</CardTitle>
@@ -144,10 +145,11 @@ export default function SettingsPage() {
                   variant="default"
                   onClick={async () => {
                     try {
-                      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010'
                       const data = await ApiService.startAdminSso()
                       if (data?.nonce) {
-                        window.location.href = `${base}/api/v1/admin-sso/sso/complete?nonce=${encodeURIComponent(data.nonce)}`
+                        window.location.href = getApiUrl(
+                          `/api/v1/admin-sso/sso/complete?nonce=${encodeURIComponent(data.nonce)}`
+                        )
                       }
                     } catch (e) {
                       console.error('SSO failed', e)
@@ -184,18 +186,21 @@ export default function SettingsPage() {
                           value={binding.menuLabel}
                           onChange={(e) => updateBinding(index, { menuLabel: e.target.value })}
                           placeholder={t('labelPlaceholder')}
+                          disabled={!canUpdate}
                         />
                         <Input
                           className="w-full sm:w-32"
                           value={binding.profileKey}
                           onChange={(e) => updateBinding(index, { profileKey: e.target.value.toUpperCase() })}
                           placeholder={t('profilePlaceholder')}
+                          disabled={!canUpdate}
                         />
                         <Input
                           className="w-full sm:w-32"
                           value={binding.icon}
                           onChange={(e) => updateBinding(index, { icon: e.target.value })}
                           placeholder={t('iconPlaceholder')}
+                          disabled={!canUpdate}
                         />
                       </div>
                       <div className="flex items-center gap-1 self-start sm:self-auto">
@@ -203,7 +208,7 @@ export default function SettingsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleReorder(index, "up")}
-                          disabled={index === 0}
+                          disabled={!canUpdate || index === 0}
                           title={t('up')}
                         >
                           <ArrowUp className="h-4 w-4" />
@@ -212,12 +217,12 @@ export default function SettingsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleReorder(index, "down")}
-                          disabled={index === bindings.length - 1}
+                          disabled={!canUpdate || index === bindings.length - 1}
                           title={t('down')}
                         >
                           <ArrowDown className="h-4 w-4" />
                         </Button>
-                        {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+                        {canUpdate && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -235,12 +240,14 @@ export default function SettingsPage() {
                         value={binding.routeSlug}
                         onChange={(e) => updateBinding(index, { routeSlug: e.target.value })}
                         placeholder={t('routeSlugPlaceholder')}
+                        disabled={!canUpdate}
                       />
                       <Input
                         className="w-full sm:flex-1"
                         value={binding.enabledFieldPacks.join(",")}
                         onChange={(e) => updateBinding(index, { enabledFieldPacks: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
                         placeholder={t('enabledPacksPlaceholder')}
+                        disabled={!canUpdate}
                       />
                       <Textarea
                         className="w-full sm:w-64"
@@ -255,6 +262,7 @@ export default function SettingsPage() {
                           )
                         }
                         placeholder={t('legendOverridePlaceholder')}
+                        disabled={!canUpdate}
                       />
                     </div>
                   </div>

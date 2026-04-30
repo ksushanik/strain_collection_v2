@@ -8,29 +8,43 @@ import { ApiService, Sample } from "@/services/api"
 import { Loader2 } from "lucide-react"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useAuth } from "@/contexts/AuthContext"
-import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
+import { hasPermission } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 
 export default function EditSamplePage({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const { id } = React.use(params)
     const [sample, setSample] = React.useState<Sample | null>(null)
     const [loading, setLoading] = React.useState(true)
     const { user, isLoading: authLoading } = useAuth()
-    const router = useRouter()
     const t = useTranslations('Samples')
+    const canUpdateSample = hasPermission(user, "Sample", "update")
+    const canManageSamplePhotos =
+        hasPermission(user, "Photo", "create") ||
+        hasPermission(user, "Photo", "delete")
 
     React.useEffect(() => {
-        if (!authLoading && user && user.role !== 'ADMIN' && user.role !== 'MANAGER') {
-            router.push('/samples') // Redirect unauthorized users
+        if (authLoading || !canUpdateSample) {
+            setLoading(false)
+            return
         }
-    }, [user, authLoading, router])
-
-    React.useEffect(() => {
         ApiService.getSample(parseInt(id))
             .then(setSample)
             .catch(console.error)
             .finally(() => setLoading(false))
-    }, [id])
+    }, [authLoading, canUpdateSample, id])
+
+    if (authLoading) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+
+    if (!canUpdateSample) {
+        return <AccessDenied />
+    }
 
     if (loading) {
         return (
@@ -74,7 +88,12 @@ export default function EditSamplePage({ params }: { params: Promise<{ locale: s
                     <PhotoUpload
                         sampleId={sample.id}
                         existingPhotos={sample.photos || []}
-                        onPhotosChange={() => ApiService.getSample(sample.id).then(setSample).catch(console.error)}
+                        readOnly={!canManageSamplePhotos}
+                        onPhotosChange={
+                            canManageSamplePhotos
+                                ? () => ApiService.getSample(sample.id).then(setSample).catch(console.error)
+                                : undefined
+                        }
                     />
                 </CardContent>
             </Card>

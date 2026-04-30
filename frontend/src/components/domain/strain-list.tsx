@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import { useApiError } from "@/hooks/use-api-error"
 import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
 import { isPositiveLike } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { ExportButton } from "@/components/export-button"
@@ -159,6 +160,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
         siderophores: "any",
         pigment: "any",
     })
+    const canCreateStrain = hasPermission(user, "Strain", "create")
 
     const matchesTrait = (p: Phenotype, code: string, name: string) =>
         p?.traitDefinition?.code === code ||
@@ -353,7 +355,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    {user && (
+                    {canCreateStrain && (
                         <Button size="sm" onClick={() => router.push('/strains/new')}>
                             <Plus className="mr-2 h-4 w-4" />
                             {t('createStrain')}

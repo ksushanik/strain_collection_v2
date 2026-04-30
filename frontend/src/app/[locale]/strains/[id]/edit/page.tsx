@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useApiError } from "@/hooks/use-api-error"
+import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
+import { AccessDenied } from "@/components/common/access-denied"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
@@ -74,6 +77,7 @@ function EditStrainContent({ id }: { id: string }) {
     const router = useRouter()
     const pathname = usePathname()
     const t = useTranslations('Strains')
+    const { user, isLoading: authLoading } = useAuth()
     const returnTo = searchParams?.get("returnTo") || undefined
     const normalizedReturnTo = normalizeReturnPath(returnTo ?? null, pathname) ?? undefined
     const { handleError } = useApiError()
@@ -88,8 +92,14 @@ function EditStrainContent({ id }: { id: string }) {
     const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
     const [allocatingStorage, setAllocatingStorage] = React.useState(false)
     const [storageForm, setStorageForm] = React.useState<{ boxId?: number; cellCode?: string; isPrimary?: boolean }>({})
+    const canUpdateStrain = hasPermission(user, "Strain", "update")
+    const canUpdateStorage = hasPermission(user, "Storage", "update")
 
     React.useEffect(() => {
+        if (authLoading || !canUpdateStrain) {
+            setLoading(false)
+            return
+        }
         Promise.all([
             ApiService.getStrain(parseInt(id)),
             ApiService.getMedia({ page: 1, limit: 100 }),
@@ -105,7 +115,7 @@ function EditStrainContent({ id }: { id: string }) {
                 handleError(err, t('failedToLoadStrain'))
             })
             .finally(() => setLoading(false))
-    }, [handleError, id, t])
+    }, [authLoading, canUpdateStrain, handleError, id, t])
 
     const refreshStrain = React.useCallback(async () => {
         try {
@@ -232,6 +242,18 @@ function EditStrainContent({ id }: { id: string }) {
     const freeCells = React.useMemo(() => selectedBox?.cells.filter((c) => c.status === 'FREE') || [], [selectedBox])
     const hasPrimary = !!strain?.storage?.some((s) => s.isPrimary)
 
+    if (authLoading) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+
+    if (!canUpdateStrain) {
+        return <AccessDenied />
+    }
+
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -356,7 +378,7 @@ function EditStrainContent({ id }: { id: string }) {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {s.isPrimary && <Badge variant="secondary">{t('primary')}</Badge>}
-                                        {!s.isPrimary && (
+                                        {!s.isPrimary && canUpdateStorage ? (
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -365,17 +387,19 @@ function EditStrainContent({ id }: { id: string }) {
                                             >
                                                 {t('makePrimary')}
                                             </Button>
-                                        )}
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="text-destructive"
-                                            onClick={() => handleUnallocate(s.cell.box.id, s.cell.cellCode)}
-                                            disabled={allocatingStorage}
-                                            title="Remove"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        ) : null}
+                                        {canUpdateStorage ? (
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="text-destructive"
+                                                onClick={() => handleUnallocate(s.cell.box.id, s.cell.cellCode)}
+                                                disabled={allocatingStorage}
+                                                title="Remove"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        ) : null}
                                     </div>
                                 </div>
                             ))}
@@ -384,6 +408,7 @@ function EditStrainContent({ id }: { id: string }) {
                         <p className="text-muted-foreground">{t('noStorage')}</p>
                     )}
 
+                    {canUpdateStorage ? (
                     <div className="rounded border p-3 space-y-3">
                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
                             <Select
@@ -450,6 +475,7 @@ function EditStrainContent({ id }: { id: string }) {
                             <p className="text-xs text-muted-foreground">{t('noPrimaryWarning')}</p>
                         )}
                     </div>
+                    ) : null}
                 </CardContent>
             </Card>
 

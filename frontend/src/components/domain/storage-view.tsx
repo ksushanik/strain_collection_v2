@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -85,6 +86,9 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
   const t = useTranslations('Storage')
   const tCommon = useTranslations('Common')
   const { user, isLoading: authLoading } = useAuth()
+  const canCreateBox = hasPermission(user, "Storage", "create")
+  const canUpdateStorage = hasPermission(user, "Storage", "update")
+  const canDeleteStorage = hasPermission(user, "Storage", "delete")
   const [boxes, setBoxes] = React.useState<BoxSummary[]>([])
   const [selectedBoxId, setSelectedBoxId] = React.useState<number | null>(null)
   const [selectedBox, setSelectedBox] = React.useState<BoxDetail | null>(null)
@@ -391,7 +395,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
             {t('filters')}
           </Button>
 
-          {user && (
+          {canCreateBox && (
             <Button onClick={() => setCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {t('createBox')}
@@ -564,16 +568,20 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                 <>
                   <div className="flex items-center gap-2">
                     <span>{selectedBox?.displayName || t('loading')}</span>
-                    {selectedBox && (
+                    {selectedBox && (canUpdateStorage || canDeleteStorage) ? (
                       <>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingBox(true)}>
-                          <Edit2 className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={handleDeleteBox}>
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {canUpdateStorage ? (
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditingBox(true)}>
+                            <Edit2 className="h-3 w-3" />
+                          </Button>
+                        ) : null}
+                        {canDeleteStorage ? (
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive" onClick={handleDeleteBox}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        ) : null}
                       </>
-                    )}
+                    ) : null}
                   </div>
                   {selectedBox && (
                     <span className="text-sm font-normal text-muted-foreground">
@@ -667,78 +675,82 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {selectedCell.status === 'OCCUPIED' ? t('reassignStrain') : t('assignStrain')}
-                        </p>
-                        <Popover open={strainPopoverOpen} onOpenChange={setStrainPopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              type="button"
-                              role="combobox"
-                              aria-expanded={strainPopoverOpen}
-                              className="w-full justify-between font-normal"
-                            >
-                              {selectedStrain
-                                ? `${selectedStrain.identifier}${selectedStrain.sample?.code ? ` (${formatSampleCodeForDisplay(selectedStrain.sample.code)})` : ''}`
-                                : t('selectStrain')}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[340px] p-0" align="start">
-                            <div className="flex flex-col">
-                              <div className="flex items-center border-b px-3">
-                                <Input
-                                  placeholder={t('selectStrain')}
-                                  value={strainSearchTerm}
-                                  onChange={(e) => setStrainSearchTerm(e.target.value)}
-                                  className="border-0 focus-visible:ring-0 px-0"
-                                />
-                                {strainSearchLoading && <Loader2 className="h-4 w-4 animate-spin opacity-50" />}
-                              </div>
-                              <div className="max-h-[260px] overflow-y-auto p-1">
-                                {strainResults.length === 0 && !strainSearchLoading && strainSearchTerm && (
-                                  <div className="py-6 text-center text-sm text-muted-foreground">{t('noResults')}</div>
-                                )}
-                                {strainResults.length === 0 && !strainSearchTerm && !strainSearchLoading && (
-                                  <div className="py-6 text-center text-sm text-muted-foreground">{t('selectStrain')}</div>
-                                )}
-                                {strainResults.map((s) => (
-                                  <div
-                                    key={s.id}
-                                    className={cn(
-                                      "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                                      allocForm.strainId === s.id && "bg-accent text-accent-foreground"
-                                    )}
-                                    onClick={() => {
-                                      setAllocForm((prev) => ({ ...prev, strainId: s.id }))
-                                      setSelectedStrain(s)
-                                      setStrainPopoverOpen(false)
-                                    }}
-                                  >
-                                    <Check className={cn("mr-2 h-4 w-4", allocForm.strainId === s.id ? "opacity-100" : "opacity-0")} />
-                                    <span>{s.identifier}{s.sample?.code ? ` (${formatSampleCodeForDisplay(s.sample.code)})` : ''}</span>
+                      {canUpdateStorage ? (
+                        <>
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium">
+                              {selectedCell.status === 'OCCUPIED' ? t('reassignStrain') : t('assignStrain')}
+                            </p>
+                            <Popover open={strainPopoverOpen} onOpenChange={setStrainPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  type="button"
+                                  role="combobox"
+                                  aria-expanded={strainPopoverOpen}
+                                  className="w-full justify-between font-normal"
+                                >
+                                  {selectedStrain
+                                    ? `${selectedStrain.identifier}${selectedStrain.sample?.code ? ` (${formatSampleCodeForDisplay(selectedStrain.sample.code)})` : ''}`
+                                    : t('selectStrain')}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[340px] p-0" align="start">
+                                <div className="flex flex-col">
+                                  <div className="flex items-center border-b px-3">
+                                    <Input
+                                      placeholder={t('selectStrain')}
+                                      value={strainSearchTerm}
+                                      onChange={(e) => setStrainSearchTerm(e.target.value)}
+                                      className="border-0 focus-visible:ring-0 px-0"
+                                    />
+                                    {strainSearchLoading && <Loader2 className="h-4 w-4 animate-spin opacity-50" />}
                                   </div>
-                                ))}
-                              </div>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                      </div>
+                                  <div className="max-h-[260px] overflow-y-auto p-1">
+                                    {strainResults.length === 0 && !strainSearchLoading && strainSearchTerm && (
+                                      <div className="py-6 text-center text-sm text-muted-foreground">{t('noResults')}</div>
+                                    )}
+                                    {strainResults.length === 0 && !strainSearchTerm && !strainSearchLoading && (
+                                      <div className="py-6 text-center text-sm text-muted-foreground">{t('selectStrain')}</div>
+                                    )}
+                                    {strainResults.map((s) => (
+                                      <div
+                                        key={s.id}
+                                        className={cn(
+                                          "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                                          allocForm.strainId === s.id && "bg-accent text-accent-foreground"
+                                        )}
+                                        onClick={() => {
+                                          setAllocForm((prev) => ({ ...prev, strainId: s.id }))
+                                          setSelectedStrain(s)
+                                          setStrainPopoverOpen(false)
+                                        }}
+                                      >
+                                        <Check className={cn("mr-2 h-4 w-4", allocForm.strainId === s.id ? "opacity-100" : "opacity-0")} />
+                                        <span>{s.identifier}{s.sample?.code ? ` (${formatSampleCodeForDisplay(s.sample.code)})` : ''}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
 
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="isPrimary"
-                          checked={allocForm.isPrimary ?? false}
-                          onCheckedChange={(checked) =>
-                            setAllocForm((prev) => ({ ...prev, isPrimary: checked === true }))
-                          }
-                        />
-                        <label htmlFor="isPrimary" className="text-sm leading-none">
-                          {t('primaryAllocation')}
-                        </label>
-                      </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="isPrimary"
+                              checked={allocForm.isPrimary ?? false}
+                              onCheckedChange={(checked) =>
+                                setAllocForm((prev) => ({ ...prev, isPrimary: checked === true }))
+                              }
+                            />
+                            <label htmlFor="isPrimary" className="text-sm leading-none">
+                              {t('primaryAllocation')}
+                            </label>
+                          </div>
+                        </>
+                      ) : null}
 
                       <div className="flex gap-2 flex-wrap">
                         {selectedCell.status === 'OCCUPIED' && (
@@ -766,19 +778,21 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                         >
                           <X className="h-4 w-4 mr-1" /> {t('deselect')}
                         </Button>
-                        <Button
-                          size="sm"
-                          onClick={handleAllocate}
-                          disabled={!allocForm.strainId || allocating}
-                        >
-                          {allocating ? (
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          ) : (
-                            <Check className="h-4 w-4 mr-1" />
-                          )}
-                          {selectedCell.status === 'OCCUPIED' ? t('reassign') : t('allocate')}
-                        </Button>
-                        {selectedCell.status === 'OCCUPIED' && (
+                        {canUpdateStorage ? (
+                          <Button
+                            size="sm"
+                            onClick={handleAllocate}
+                            disabled={!allocForm.strainId || allocating}
+                          >
+                            {allocating ? (
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4 mr-1" />
+                            )}
+                            {selectedCell.status === 'OCCUPIED' ? t('reassign') : t('allocate')}
+                          </Button>
+                        ) : null}
+                        {selectedCell.status === 'OCCUPIED' && canUpdateStorage ? (
                           <Button
                             variant="destructive"
                             size="sm"
@@ -788,7 +802,7 @@ export function StorageView({ legendText }: { legendText?: string | null }) {
                             {allocating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                             {t('unallocate')}
                           </Button>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>

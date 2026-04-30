@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { useApiError } from "@/hooks/use-api-error"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/contexts/AuthContext"
+import { hasPermission } from "@/lib/permissions"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { ExportButton } from "@/components/export-button"
@@ -70,6 +71,7 @@ export function SampleList() {
     const sortStorageKey = "sampleList.sort"
     const [sortBy, setSortBy] = React.useState<SampleSortBy>(() => readSortPreference(sortStorageKey)?.sortBy ?? "collectedAt")
     const [sortOrder, setSortOrder] = React.useState<SortOrder>(() => readSortPreference(sortStorageKey)?.sortOrder ?? "desc")
+    const canCreateSample = hasPermission(user, "Sample", "create")
 
     const loadSamples = React.useCallback(() => {
         setLoading(true)
@@ -182,7 +184,7 @@ export function SampleList() {
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}
                     </Button>
-                    {user && (
+                    {canCreateSample && (
                         <Button size="sm" onClick={() => router.push('/samples/new')}>{t('createSample')}</Button>
                     )}
                 </div>

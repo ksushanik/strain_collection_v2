@@ -7,6 +7,9 @@ import { ApiService, UiBinding } from "@/services/api"
 import { StrainList } from "@/components/domain/strain-list"
 import { SampleList } from "@/components/domain/sample-list"
 import { StorageView } from "@/components/domain/storage-view"
+import { AccessDenied } from "@/components/common/access-denied"
+import { useAuth } from "@/contexts/AuthContext"
+import { canReadProfile } from "@/lib/permissions"
 import { useTranslations } from "next-intl"
 import { translateDynamic } from "@/lib/translate-dynamic"
 
@@ -15,18 +18,26 @@ export default function DynamicPage() {
     const slug = params?.slug as string
     const t = useTranslations('Common')
     const tDynamic = useTranslations('DynamicPages')
+    const { user } = useAuth()
 
     const [binding, setBinding] = React.useState<UiBinding | null>(null)
     const [loading, setLoading] = React.useState(true)
+    const [forbidden, setForbidden] = React.useState(false)
 
     React.useEffect(() => {
         setLoading(true)
+        setForbidden(false)
         ApiService.getUiBindings().then(bindings => {
             const found = bindings.find(b => b.routeSlug === slug)
             setBinding(found || null)
             setLoading(false)
         }).catch(err => {
-            console.error('Failed to load bindings:', err)
+            const status = (err as { status?: number } | null)?.status
+            if (status === 401 || status === 403) {
+                setForbidden(true)
+            } else {
+                console.error('Failed to load bindings:', err)
+            }
             setLoading(false)
         })
     }, [slug])
@@ -39,6 +50,10 @@ export default function DynamicPage() {
         )
     }
 
+    if (forbidden) {
+        return <AccessDenied />
+    }
+
     if (!binding) {
         return (
             <div className="p-8 text-center">
@@ -46,6 +61,10 @@ export default function DynamicPage() {
                 <p className="text-muted-foreground">{t('pageNotFoundDescription')}</p>
             </div>
         )
+    }
+
+    if (!canReadProfile(user, binding.profileKey)) {
+        return <AccessDenied />
     }
 
     return (
