@@ -1,8 +1,9 @@
 # API и аутентификация
 
 - **Base URL**: `http://localhost:3000/api/v1`
-- **Swagger**: `/docs`
-- **Auth**: `POST /api/v1/auth/register`, `POST /api/v1/auth/login` → Bearer JWT; передавать `Authorization: Bearer <token>`.
+- **Swagger**: `/api/v1/docs`
+- **Auth**: `POST /api/v1/auth/login`, `GET /api/v1/auth/profile` → Bearer JWT; передавать `Authorization: Bearer <token>`.
+- **Регистрация**: `POST /api/v1/auth/register` отключена по умолчанию и включается только через `ALLOW_PUBLIC_REGISTRATION=true`.
 - **Ключевые эндпоинты** (неполный список):
   - Strains: `GET /strains` (фильтры), `POST /strains`, `GET/PUT/DELETE /strains/:id`, `POST /strains/:id/media`, `DELETE /strains/:id/media/:mediaId`.
   - Samples: CRUD + `POST /samples/:id/photos`, `DELETE /samples/photos/:photoId`.

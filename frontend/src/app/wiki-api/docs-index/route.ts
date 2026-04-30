@@ -21,6 +21,7 @@ const DOCS: DocMeta[] = [
   { id: "legend", title: "Legend", file: "legend.md" },
   { id: "admin", title: "Admin (AdminJS)", file: "admin.md" },
   { id: "testing", title: "Testing", file: "testing.md" },
+  { id: "fix-plan", title: "Priority Fix Plan", file: "fix-plan.md" },
   { id: "playbooks", title: "Playbooks", file: "playbooks.md" },
   { id: "changelog", title: "Changelog", file: "changelog.md" },
   { id: "audit", title: "Audit Log", file: "audit.md" },

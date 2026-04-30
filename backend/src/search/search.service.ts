@@ -17,7 +17,11 @@ type WikiDocMeta = { id: string; title: string; file: string };
 
 const WIKI_DOCS: WikiDocMeta[] = [
   { id: 'index', title: 'Index', file: 'index.md' },
-  { id: 'architecture', title: 'Architecture & Overview', file: 'architecture.md' },
+  {
+    id: 'architecture',
+    title: 'Architecture & Overview',
+    file: 'architecture.md',
+  },
   { id: 'backend', title: 'Backend (NestJS/Prisma)', file: 'backend.md' },
   { id: 'frontend', title: 'Frontend (Next.js)', file: 'frontend.md' },
   { id: 'api', title: 'API & Auth', file: 'api.md' },
@@ -28,6 +32,7 @@ const WIKI_DOCS: WikiDocMeta[] = [
   { id: 'legend', title: 'Legend', file: 'legend.md' },
   { id: 'admin', title: 'Admin (AdminJS)', file: 'admin.md' },
   { id: 'testing', title: 'Testing', file: 'testing.md' },
+  { id: 'fix-plan', title: 'Priority Fix Plan', file: 'fix-plan.md' },
   { id: 'playbooks', title: 'Playbooks', file: 'playbooks.md' },
   { id: 'changelog', title: 'Changelog', file: 'changelog.md' },
   { id: 'audit', title: 'Audit Log', file: 'audit.md' },
@@ -56,8 +61,7 @@ export class SearchService {
   async search(input: SearchInput): Promise<GlobalSearchResponse> {
     const q = input.query.trim();
     const mode = input.mode;
-    const perSection =
-      input.perSection ?? (mode === 'preview' ? 3 : 10);
+    const perSection = input.perSection ?? (mode === 'preview' ? 3 : 10);
 
     const ability = this.caslAbilityFactory.createForUser(
       input.user ?? { role: 'GUEST' },
@@ -337,7 +341,10 @@ export class SearchService {
       if (!content) continue;
 
       const lower = content.toLowerCase();
-      if (!lower.includes(qLower) && !doc.title.toLowerCase().includes(qLower)) {
+      if (
+        !lower.includes(qLower) &&
+        !doc.title.toLowerCase().includes(qLower)
+      ) {
         continue;
       }
 

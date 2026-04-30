@@ -13,6 +13,7 @@
 - [Audit Log](audit.md)
 - [Admin (AdminJS)](admin.md)
 - [Testing](testing.md)
+- [План исправлений](fix-plan.md)
 - [Playbooks](playbooks.md)
 - [Changelog](changelog.md)
 - [Правила обновления wiki](contrib.md)
