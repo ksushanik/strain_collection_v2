@@ -4,6 +4,7 @@ import React, { useState, Suspense } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { ApiService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,14 +13,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010';
-
 function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, logout } = useAuth();
+    const { login, continueAsGuest } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const t = useTranslations('Login');
@@ -32,17 +31,7 @@ function LoginForm() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Invalid credentials');
-            }
-
-            const data = await response.json();
+            const data = await ApiService.loginUser({ email, password });
             login(data.access_token, data.user);
             router.push(from);
         } catch {
@@ -107,8 +96,8 @@ function LoginForm() {
                         variant="outline"
                         className="w-full"
                         onClick={() => {
-                            logout();
-                            router.push('/');
+                            continueAsGuest();
+                            router.push(from);
                         }}
                     >
                         {t('continueAsGuest')}

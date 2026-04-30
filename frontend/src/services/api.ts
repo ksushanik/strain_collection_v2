@@ -9,7 +9,7 @@ import * as strains from './strains';
 import * as taxonomy from './taxonomy';
 import * as uploads from './uploads';
 import * as search from './search';
-import { assertOk, request, toApiError } from './http';
+import { assertOk, getApiUrl, request, toApiError } from './http';
 import type { ApiError } from './http';
 
 import type {
@@ -51,6 +51,7 @@ export const ApiService = {
 export {
   ApiError,
   assertOk,
+  getApiUrl,
   request,
   toApiError,
   TraitDataType,

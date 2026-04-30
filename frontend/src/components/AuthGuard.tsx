@@ -17,9 +17,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             router.replace('/');
         }
         if (!isLoading && !isAuthenticated && !isLoginPage) {
-            router.replace('/login');
+            const target =
+                pathWithoutLocale && pathWithoutLocale !== '/'
+                    ? `/login?from=${encodeURIComponent(pathWithoutLocale)}`
+                    : '/login';
+            router.replace(target);
         }
-    }, [isLoading, isAuthenticated, isLoginPage, router]);
+    }, [isLoading, isAuthenticated, isLoginPage, pathWithoutLocale, router]);
 
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-screen">Loading...</div>;

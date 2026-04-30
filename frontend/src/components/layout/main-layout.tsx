@@ -4,6 +4,7 @@ import * as React from "react"
 import { usePathname } from "@/i18n/routing"
 import { Sidebar } from "@/components/layout/sidebar"
 import { AuthGuard } from "@/components/AuthGuard"
+import { useAuth } from "@/contexts/AuthContext"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 import { Button } from "@/components/ui/button"
 import { Menu, Microscope } from "lucide-react"
@@ -12,6 +13,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
+    const { hasToken } = useAuth()
     const isLoginPage = pathname === '/login' || pathname?.endsWith('/login')
     const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false)
 
@@ -44,13 +46,13 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <GlobalSearch trigger="icon" />
+                                {hasToken ? <GlobalSearch trigger="icon" /> : null}
                                 <ThemeToggle />
                                 <LanguageSwitcher />
                             </div>
                         </div>
                         <div className="hidden items-center gap-3 bg-card px-4 py-3 md:flex rounded-t-xl border-b border-border/60">
-                            <GlobalSearch />
+                            {hasToken ? <GlobalSearch /> : null}
                             <div className="ml-auto flex items-center gap-2">
                                 <ThemeToggle />
                                 <LanguageSwitcher />

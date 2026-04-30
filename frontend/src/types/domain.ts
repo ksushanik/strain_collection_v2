@@ -58,7 +58,7 @@ export interface StorageCell {
     strainIdentifier?: string;
 }
 
-export type Role = 'ADMIN' | 'MANAGER' | 'USER';
+export type Role = 'ADMIN' | 'MANAGER' | 'USER' | 'GUEST';
 
 export interface User {
     id: number;

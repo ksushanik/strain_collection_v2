@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
 import { translateDynamic } from "@/lib/translate-dynamic"
-import { canRead } from "@/lib/permissions"
+import { canRead, canReadProfile } from "@/lib/permissions"
 
 type SidebarProps = {
     isMobile?: boolean
@@ -47,13 +47,13 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
     const tCommon = useTranslations('Common')
     const pathname = usePathname()
     const router = useRouter()
-    const { user, logout } = useAuth()
+    const { user, logout, isGuest } = useAuth()
     const [isCollapsed, setIsCollapsed] = React.useState(false)
     const [bindings, setBindings] = React.useState<UiBinding[]>([])
     const [loading, setLoading] = React.useState(true)
 
     React.useEffect(() => {
-        if (!user) {
+        if (!user || isGuest) {
             setBindings([])
             setLoading(false)
             return
@@ -68,7 +68,7 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
             setBindings([])
             setLoading(false)
         })
-    }, [user])
+    }, [isGuest, user])
 
     React.useEffect(() => {
         if (isMobile && isCollapsed) {
@@ -207,6 +207,7 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                     ) : (
                         bindings
                             .filter(item => item.translationKey !== 'myCollection' && item.routeSlug !== 'my-collection' && item.profileKey !== 'SAMPLE' && item.profileKey !== 'STORAGE')
+                            .filter(item => canReadProfile(user, item.profileKey))
                             .map((item, index) => {
                                 const Icon = IconMap[item.icon] || Box
                                 const href = `/dynamic/${item.routeSlug}`
@@ -356,7 +357,9 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{user.name}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                        {!isGuest && user.email ? (
+                                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                                        ) : null}
                                         <p className="text-xs text-muted-foreground mt-1">
                                             <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                                                 {user.role}
@@ -373,7 +376,7 @@ export function Sidebar({ isMobile = false, onNavigate, className }: SidebarProp
                                 className={cn("w-full", isCollapsed && "h-8 w-8")}
                             >
                                 <LogOut className="h-4 w-4" />
-                                {!isCollapsed && <span className="ml-2">{t('logout')}</span>}
+                                {!isCollapsed && <span className="ml-2">{isGuest ? (tCommon('login') ?? 'Вход') : t('logout')}</span>}
                             </Button>
                         </div>
                     </>

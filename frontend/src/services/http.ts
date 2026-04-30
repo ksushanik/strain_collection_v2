@@ -1,10 +1,15 @@
+import { clearAuthSession, readAuthSession } from '@/lib/auth-session';
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (typeof window !== 'undefined' ? window.location.origin : '');
 
+export function getApiUrl(path: string) {
+  return `${API_BASE_URL}${path}`;
+}
+
 function authHeaders() {
-  if (typeof window === 'undefined') return {};
-  const token = localStorage.getItem('token');
+  const { token } = readAuthSession();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -33,10 +38,13 @@ export async function request(path: string, options: RequestInit = {}) {
     ...(options.headers || {}),
     ...authHeaders(),
   } as Record<string, string>;
-  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const response = await fetch(getApiUrl(path), { ...options, headers });
 
-  if (response.status === 401 && typeof window !== 'undefined') {
-    localStorage.removeItem('token');
+  if (response.status === 401) {
+    const { token } = readAuthSession();
+    if (token) {
+      clearAuthSession();
+    }
   }
 
   return response;

@@ -23,3 +23,31 @@ export function hasPermission(
 export function canRead(user: User | null | undefined, subject: string) {
   return hasPermission(user, subject, "read")
 }
+
+export function subjectFromProfileKey(profileKey: string | null | undefined) {
+  switch ((profileKey ?? "").toUpperCase()) {
+    case "STRAIN":
+      return "Strain"
+    case "SAMPLE":
+      return "Sample"
+    case "STORAGE":
+      return "Storage"
+    case "MEDIA":
+      return "Media"
+    case "METHOD":
+      return "Method"
+    case "TRAITDEFINITION":
+    case "TRAIT_DEFINITION":
+      return "TraitDefinition"
+    default:
+      return null
+  }
+}
+
+export function canReadProfile(
+  user: User | null | undefined,
+  profileKey: string | null | undefined,
+) {
+  const subject = subjectFromProfileKey(profileKey)
+  return subject ? canRead(user, subject) : false
+}

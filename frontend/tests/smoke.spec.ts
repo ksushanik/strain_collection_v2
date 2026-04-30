@@ -9,7 +9,7 @@ const fakeUser = {
 
 test('login page renders form', async ({ page }) => {
   // No token set — login form should be visible
-  await page.route('**/auth/login', (route: Route) =>
+  await page.route('**/api/v1/auth/login', (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
