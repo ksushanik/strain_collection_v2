@@ -68,3 +68,10 @@ progress.md
 .gemini/
 .kilocode/
 .kilocodemodes
+.playwright-cli/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Personal notes (not project artifacts)
+SCHEDULE.md
