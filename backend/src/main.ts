@@ -204,10 +204,16 @@ async function bootstrap() {
       const [email, password] = Buffer.from(base64, 'base64')
         .toString()
         .split(':');
-      const user = await authService.validateUser(email, password);
+      const user = (await authService.validateUser(email, password)) as {
+        role?: string | { key?: string } | null;
+      } | null;
+      const role = user?.role;
       const roleKey =
-        (user as any)?.role?.key ??
-        (typeof (user as any)?.role === 'string' ? (user as any).role : null);
+        typeof role === 'string'
+          ? role
+          : role && typeof role === 'object'
+            ? (role.key ?? null)
+            : null;
       if (!user || roleKey !== 'ADMIN') {
         res.setHeader('WWW-Authenticate', 'Basic realm="Swagger API Docs"');
         res.status(401).send('Invalid credentials or insufficient permissions');
