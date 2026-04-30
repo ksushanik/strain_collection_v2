@@ -1,36 +1,62 @@
-const API_URL = 'http://localhost:3000';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
+
+const prisma = new PrismaClient();
+
+const ADMIN_EMAIL = 'admin@example.com';
+const ADMIN_PASSWORD = 'admin123';
+const ADMIN_NAME = 'Super Admin';
 
 async function createAdminUser() {
-    try {
-        console.log('Creating admin user...');
-        const registerRes = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: 'admin@example.com',
-                password: 'admin123',
-                name: 'Super Admin',
-                role: 'ADMIN'
-            })
-        });
+  try {
+    console.log('Ensuring admin role and user...');
 
-        if (!registerRes.ok) {
-            const error = await registerRes.text();
-            throw new Error(`Registration failed: ${registerRes.statusText} - ${error}`);
-        }
+    const adminRole = await prisma.role.upsert({
+      where: { key: 'ADMIN' },
+      update: { name: 'Администратор' },
+      create: {
+        key: 'ADMIN',
+        name: 'Администратор',
+        description: 'Полный доступ',
+        permissions: { all: ['manage'] },
+      },
+    });
 
-        const user = await registerRes.json();
-        console.log('✅ Admin user created successfully:');
-        console.log('   Email:', user.email);
-        console.log('   Name:', user.name);
-        console.log('   Role:', user.role);
-        console.log('   ID:', user.id);
-        console.log('\n📝 Login credentials:');
-        console.log('   Email: admin@example.com');
-        console.log('   Password: admin123');
-    } catch (error) {
-        console.error('❌ Failed to create admin user:', error.message);
-    }
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+    const user = await prisma.user.upsert({
+      where: { email: ADMIN_EMAIL },
+      update: {
+        name: ADMIN_NAME,
+        password: hashedPassword,
+        roleId: adminRole.id,
+      },
+      create: {
+        email: ADMIN_EMAIL,
+        name: ADMIN_NAME,
+        password: hashedPassword,
+        roleId: adminRole.id,
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    console.log('Admin user is ready:');
+    console.log('   Email:', user.email);
+    console.log('   Name:', user.name);
+    console.log('   Role:', user.role?.key ?? 'ADMIN');
+    console.log('   ID:', user.id);
+    console.log('');
+    console.log('Login credentials:');
+    console.log('   Email:', ADMIN_EMAIL);
+    console.log('   Password:', ADMIN_PASSWORD);
+  } catch (error) {
+    console.error('Failed to create admin user:', error.message);
+    process.exitCode = 1;
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-createAdminUser();
+void createAdminUser();
