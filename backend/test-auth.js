@@ -4,7 +4,7 @@ async function testAuth() {
     try {
         console.log('1. Registering user...');
         const email = `test_${Date.now()}@example.com`;
-        const registerRes = await fetch(`${API_URL}/auth/register`, {
+        const registerRes = await fetch(`${API_URL}/api/v1/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -20,7 +20,7 @@ async function testAuth() {
         console.log('Registration successful:', user);
 
         console.log('2. Logging in...');
-        const loginRes = await fetch(`${API_URL}/auth/login`, {
+        const loginRes = await fetch(`${API_URL}/api/v1/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -36,7 +36,7 @@ async function testAuth() {
         const token = loginData.access_token;
 
         console.log('3. Accessing protected profile...');
-        const profileRes = await fetch(`${API_URL}/auth/profile`, {
+        const profileRes = await fetch(`${API_URL}/api/v1/auth/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
 

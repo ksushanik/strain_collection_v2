@@ -6,6 +6,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import session from 'express-session';
 import { adminSessionOptions } from './admin/admin-session.config';
 import express, { Request, Response, NextFunction } from 'express';
+import { AuthService } from './auth/auth.service';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -188,19 +189,43 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger
-  if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('Strain Collection API')
-      .setDescription(
-        'API documentation for microbiological strain collection system',
-      )
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('docs', app, document);
-  }
+  // Swagger (protected with the same credentials as the admin dashboard)
+  const authService = app.get(AuthService);
+  app.use(
+    '/api/v1/docs',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Basic ')) {
+        res.setHeader('WWW-Authenticate', 'Basic realm="Swagger API Docs"');
+        res.status(401).send('Authentication required');
+        return;
+      }
+      const base64 = authHeader.slice(6);
+      const [email, password] = Buffer.from(base64, 'base64')
+        .toString()
+        .split(':');
+      const user = await authService.validateUser(email, password);
+      const roleKey =
+        (user as any)?.role?.key ??
+        (typeof (user as any)?.role === 'string' ? (user as any).role : null);
+      if (!user || roleKey !== 'ADMIN') {
+        res.setHeader('WWW-Authenticate', 'Basic realm="Swagger API Docs"');
+        res.status(401).send('Invalid credentials or insufficient permissions');
+        return;
+      }
+      next();
+    },
+  );
+  const config = new DocumentBuilder()
+    .setTitle('Strain Collection API')
+    .setDescription(
+      'API documentation for microbiological strain collection system',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
