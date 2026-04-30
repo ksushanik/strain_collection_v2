@@ -23,4 +23,3 @@ export type GlobalSearchResponse = {
   perSection: number;
   sections: Record<SearchSection, SearchHit[]>;
 };
-

@@ -31,9 +31,7 @@ describe('SamplesService', () => {
         findUnique: jest.fn().mockResolvedValue({ id: 1, slug: 'other' }),
       },
       sample: {
-        findMany: jest
-          .fn()
-          .mockResolvedValue([{ code: `10_${base}` }]),
+        findMany: jest.fn().mockResolvedValue([{ code: `10_${base}` }]),
         create: jest.fn().mockResolvedValue({ id: 42 }),
         update: jest.fn().mockResolvedValue({ id: 42 }),
       },

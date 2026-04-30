@@ -260,7 +260,11 @@ export class StorageService {
             where: { id: existingInCell.id },
             data: { isPrimary: targetShouldBePrimary },
           });
-          if (targetShouldBePrimary && currentPrimary && currentPrimary.id !== updated.id) {
+          if (
+            targetShouldBePrimary &&
+            currentPrimary &&
+            currentPrimary.id !== updated.id
+          ) {
             await tx.strainStorage.update({
               where: { id: currentPrimary.id },
               data: { isPrimary: false },
@@ -278,10 +282,18 @@ export class StorageService {
           });
 
           const created = await tx.strainStorage.create({
-            data: { strainId, cellId: cell.id, isPrimary: targetShouldBePrimary },
+            data: {
+              strainId,
+              cellId: cell.id,
+              isPrimary: targetShouldBePrimary,
+            },
           });
 
-          if (targetShouldBePrimary && currentPrimary && currentPrimary.id !== created.id) {
+          if (
+            targetShouldBePrimary &&
+            currentPrimary &&
+            currentPrimary.id !== created.id
+          ) {
             await tx.strainStorage.update({
               where: { id: currentPrimary.id },
               data: { isPrimary: false },

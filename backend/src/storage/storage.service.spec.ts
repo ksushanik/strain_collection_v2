@@ -46,7 +46,11 @@ describe('StorageService', () => {
   });
 
   it('throws when strain not found on allocate', async () => {
-    (prisma.storageCell.findFirst as jest.Mock).mockResolvedValue({ id: 1, boxId: 1, cellCode: 'A1' });
+    (prisma.storageCell.findFirst as jest.Mock).mockResolvedValue({
+      id: 1,
+      boxId: 1,
+      cellCode: 'A1',
+    });
     (prisma.strain.findUnique as jest.Mock).mockResolvedValue(null);
     await expect(
       service.allocateStrain({ boxId: 1, cellCode: 'A1', strainId: 99 }),
@@ -54,9 +58,14 @@ describe('StorageService', () => {
   });
 
   it('updates primary flag when same strain already allocated', async () => {
-    (prisma.storageCell.findFirst as jest.Mock).mockResolvedValue({ id: 1, boxId: 1, cellCode: 'A1', strain: {} });
+    (prisma.storageCell.findFirst as jest.Mock).mockResolvedValue({
+      id: 1,
+      boxId: 1,
+      cellCode: 'A1',
+      strain: {},
+    });
     (prisma.strain.findUnique as jest.Mock).mockResolvedValue({ id: 5 });
-    
+
     // Sequence of findUnique calls:
     // 1. existingInCell (inside transaction)
     // 2. return value (outside transaction)
@@ -67,7 +76,7 @@ describe('StorageService', () => {
         strain: { id: 5, identifier: 'S-5' },
         cell: { box: { id: 1, displayName: 'Box' } },
       } as any);
-      
+
     (prisma.strainStorage.update as jest.Mock).mockResolvedValue({ id: 10 });
 
     const res = await service.allocateStrain({
@@ -92,17 +101,17 @@ describe('StorageService', () => {
       strain: { id: 2 },
     });
     (prisma.strain.findUnique as jest.Mock).mockResolvedValue({ id: 5 });
-    
+
     // Sequence of findUnique calls:
     // 1. existingInCell (inside transaction) - returns strain 2
     // 2. return value (outside transaction) - returns new allocation
     (prisma.strainStorage.findUnique as jest.Mock)
       .mockResolvedValueOnce({ id: 11, strainId: 2 })
       .mockResolvedValueOnce({
-          id: 12,
-          strain: { id: 5, identifier: 'S-5' },
-          cell: { box: { id: 1, displayName: 'Box' } },
-        } as any);
+        id: 12,
+        strain: { id: 5, identifier: 'S-5' },
+        cell: { box: { id: 1, displayName: 'Box' } },
+      } as any);
 
     (prisma.strainStorage.delete as jest.Mock).mockResolvedValue({});
     (prisma.storageCell.update as jest.Mock).mockResolvedValue({});

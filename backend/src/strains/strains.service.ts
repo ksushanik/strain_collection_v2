@@ -86,9 +86,7 @@ export class StrainsService {
     }
 
     if (amylase !== undefined) {
-      andFilters.push(
-        this.buildTraitFilter('amylase', ['Amylase'], amylase),
-      );
+      andFilters.push(this.buildTraitFilter('amylase', ['Amylase'], amylase));
     }
 
     if (phosphateSolubilization !== undefined) {
@@ -586,7 +584,9 @@ export class StrainsService {
 
       const meta = (photo.meta ?? {}) as Prisma.JsonObject;
       const nextMeta: Prisma.InputJsonValue =
-        trimmedName !== undefined ? { ...meta, originalName: trimmedName } : meta;
+        trimmedName !== undefined
+          ? { ...meta, originalName: trimmedName }
+          : meta;
 
       return tx.strainPhoto.update({
         where: { id: photoId },
@@ -624,15 +624,16 @@ export class StrainsService {
     }
   }
 
-  private getTaxonomyRule(
-    scientificName?: string | null,
-  ): TaxonomyRule | null {
+  private getTaxonomyRule(scientificName?: string | null): TaxonomyRule | null {
     if (!scientificName) return null;
     const name = scientificName.toLowerCase();
     return TAXONOMY_RULES.find((rule) => name.includes(rule.genus)) ?? null;
   }
 
-  private async getGramStainTrait(): Promise<{ id: number; name: string } | null> {
+  private async getGramStainTrait(): Promise<{
+    id: number;
+    name: string;
+  } | null> {
     if (this.gramStainTraitCache !== undefined) {
       return this.gramStainTraitCache;
     }
@@ -736,10 +737,7 @@ export class StrainsService {
         some: {
           AND: [
             {
-              OR: [
-                { traitDefinition: { is: { code } } },
-                ...nameMatches,
-              ],
+              OR: [{ traitDefinition: { is: { code } } }, ...nameMatches],
             },
             resultFilter,
           ],

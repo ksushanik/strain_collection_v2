@@ -16,4 +16,3 @@ export class MethodQueryDto {
   @Type(() => Number)
   limit?: number;
 }
-

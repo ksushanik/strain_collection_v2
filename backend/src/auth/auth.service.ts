@@ -21,10 +21,7 @@ export class AuthService {
     private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
-  async validateUser(
-    email: string,
-    pass: string,
-  ): Promise<AuthUser | null> {
+  async validateUser(email: string, pass: string): Promise<AuthUser | null> {
     const user = await this.usersService.findOne(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
       const { password: _password, ...result } = user;

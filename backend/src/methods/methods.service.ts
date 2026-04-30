@@ -66,9 +66,12 @@ export class MethodsService {
     const deleted = await this.prisma.method.delete({ where: { id } });
     return {
       ...deleted,
-      _meta: usageCount > 0
-        ? { warning: `${usageCount} phenotype(s) had their method reference cleared.` }
-        : undefined,
+      _meta:
+        usageCount > 0
+          ? {
+              warning: `${usageCount} phenotype(s) had their method reference cleared.`,
+            }
+          : undefined,
     };
   }
 
@@ -79,4 +82,3 @@ export class MethodsService {
     }
   }
 }
-

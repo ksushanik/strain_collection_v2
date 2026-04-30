@@ -57,9 +57,7 @@ export class SettingsController {
 
   @Put('indexers')
   @CheckPolicies((ability) => ability.can('update', 'Legend'))
-  async updateIndexers(
-    @Body() payload: { index: string; fullName: string }[],
-  ) {
+  async updateIndexers(@Body() payload: { index: string; fullName: string }[]) {
     return this.settingsService.updateIndexers(payload);
   }
 }

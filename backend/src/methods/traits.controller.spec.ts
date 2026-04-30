@@ -50,9 +50,9 @@ describe('TraitsController', () => {
 
   describe('getDictionary', () => {
     it('should return dictionary', async () => {
-        const result = [{ id: 1, name: 'Gram Stain' }];
-        jest.spyOn(service, 'getDictionary').mockResolvedValue(result as any);
-        expect(await controller.getDictionary()).toBe(result);
+      const result = [{ id: 1, name: 'Gram Stain' }];
+      jest.spyOn(service, 'getDictionary').mockResolvedValue(result as any);
+      expect(await controller.getDictionary()).toBe(result);
     });
   });
 });

@@ -34,7 +34,8 @@ export class SearchController {
       ability.can('read', 'Settings'),
   )
   async search(
-    @Req() req: Request & { user?: Partial<User> & { role?: { key?: string } } },
+    @Req()
+    req: Request & { user?: Partial<User> & { role?: { key?: string } } },
     @Query(new ValidationPipe({ transform: true })) query: SearchQueryDto,
   ) {
     return this.searchService.search({
@@ -45,4 +46,3 @@ export class SearchController {
     });
   }
 }
-

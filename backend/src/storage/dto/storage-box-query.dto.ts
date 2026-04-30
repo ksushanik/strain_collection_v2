@@ -9,4 +9,3 @@ export class StorageBoxQueryDto {
   @IsEnum(['asc', 'desc'])
   sortOrder?: 'asc' | 'desc';
 }
-

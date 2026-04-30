@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTraitDto } from './dto/create-trait.dto';
 import { UpdateTraitDto } from './dto/update-trait.dto';
@@ -40,13 +45,18 @@ export class TraitsService implements OnModuleInit {
 
   async update(id: number, dto: UpdateTraitDto) {
     const existing = await this.ensureExists(id);
-    
+
     if (existing.isSystem) {
       if (dto.code && dto.code !== existing.code) {
         throw new BadRequestException(`Cannot change code for system trait`);
       }
-      if (dto.dataType && (dto.dataType as string) !== (existing.dataType as string)) {
-        throw new BadRequestException(`Cannot change dataType for system trait`);
+      if (
+        dto.dataType &&
+        (dto.dataType as string) !== (existing.dataType as string)
+      ) {
+        throw new BadRequestException(
+          `Cannot change dataType for system trait`,
+        );
       }
     }
 
@@ -164,7 +174,9 @@ export class TraitsService implements OnModuleInit {
           traitDefinitionId: null,
           OR: [
             { traitName: { equals: pigment.name, mode: 'insensitive' } },
-            { traitName: { equals: 'Pigment Production', mode: 'insensitive' } },
+            {
+              traitName: { equals: 'Pigment Production', mode: 'insensitive' },
+            },
           ],
         },
         data: { traitDefinitionId: pigment.id, traitName: pigment.name },

@@ -8,4 +8,3 @@ export class CreateMethodDto {
   @IsString()
   description?: string;
 }
-

@@ -22,7 +22,11 @@ export class CreateStrainDto {
   // --- Refactoring v2 Fields ---
   @IsOptional()
   @IsInt()
-  @Transform(({ value }: { value: unknown }): number | null | undefined => (value === null || value === undefined ? value : Number(value as string | number)))
+  @Transform(({ value }: { value: unknown }): number | null | undefined =>
+    value === null || value === undefined
+      ? value
+      : Number(value as string | number),
+  )
   ncbiTaxonomyId?: number | null;
 
   @IsOptional()

@@ -13,4 +13,3 @@ import { TraitsService } from './traits.service';
   exports: [MethodsService, TraitsService],
 })
 export class MethodsModule {}
-

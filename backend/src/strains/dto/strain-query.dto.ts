@@ -45,7 +45,9 @@ export class StrainQueryDto {
   @IsOptional()
   @IsEnum(['positive', 'negative'])
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.toLowerCase() : (value as 'positive' | 'negative' | undefined),
+    typeof value === 'string'
+      ? value.toLowerCase()
+      : (value as 'positive' | 'negative' | undefined),
   )
   gramStain?: 'positive' | 'negative';
 
@@ -74,7 +76,13 @@ export class StrainQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(['createdAt', 'identifier', 'sampleCode', 'taxonomy16s', 'ncbiScientificName'])
+  @IsEnum([
+    'createdAt',
+    'identifier',
+    'sampleCode',
+    'taxonomy16s',
+    'ncbiScientificName',
+  ])
   sortBy?:
     | 'createdAt'
     | 'identifier'

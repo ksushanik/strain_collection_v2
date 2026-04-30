@@ -301,9 +301,7 @@ export class SamplesService implements OnModuleInit {
 
       if (shouldRebuildCode) {
         if (!sampleTypeId || !sampleTypeSlug) {
-          throw new NotFoundException(
-            `Sample Type for Sample ${id} not found`,
-          );
+          throw new NotFoundException(`Sample Type for Sample ${id} not found`);
         }
 
         const nextSubject =

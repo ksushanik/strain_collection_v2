@@ -11,4 +11,3 @@ import { SearchService } from './search.service';
   providers: [SearchService],
 })
 export class SearchModule {}
-
