@@ -1,4 +1,5 @@
 process.env.SKIP_ADMIN = 'true';
+process.env.ALLOW_PUBLIC_REGISTRATION = 'true';
 
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
@@ -52,7 +53,7 @@ describe('Auth roles & storage permissions e2e', () => {
     const adminEmail = `admin-${Date.now()}@example.com`;
     const adminPassword = 'Admin123!';
     await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({ email: adminEmail, password: adminPassword, name: 'Admin' })
       .expect(201);
     await prisma.user.update({
@@ -60,7 +61,7 @@ describe('Auth roles & storage permissions e2e', () => {
       data: { role: { connect: { key: 'ADMIN' } } },
     });
     const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: adminEmail, password: adminPassword })
       .expect(201);
     adminToken = adminLogin.body.access_token;
@@ -69,7 +70,7 @@ describe('Auth roles & storage permissions e2e', () => {
     const userEmail = `user-${Date.now()}@example.com`;
     const userPassword = 'User123!';
     await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({ email: userEmail, password: userPassword, name: 'User' })
       .expect(201);
     // Ensure role assignment (register defaults to USER but ensure connect)
@@ -78,7 +79,7 @@ describe('Auth roles & storage permissions e2e', () => {
       data: { role: { connect: { key: 'USER' } } },
     });
     const userLogin = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email: userEmail, password: userPassword })
       .expect(201);
     userToken = userLogin.body.access_token;

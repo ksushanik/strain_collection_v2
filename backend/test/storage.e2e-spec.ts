@@ -1,4 +1,5 @@
 process.env.SKIP_ADMIN = 'true';
+process.env.ALLOW_PUBLIC_REGISTRATION = 'true';
 
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
@@ -51,7 +52,7 @@ describe('Storage e2e (limited smoke)', () => {
     const email = `test${Date.now()}@example.com`;
     const password = 'P@ssword123';
     const registerRes = await request(app.getHttpServer())
-      .post('/auth/register')
+      .post('/api/v1/auth/register')
       .send({ email, password, name: 'Tester' })
       .expect(201);
 
@@ -61,7 +62,7 @@ describe('Storage e2e (limited smoke)', () => {
     });
 
     const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({ email, password })
       .expect(201);
     token = loginRes.body.access_token;
