@@ -138,6 +138,8 @@ model Method {
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
 
+  phenotypes StrainPhenotype[]
+
   @@map("methods")
 }
 
@@ -361,15 +363,18 @@ model StrainPhenotype {
   traitName         String?          @map("trait_name") // Kept for legacy/fallback
   result            String
   method            String?
+  methodId          Int?             @map("method_id")
   conditions        Json? // e.g. { temp: 28, time: "48h" }
   createdAt         DateTime         @default(now()) @map("created_at")
 
   strain          Strain           @relation(fields: [strainId], references: [id], onDelete: Cascade)
   traitDefinition TraitDefinition? @relation(fields: [traitDefinitionId], references: [id])
+  methodRef       Method?          @relation(fields: [methodId], references: [id], onDelete: SetNull)
 
   @@unique([strainId, traitDefinitionId])
   @@index([strainId])
   @@index([traitDefinitionId])
+  @@index([methodId])
   @@map("strain_phenotypes")
 }
 
