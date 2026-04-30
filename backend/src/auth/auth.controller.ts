@@ -5,7 +5,9 @@ import {
   UseGuards,
   Get,
   Body,
+  ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiBody, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { LocalAuthGuard } from './local-auth.guard';
@@ -16,12 +18,13 @@ import { UsersService } from '../users/users.service';
 
 import { RegisterUserDto } from './dto/register-user.dto';
 
-@Controller('auth')
+@Controller('api/v1/auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -45,8 +48,12 @@ export class AuthController {
   @Post('register')
   @ApiBody({ type: RegisterUserDto })
   async register(@Body() createUserDto: RegisterUserDto) {
-    // Strictly sanitize input by pulling only known fields from the DTO
-    // This prevents privilege escalation via injected 'role' property
+    const allowPublicRegistration =
+      this.configService.get<string>('ALLOW_PUBLIC_REGISTRATION') === 'true';
+    if (!allowPublicRegistration) {
+      throw new ForbiddenException('Public registration is disabled');
+    }
+
     return this.usersService.create({
       email: createUserDto.email,
       password: createUserDto.password,
