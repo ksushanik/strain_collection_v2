@@ -3,6 +3,9 @@ deploy_known_hosts.txt
 deploy_ed25519
 deploy_ed25519.pub
 
+# Playwright CLI debug output (trace files, screenshots, network logs)
+.playwright-cli/
+
 # Dependencies
 node_modules/
 
