@@ -41,10 +41,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={localeCode}>
+    <html lang={localeCode} suppressHydrationWarning>
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
-        suppressHydrationWarning
       >
         {umamiWebsiteId ? (
           <Script
