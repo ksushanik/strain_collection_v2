@@ -1,4 +1,6 @@
-REGISTRY      ?= gimmyhat
+# Default registry. CI publishes to GHCR via build.yml; the local push-all
+# target is an escape hatch for shipping when GH Actions is unavailable.
+REGISTRY      ?= ghcr.io/ksushanik
 TAG           ?= latest
 API_URL       ?= https://culturedb.elcity.ru
 BACKEND_IMAGE := $(REGISTRY)/strain-collection-v2-backend:$(TAG)
@@ -18,18 +20,26 @@ push-backend: build-backend
 push-frontend: build-frontend
 	docker push $(FRONTEND_IMAGE)
 
+# === ESCAPE HATCH ===
+# Normally CI builds and pushes images on every main push (build.yml).
+# Use this only if GH Actions is broken and you must ship from your laptop.
+# Requires `docker login ghcr.io` locally.
 push-all: push-backend push-frontend
 
 # Local deploy with local images (see docker-compose.local.yml override)
 deploy-local:
 	docker compose -f docker-compose.yml -f docker-compose.local.yml up -d postgres redis backend frontend
 
-# Деплой на прод (сервер alias ssh 4feb, путь /home/user/bio_collection).
-# Логика вынесена в scripts/deploy-prod.sh, чтобы избежать многоуровневого
-# экранирования. Скрипт выполняет: pull → up -d → ждёт healthy → синхронизирует
-# AdminJS bundle. Падает с ненулевым кодом, если backend не стал healthy за 90с.
+# === ESCAPE HATCH ===
+# Normally deploy is triggered from GitHub UI: Actions → "Deploy to Production"
+# → Run workflow → choose tag. Use this only if GH Actions is unavailable.
+# Targets the LEGACY /home/user/bio_collection path because the alias `4feb`
+# logs in as `user`, which has no access to /home/deploy/ (owned by deploy
+# user, mode 750). After Phase D1 cleanup removes the legacy path, this
+# target becomes obsolete; the deploy.yml workflow is the only supported
+# route at that point.
 deploy-prod:
-	ssh 4feb 'bash -s' < scripts/deploy-prod.sh
+	ssh 4feb 'PROJECT_DIR=/home/user/bio_collection bash -s' < scripts/deploy-prod.sh
 
 # Обновить .env файлы на production (использует scp)
 update-prod-env:
@@ -49,7 +59,7 @@ migrate-prod-win:
 # используйте этот таргет (оборачивает ssh в powershell -Command).
 # Get-Content -Raw сохраняет LF (важно: .gitattributes пинит scripts/*.sh к LF).
 deploy-prod-win:
-	powershell -NoProfile -Command "Get-Content -Raw scripts/deploy-prod.sh | ssh 4feb 'bash -s'"
+	powershell -NoProfile -Command "Get-Content -Raw scripts/deploy-prod.sh | ssh 4feb 'PROJECT_DIR=/home/user/bio_collection bash -s'"
 
 # Windows: обновить .env файлы на production
 update-prod-env-win:
