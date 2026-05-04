@@ -174,13 +174,16 @@ async function bootstrap() {
     },
   );
 
-  // Validation/transform
+  // Validation/transform.
+  // NOTE: enableImplicitConversion is intentionally OFF. With it on, query-string
+  // boolean params get cast via JS Boolean() — Boolean('false') is true — which
+  // silently inverts negative filters before any @Transform decorator can run.
+  // All number/int DTO fields use explicit @Type(() => Number).
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
-      transformOptions: { enableImplicitConversion: true },
       exceptionFactory: (errors) => {
         console.error('Validation errors:', JSON.stringify(errors, null, 2));
         return new BadRequestException(errors);
