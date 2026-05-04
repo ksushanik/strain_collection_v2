@@ -19,7 +19,7 @@ function LoginForm() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login, logout } = useAuth();
+    const { login, continueAsGuest } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const t = useTranslations('Login');
@@ -107,7 +107,7 @@ function LoginForm() {
                         variant="outline"
                         className="w-full"
                         onClick={() => {
-                            logout();
+                            continueAsGuest();
                             router.push('/');
                         }}
                     >
