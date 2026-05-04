@@ -1,22 +1,41 @@
 #!/usr/bin/env bash
 # Production deploy for strain_collection_v2.
-# Invoked from Makefile:  ssh 4feb 'bash -s' < scripts/deploy-prod.sh
+#
+# Invoked by:
+#   - .github/workflows/deploy.yml (primary path)
+#   - `make deploy-prod` (escape hatch when GH Actions is down)
+#
+# Reads .env in PROJECT_DIR for IMAGE_REGISTRY / IMAGE_TAG (used by
+# docker-compose.prod.yml's image: ${...} interpolation). Override
+# PROJECT_DIR via env var if needed (default: /home/deploy/bio_collection).
 #
 # Steps:
-#   1. Pull new images
-#   2. Recreate containers (docker compose up -d)
-#   3. Wait for backend to report `healthy` via Docker HEALTHCHECK
+#   1. Source .env (IMAGE_TAG, IMAGE_REGISTRY)
+#   2. Pull new images
+#   3. Recreate containers (docker compose up -d)
+#   4. Wait for backend to report `healthy` via Docker HEALTHCHECK
 #      (fail loudly if it does not — previous version exited 0 either way)
-#   4. Best-effort sync of AdminJS components bundle to host so the
+#   5. Best-effort sync of AdminJS components bundle to host so the
 #      external nginx alias can serve the freshest file.
 
 set -euo pipefail
 
-PROJECT_DIR="/home/user/bio_collection"
-HEALTH_TIMEOUT_SEC=90
-HEALTH_POLL_INTERVAL=2
+PROJECT_DIR="${PROJECT_DIR:-/home/deploy/bio_collection}"
+HEALTH_TIMEOUT_SEC="${HEALTH_TIMEOUT_SEC:-90}"
+HEALTH_POLL_INTERVAL="${HEALTH_POLL_INTERVAL:-2}"
 
 cd "$PROJECT_DIR"
+
+# Load IMAGE_TAG / IMAGE_REGISTRY (and any other deploy-time vars) from .env
+# so docker compose sees them for image: ${...} interpolation. set -a exports
+# every assigned variable until set +a.
+if [ -f .env ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . ./.env
+    set +a
+    echo ">>> Loaded .env (IMAGE_TAG=${IMAGE_TAG:-unset}, IMAGE_REGISTRY=${IMAGE_REGISTRY:-unset})"
+fi
 
 echo ">>> Pulling images..."
 docker compose pull
