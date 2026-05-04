@@ -4,9 +4,17 @@ on:
   push:
   pull_request:
 
+# Cancel older runs on the same branch when a new push lands.
+# Safe for pure CI; if a deploy job is added later it MUST opt out
+# of cancellation (e.g. by using a different concurrency group).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
@@ -60,6 +68,7 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       NEXT_PUBLIC_API_URL: http://localhost:3010
     steps:
