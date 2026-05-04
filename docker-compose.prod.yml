@@ -1,0 +1,48 @@
+# Production compose for the bio_collection stack on 4feb (user: deploy).
+# Single source of truth — committed instead of drifting on the server.
+# IMAGE_REGISTRY and IMAGE_TAG are written to .env by .github/workflows/deploy.yml
+# and consumed by docker compose at variable interpolation time.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: strain_v2_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: strain_collection_v2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_v2_data:/var/lib/postgresql/data
+    networks: [strain_v2]
+
+  redis:
+    image: redis:7-alpine
+    container_name: strain_v2_redis
+    restart: unless-stopped
+    networks: [strain_v2]
+
+  backend:
+    image: ${IMAGE_REGISTRY:-ghcr.io/ksushanik}/strain-collection-v2-backend:${IMAGE_TAG:-latest}
+    container_name: strain_v2_backend
+    restart: unless-stopped
+    depends_on: [postgres, redis]
+    env_file: ./backend/.env
+    command: sh -c "npx prisma migrate deploy && node dist/src/main.js"
+    networks: [strain_v2]
+    ports: ["3010:3000"]
+
+  frontend:
+    image: ${IMAGE_REGISTRY:-ghcr.io/ksushanik}/strain-collection-v2-frontend:${IMAGE_TAG:-latest}
+    container_name: strain_v2_frontend
+    restart: unless-stopped
+    env_file: ./frontend/.env
+    networks: [strain_v2]
+    ports: ["8082:3001"]
+
+volumes:
+  postgres_v2_data:
+
+networks:
+  strain_v2:
+    driver: bridge
