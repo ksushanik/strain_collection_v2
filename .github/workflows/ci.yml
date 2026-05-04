@@ -58,6 +58,14 @@ jobs:
         working-directory: backend
         run: npm run lint -- --max-warnings=0
 
+      # `nest build` runs tsc with tsconfig.build.json — strict mode, no
+      # transpileOnly. Catches TS errors that lint and ts-jest tolerate
+      # (e.g. TS2588 const reassignment, which slipped through to build.yml
+      # in the CI/CD rollout because this step didn't exist).
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+
       - name: Test backend
         working-directory: backend
         run: npm run test -- --runInBand
@@ -86,6 +94,14 @@ jobs:
       - name: Lint frontend
         working-directory: frontend
         run: npm run lint
+
+      # `next build` does strict typecheck and full prod bundle. Ловит
+      # SSR/RSC-специфические TS-ошибки, которые lint и dev server пропускают.
+      # Кэш Next.js использует node_modules + cache: npm выше, повторные ранs
+      # быстрее за счёт кэша pages/.next-cache (если будет добавлен позже).
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
 
       - name: Install Playwright browsers
         working-directory: frontend
