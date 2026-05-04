@@ -263,7 +263,12 @@ export class StrainsService {
 
   async create(createStrainDto: CreateStrainDto) {
     await this.validateTaxonomy(createStrainDto);
-    const { phenotypes, genetics, ...strainData } = createStrainDto;
+    const {
+      phenotypes: initialPhenotypes,
+      genetics,
+      ...strainData
+    } = createStrainDto;
+    let phenotypes = initialPhenotypes;
 
     // Auto-enrich based on taxonomy if needed
     const rule = this.getTaxonomyRule(createStrainDto.ncbiScientificName);
