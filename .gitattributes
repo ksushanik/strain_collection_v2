@@ -1,0 +1,9 @@
+# Force LF line endings for files that must run on Linux servers,
+# regardless of the developer's git core.autocrlf setting.
+*.sh        text eol=lf
+*.bash      text eol=lf
+Dockerfile  text eol=lf
+*.Dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+.github/workflows/*.yml text eol=lf
+Makefile    text eol=lf

@@ -11,4 +11,5 @@
 - **Посмотреть легенду в Storage**: легенда выводится в разделе Storage, если для соответствующего binding в `/settings` задан текст (override).
 - **Деплой на прод (Docker/Make)**:
   - Локально: `make push-all` (или `make push-backend`/`push-frontend`) — собирает и пушит образы в Docker Hub (`gimmyhat/strain-collection-v2-*` с тегом `latest` по умолчанию).
-  - Прод: `make deploy-prod` — на сервере `ssh 4feb` в `/home/user/bio_collection` выполняет `docker compose pull && docker compose up -d`, подтягивая свежие теги и перезапуская контейнеры.
+  - Прод: `make deploy-prod` — стримит `scripts/deploy-prod.sh` через SSH на `4feb`. Скрипт делает `docker compose pull` → `up -d`, ждёт до 90 секунд пока backend не станет `healthy` (по Docker `HEALTHCHECK` в [backend/Dockerfile](../../backend/Dockerfile)), и только затем синхронизирует AdminJS bundle. **Падает с ненулевым кодом, если backend не поднялся** — больше не считается успешным деплой при упавшем контейнере. Под Windows: `make deploy-prod-win`.
+  - Очистка диска на проде: `make clean-prod` — `docker system prune -af --filter 'until=168h'`. Фильтр оставляет образы новее недели, чтобы был запас для отката (без фильтра prune снёс бы и образы соседних проектов на хосте).

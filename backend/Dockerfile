@@ -37,4 +37,9 @@ RUN mkdir -p .adminjs
 COPY --from=prod-deps /app/prisma ./prisma
 ENV PORT=3000
 EXPOSE 3000
+# Liveness probe used by deploy-prod (and by `docker compose ps`).
+# Hits the root route which currently returns 200/text (AppController.getHello).
+# start-period gives Nest+Prisma migrate time to bootstrap before failures count.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:3000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 CMD ["node", "dist/src/main.js"]
