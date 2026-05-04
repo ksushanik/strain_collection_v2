@@ -1,0 +1,59 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to deploy (commit SHA or "latest")'
+        required: true
+        default: 'latest'
+
+# Never cancel an in-flight deploy — interrupting docker compose up -d
+# could leave the stack in an inconsistent state.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production  # creates an audit trail / approval gate point
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH agent with deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust the deploy host (anti-MITM)
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Sync compose + deploy script to server
+        env:
+          USER: ${{ secrets.DEPLOY_SSH_USER }}
+          HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+        run: |
+          scp docker-compose.prod.yml "$USER@$HOST:/home/deploy/bio_collection/docker-compose.yml"
+          scp scripts/deploy-prod.sh   "$USER@$HOST:/home/deploy/bio_collection/scripts/deploy-prod.sh"
+
+      - name: Deploy
+        env:
+          USER: ${{ secrets.DEPLOY_SSH_USER }}
+          HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          TAG: ${{ inputs.tag }}
+        # IMPORTANT: <<EOF (unquoted) — runner expands $TAG before sending.
+        # Inside the heredoc, single quotes around the printf format
+        # prevent the remote bash from re-interpreting %s.
+        run: |
+          ssh "$USER@$HOST" "bash -s" <<EOF
+          set -euo pipefail
+          cd /home/deploy/bio_collection
+          printf 'IMAGE_REGISTRY=ghcr.io/ksushanik\nIMAGE_TAG=%s\n' "$TAG" > .env
+          chmod +x scripts/deploy-prod.sh
+          bash scripts/deploy-prod.sh
+          EOF

@@ -1,5 +1,23 @@
 # Changelog (кратко)
 
+## 2026-05-04
+- **Инфраструктура (CI/CD)**:
+  - `make deploy-prod` теперь fail-loud: логика вынесена в `scripts/deploy-prod.sh`, скрипт ждёт `healthy` статус backend (через Docker `HEALTHCHECK` на root `/`) до 90 с и падает с ненулевым кодом при таймауте. Раньше деплой всегда возвращал успех, даже если backend не поднялся.
+  - Backend получил `HEALTHCHECK` в [backend/Dockerfile](../../backend/Dockerfile) — node-проба на `127.0.0.1:3000`, `start-period=30s` под Nest+Prisma migrate.
+  - `make clean-prod` получил `--filter "until=168h"` — больше не сносит образы соседних проектов на хосте и оставляет окно для отката.
+  - GitHub Actions: добавлены `concurrency` с `cancel-in-progress` (старые ранs прерываются при новом push) и `timeout-minutes` per-job (защита от зависших job'ов).
+  - `.gitattributes`: пинит `.sh`/`Dockerfile`/`Makefile`/workflow YAML к LF — защита от Windows `core.autocrlf=true`, который иначе ломает bash на сервере.
+  - AdminJS bundle sync в деплое теперь записывает в temp-файл и promotes через `mv` только если непустой — раньше при отсутствии bundle в контейнере перезаписывал host-файл нулём байт.
+- **CI/CD автоматизация (build auto + deploy by button)** — продолжение того же дня:
+  - Новый workflow `.github/workflows/build.yml`: на каждый push в `main` собирает backend+frontend образы (buildx + GH Actions cache) и пушит в **GHCR** (`ghcr.io/ksushanik/strain-collection-v2-{backend,frontend}`) с тегами `:latest` и `:<sha>`.
+  - Новый workflow `.github/workflows/deploy.yml`: `workflow_dispatch` (кнопка в GH UI) с input `tag`, SSH'ится на сервер через `webfactory/ssh-agent`, scp'ит compose+скрипт, пишет `IMAGE_TAG` в `.env`, запускает `scripts/deploy-prod.sh`. Rollback = деплой со старым SHA.
+  - `docker-compose.prod.yml` закоммичен в репо (image параметризован через `${IMAGE_REGISTRY}/...:${IMAGE_TAG}`), больше не дрейфует от серверного.
+  - На сервере появился `deploy` user с docker-доступом (без sudo, password locked, key-only), стек переехал в `/home/deploy/bio_collection`. Старый `/home/user/bio_collection` параллельно работает до nginx-cutover.
+  - `scripts/deploy-prod.sh` сделан env-driven: `PROJECT_DIR`, `HEALTH_TIMEOUT_SEC`, `HEALTH_POLL_INTERVAL` через env; источает `.env` при старте.
+  - Реестр сменился с `gimmyhat/*` на `ghcr.io/ksushanik/*`. `make push-all` / `make deploy-prod` помечены как escape hatch.
+  - 4 GH Actions secrets настроены: `DEPLOY_SSH_KEY`, `DEPLOY_SSH_HOST`, `DEPLOY_SSH_USER`, `DEPLOY_SSH_KNOWN_HOSTS`. Сервер залогинен в GHCR через single-scope `read:packages` PAT.
+  - Spec: [docs/superpowers/specs/2026-05-04-automated-cicd-design.md](../superpowers/specs/2026-05-04-automated-cicd-design.md). Plan: [docs/superpowers/plans/2026-05-04-automated-cicd.md](../superpowers/plans/2026-05-04-automated-cicd.md).
+
 ## 2025-12-18
 - **Strains (Edit)**: исправлено сохранение на странице редактирования (кнопка «Сохранить изменения»), триггеры автокомплитов больше не сабмитят форму.
 - **Strains (Form UX)**: добавлена возможность очистить «Научное название (NCBI)» и вернуть пустые значения для селектов (например, «Регион изоляции», BSL).

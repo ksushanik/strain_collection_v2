@@ -1,4 +1,6 @@
-REGISTRY      ?= gimmyhat
+# Default registry. CI publishes to GHCR via build.yml; the local push-all
+# target is an escape hatch for shipping when GH Actions is unavailable.
+REGISTRY      ?= ghcr.io/ksushanik
 TAG           ?= latest
 API_URL       ?= https://culturedb.elcity.ru
 BACKEND_IMAGE := $(REGISTRY)/strain-collection-v2-backend:$(TAG)
@@ -18,19 +20,26 @@ push-backend: build-backend
 push-frontend: build-frontend
 	docker push $(FRONTEND_IMAGE)
 
+# === ESCAPE HATCH ===
+# Normally CI builds and pushes images on every main push (build.yml).
+# Use this only if GH Actions is broken and you must ship from your laptop.
+# Requires `docker login ghcr.io` locally.
 push-all: push-backend push-frontend
 
 # Local deploy with local images (see docker-compose.local.yml override)
 deploy-local:
 	docker compose -f docker-compose.yml -f docker-compose.local.yml up -d postgres redis backend frontend
 
-# Простой деплой на прод (сервер alias ssh 4feb, путь /home/user/bio_collection).
-# Обновляет образы и перезапускает стек.
-# После старта пытается синхронизировать AdminJS components.bundle.js
-# из контейнера на хост (best-effort), чтобы внешний nginx alias
-# при необходимости всегда видел актуальный файл.
+# === ESCAPE HATCH ===
+# Normally deploy is triggered from GitHub UI: Actions → "Deploy to Production"
+# → Run workflow → choose tag. Use this only if GH Actions is unavailable.
+# Targets the LEGACY /home/user/bio_collection path because the alias `4feb`
+# logs in as `user`, which has no access to /home/deploy/ (owned by deploy
+# user, mode 750). After Phase D1 cleanup removes the legacy path, this
+# target becomes obsolete; the deploy.yml workflow is the only supported
+# route at that point.
 deploy-prod:
-	ssh 4feb "bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=$$(docker compose ps -q backend) && if [ -n \"$$cid\" ]; then docker exec $$cid sh -lc \"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\"$$src\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\"$$src\\\" ]; then cat \\\"$$src\\\"; fi\" > backend/.adminjs/components.bundle.js || true; fi'"
+	ssh 4feb 'PROJECT_DIR=/home/user/bio_collection bash -s' < scripts/deploy-prod.sh
 
 # Обновить .env файлы на production (использует scp)
 update-prod-env:
@@ -48,20 +57,24 @@ migrate-prod-win:
 
 # Для PowerShell/Windows, где GNU make запускает cmd.exe и ssh не находится,
 # используйте этот таргет (оборачивает ssh в powershell -Command).
+# Get-Content -Raw сохраняет LF (важно: .gitattributes пинит scripts/*.sh к LF).
 deploy-prod-win:
-	powershell -Command "ssh 4feb \"bash -lc 'cd /home/user/bio_collection && docker compose pull && docker compose up -d && mkdir -p backend/.adminjs && cid=\$(docker compose ps -q backend) && if [ -n \\\"\\\$cid\\\" ]; then docker exec \\\$cid sh -lc \\\"src=; [ -f /app/.adminjs/components.bundle.js ] && src=/app/.adminjs/components.bundle.js; [ -z \\\\\\\"\\\$src\\\\\\\" ] && [ -f /app/.adminjs/bundle.js ] && src=/app/.adminjs/bundle.js; if [ -n \\\\\\\"\\\$src\\\\\\\" ]; then cat \\\\\\\"\\\$src\\\\\\\"; fi\\\" > backend/.adminjs/components.bundle.js || true; fi'\""
+	powershell -NoProfile -Command "Get-Content -Raw scripts/deploy-prod.sh | ssh 4feb 'PROJECT_DIR=/home/user/bio_collection bash -s'"
 
 # Windows: обновить .env файлы на production
 update-prod-env-win:
 	powershell -Command "scp backend/.env.prod user@4feb:/home/user/bio_collection/backend/.env; scp frontend/.env.prod user@4feb:/home/user/bio_collection/frontend/.env"
 
-# Очистка неиспользуемых Docker ресурсов на production
+# Очистка неиспользуемых Docker ресурсов на production.
+# --filter "until=168h" сохраняет образы новее недели — они нужны для отката
+# на предыдущую версию. Без фильтра prune снёс бы все unused-образы, включая
+# образы соседних проектов на том же хосте.
 clean-prod:
-	ssh 4feb "docker system prune -af"
+	ssh 4feb "docker system prune -af --filter 'until=168h'"
 
 # Для Windows
 clean-prod-win:
-	powershell -Command "ssh 4feb \"docker system prune -af\""
+	powershell -NoProfile -Command "ssh 4feb \"docker system prune -af --filter 'until=168h'\""
 
 # Проверка использования диска на production
 disk-usage-prod:
