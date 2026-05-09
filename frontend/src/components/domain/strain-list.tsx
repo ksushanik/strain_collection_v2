@@ -32,6 +32,7 @@ import { isPositiveLike } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { ExportButton } from "@/components/export-button"
 import { CsvColumn } from "@/lib/export-data"
+import { PhenotypeBadges } from "@/components/domain/phenotype-badges"
 
 interface StrainListProps {
     enabledPacks: string[]
@@ -577,10 +578,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                             {showGrowth && (
                                                 <TableCell>
                                                     <div className="flex gap-1 flex-wrap">
-                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'amylase', 'Amylase') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('amylasePosBadge')}</Badge>}
-                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'phosphate_solubilization', 'Phosphate Solubilization') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'siderophore_production', 'Siderophore Production') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                                        {strain.phenotypes?.some((p) => matchesTrait(p, 'pigment_secretion', 'Pigment Secretion') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                                        <PhenotypeBadges
+                                                            phenotypes={strain.phenotypes}
+                                                            t={t}
+                                                            variant="secondary"
+                                                            className="text-[10px]"
+                                                        />
                                                     </div>
                                                 </TableCell>
                                             )}
@@ -650,10 +653,12 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                                     )}
                                     {showGrowth && (
                                         <div className="flex flex-wrap gap-1 pt-2">
-                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'amylase', 'Amylase') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('amylasePosBadge')}</Badge>}
-                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'phosphate_solubilization', 'Phosphate Solubilization') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pPosBadge')}</Badge>}
-                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'siderophore_production', 'Siderophore Production') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('sidPosBadge')}</Badge>}
-                                            {strain.phenotypes?.some((p) => matchesTrait(p, 'pigment_secretion', 'Pigment Secretion') && isPositiveLike(p.result)) && <Badge variant="secondary" className="text-[10px]">{t('pigmentBadge')}</Badge>}
+                                            <PhenotypeBadges
+                                                phenotypes={strain.phenotypes}
+                                                t={t}
+                                                variant="secondary"
+                                                className="text-[10px]"
+                                            />
                                         </div>
                                     )}
                                 </div>

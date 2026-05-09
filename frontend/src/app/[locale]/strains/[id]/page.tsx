@@ -13,9 +13,8 @@ import { useTranslations } from "next-intl"
 import { useApiError } from "@/hooks/use-api-error"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { useAuth } from "@/contexts/AuthContext"
-import { TraitDataType } from "@/services/api"
-import { getTraitDisplayName } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
+import { PhenotypeBadges, buildPhenotypeChips } from "@/components/domain/phenotype-badges"
 
 type Phenotype = NonNullable<Strain["phenotypes"]>[number]
 type RoutingLocale = (typeof routing.locales)[number]
@@ -82,38 +81,13 @@ function StrainDetailContent({ id }: { id: string }) {
 
     const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
-    const getTraitCode = React.useCallback((p: Phenotype | null | undefined) => {
-        return p?.traitCode || p?.traitDefinition?.code || null
-    }, [])
-
-    const getTraitName = React.useCallback((p: Phenotype | null | undefined) => {
-        return (p as { traitDefinition?: { name?: string } | null } | null | undefined)?.traitDefinition?.name || p?.traitName || ""
-    }, [])
-
-    const getDataType = React.useCallback((p: Phenotype | null | undefined): TraitDataType => {
-        return (
-            (p as { dataType?: TraitDataType; traitDefinition?: { dataType?: TraitDataType } | null } | null | undefined)?.dataType ||
-            (p as { traitDefinition?: { dataType?: TraitDataType } | null } | null | undefined)?.traitDefinition?.dataType ||
-            TraitDataType.TEXT
-        )
-    }, [])
-
-    const definedPhenotypes = React.useMemo(() => {
-        const phenotypes = (strain?.phenotypes ?? []) as Phenotype[]
-        return phenotypes.filter((p) => {
-            const dataType = getDataType(p)
-            if (dataType === TraitDataType.BOOLEAN) return p?.result === "true"
-            return typeof p?.result === "string" && p.result.trim().length > 0
-        })
-    }, [getDataType, strain?.phenotypes])
-
     const gramPhenotype = React.useMemo(() => {
         return (
-            (strain?.phenotypes ?? []).find((p) => getTraitCode(p as Phenotype) === "gram_stain") ||
+            (strain?.phenotypes ?? []).find((p) => (p?.traitCode || p?.traitDefinition?.code) === "gram_stain") ||
             (strain?.phenotypes ?? []).find((p) => (p as Phenotype)?.traitName === "Gram Stain") ||
             null
         )
-    }, [getTraitCode, strain?.phenotypes])
+    }, [strain?.phenotypes])
 
     const gramLabel = React.useMemo(() => {
         const raw = gramPhenotype?.result
@@ -127,48 +101,21 @@ function StrainDetailContent({ id }: { id: string }) {
         return String(raw).trim()
     }, [gramPhenotype, t])
 
-    const compactChips = React.useMemo(() => {
-        const chips: { label: string; suffix?: string }[] = []
-
-        // Prefer showing only "signal" traits compactly
-        const codesInOrder = [
+    const detailChipCodes = React.useMemo(
+        () => [
             "siderophore_production",
             "pigment_secretion",
             "phosphate_solubilization",
             "sequenced_seq",
             "amylase",
-        ]
+        ],
+        [],
+    )
 
-        const findByCode = (code: string) =>
-            definedPhenotypes.find((p) => getTraitCode(p) === code) || null
-
-        for (const code of codesInOrder) {
-            const p = findByCode(code)
-            if (!p) continue
-            const name = getTraitDisplayName(code, getTraitName(p), t)
-            const dataType = getDataType(p)
-
-            if (dataType === TraitDataType.BOOLEAN) {
-                chips.push({ label: name, suffix: "+" })
-                continue
-            }
-
-            if (dataType === TraitDataType.CATEGORICAL) {
-                const result = String(p.result || "").trim()
-                if (!result) continue
-                const normalized = result.toLowerCase()
-                const suffix =
-                    normalized === "+" || result.includes("+")
-                        ? "+"
-                        : normalized === "-" || result.includes("-")
-                            ? "-"
-                            : result
-                chips.push({ label: name, suffix })
-            }
-        }
-
-        return chips
-    }, [definedPhenotypes, getDataType, getTraitName, getTraitCode, t])
+    const detailChips = React.useMemo(
+        () => buildPhenotypeChips(strain?.phenotypes, t, detailChipCodes),
+        [strain?.phenotypes, t, detailChipCodes],
+    )
 
     const isolationRegionLabel = React.useMemo(() => {
         const value = strain?.isolationRegion
@@ -406,13 +353,15 @@ function StrainDetailContent({ id }: { id: string }) {
                     {/* PHENOTYPES */}
                     <SectionBlock title={t('growthAndTraits')} icon={FlaskConical}>
                         <div className="space-y-4">
-                            {compactChips.length > 0 ? (
+                            {detailChips.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {compactChips.map((c) => (
-                                        <Badge key={`${c.label}-${c.suffix ?? ""}`} variant="outline" className="rounded-full px-3 py-1">
-                                            {c.label}{c.suffix ? ` ${c.suffix}` : ""}
-                                        </Badge>
-                                    ))}
+                                    <PhenotypeBadges
+                                        phenotypes={strain.phenotypes}
+                                        t={t}
+                                        codes={detailChipCodes}
+                                        variant="outline"
+                                        className="px-3 py-1"
+                                    />
                                 </div>
                             ) : (
                                 <p className="text-sm text-muted-foreground italic">{t('noTraitsAdded')}</p>

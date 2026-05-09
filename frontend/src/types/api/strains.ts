@@ -1,4 +1,5 @@
 import { Media, StrainPhoto } from './media';
+import { TraitDataType } from './methods';
 
 export interface StrainStorageCell {
   id: number;
@@ -38,6 +39,8 @@ export interface StrainPhenotype {
     method?: string
     traitDefinition?: {
       code: string
+      name?: string
+      dataType?: TraitDataType
     } | null
 }
 
