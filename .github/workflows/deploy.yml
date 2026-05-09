@@ -1,6 +1,16 @@
 name: Deploy to Production
 
 on:
+  # Auto-trigger after EITHER required workflow completes on main. The
+  # preflight job below waits for BOTH (Build & Push Images, CI) to be
+  # green for the same head_sha before letting deploy run, so this fires
+  # twice per push but only one of the two preflight runs proceeds (the
+  # one whose completion was second). Failed runs of either workflow stop
+  # the deploy at preflight, never reaching the production environment.
+  workflow_run:
+    workflows: ["Build & Push Images", "CI"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       tag:
@@ -8,19 +18,185 @@ on:
         required: true
         default: 'latest'
 
+# Least-privilege token. `gh api` in preflight reads Actions runs and
+# deployments; checkout needs contents read. Explicit declaration so the
+# auto-deploy doesn't 403 in repos/orgs with restricted-by-default
+# GITHUB_TOKEN policies.
+permissions:
+  contents: read
+  actions: read
+  deployments: read
+
 # Never cancel an in-flight deploy — interrupting docker compose up -d
-# could leave the stack in an inconsistent state.
+# could leave the stack in an inconsistent state. cancel-in-progress=false
+# also queues a second auto-trigger behind a manual dispatch instead of
+# stomping on it.
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
 
 jobs:
+  # Preflight runs OUTSIDE the production environment so stale-trigger
+  # skips and gate failures do not pollute the production deployment
+  # history (or wake reviewers if env approvals are configured).
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should_deploy: ${{ steps.gate.outputs.should_deploy }}
+      tag: ${{ steps.gate.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute tag and check gates
+        id: gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # --- Manual dispatch: operator intent is authoritative, skip gates.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # --- Auto-trigger path (workflow_run from build.yml or ci.yml).
+          triggering_sha="${{ github.event.workflow_run.head_sha }}"
+
+          # Gate 1: freshness. Triggering SHA must still be main's tip,
+          # otherwise a queued auto-deploy could roll prod backwards after
+          # a newer commit landed.
+          git fetch origin main --quiet
+          current=$(git rev-parse origin/main)
+          if [ "$triggering_sha" != "$current" ]; then
+            echo "::notice::Skipping stale auto-trigger. main has moved to $current; the newer build's auto-deploy will catch up."
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Gate 2: BOTH required workflows must be green for this SHA.
+          # Bind to main-branch runs of the exact workflow files. Without
+          # the branch filter, a PR run or another ref's run for the same
+          # SHA could be paired with this trigger and falsely satisfy the
+          # gate. We key off `path` (workflow file location) instead of
+          # display name so future renames don't silently break the gate.
+          runs_json=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$triggering_sha&branch=main&per_page=50" \
+            --jq '[.workflow_runs[] | select(.path == ".github/workflows/build.yml" or .path == ".github/workflows/ci.yml") | {path, status, conclusion, id, updated_at, created_at}]')
+
+          # Latest run per workflow file (in case of reruns), keyed by updated_at.
+          build=$(echo "$runs_json" | jq -r '[.[] | select(.path == ".github/workflows/build.yml")] | sort_by(.updated_at) | last // {}')
+          ci=$(echo    "$runs_json" | jq -r '[.[] | select(.path == ".github/workflows/ci.yml")] | sort_by(.updated_at) | last // {}')
+
+          build_status=$(echo "$build" | jq -r '.status // "missing"')
+          build_conclusion=$(echo "$build" | jq -r '.conclusion // "missing"')
+          ci_status=$(echo "$ci" | jq -r '.status // "missing"')
+          ci_conclusion=$(echo "$ci" | jq -r '.conclusion // "missing"')
+
+          echo "Build & Push Images: status=$build_status conclusion=$build_conclusion"
+          echo "CI:                  status=$ci_status conclusion=$ci_conclusion"
+
+          if [ "$build_status" != "completed" ] || [ "$ci_status" != "completed" ]; then
+            echo "::notice::One of the required workflows is still in progress for $triggering_sha; skipping. The remaining workflow's completion will re-trigger this preflight."
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$build_conclusion" != "success" ] || [ "$ci_conclusion" != "success" ]; then
+            echo "::error::Refusing to auto-deploy $triggering_sha — required workflows are not green (build=$build_conclusion, ci=$ci_conclusion)."
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          # Gate 3: singleton election. Both workflow completions trigger
+          # preflight; without this guard, both could see all gates green
+          # and deploy the same SHA twice. Proceed only if THIS event is
+          # for the workflow run that completed LAST among the required
+          # set — the other completion's preflight will skip here.
+          latest_id=$(echo "$runs_json" | jq -r '[.[] | select(.status == "completed")] | sort_by(.updated_at) | last.id // ""')
+          this_id="${{ github.event.workflow_run.id }}"
+          if [ "$latest_id" != "$this_id" ]; then
+            echo "::notice::This run ($this_id) is not the latest completed required workflow ($latest_id) for $triggering_sha; another preflight will handle deploy."
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Gate 4: do not override a successful operator action. Iterate
+          # ALL production deployments created after this trigger; if ANY
+          # of them reached state=success, an operator deliberately
+          # superseded this auto-deploy and we must skip. Checking only
+          # the latest deployment object would miss the case where a
+          # successful rollback is followed by a failed/pending deployment
+          # (the latest would be non-success and the rollback would be
+          # silently overwritten).
+          trigger_at="${{ github.event.workflow_run.updated_at }}"
+          newer_ids=$(gh api "repos/${{ github.repository }}/deployments?environment=production&per_page=50" \
+            --jq "[.[] | select(.created_at > \"$trigger_at\") | .id] | .[]")
+          for dep_id in $newer_ids; do
+            dep_state=$(gh api "repos/${{ github.repository }}/deployments/$dep_id/statuses?per_page=1" --jq '.[0].state // "unknown"')
+            if [ "$dep_state" = "success" ]; then
+              echo "::notice::Production deployment $dep_id (newer than trigger $trigger_at) reached success. Operator action is authoritative; skipping auto."
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          # All gates pass. Pin to the immutable :<sha> tag that build.yml
+          # publishes alongside :latest, so we ship the exact image whose
+          # build satisfied the gate.
+          echo "tag=$triggering_sha" >> "$GITHUB_OUTPUT"
+          echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+
   deploy:
+    needs: preflight
+    if: needs.preflight.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production  # creates an audit trail / approval gate point
     steps:
       - uses: actions/checkout@v4
+
+      # Post-wait freshness re-check. preflight's gate 1 verified main
+      # HEAD when preflight ran; between that and now this job may have
+      # waited on environment approval or the deploy-prod concurrency
+      # queue, during which main can advance. Without this re-check,
+      # approving an old run would ship a stale SHA after a newer one
+      # already deployed. Manual dispatch skips — operator chose the tag.
+      - name: Re-verify auto-trigger freshness post-wait
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: |
+          set -euo pipefail
+          git fetch origin main --quiet
+          current=$(git rev-parse origin/main)
+          triggering="${{ github.event.workflow_run.head_sha }}"
+          if [ "$triggering" != "$current" ]; then
+            echo "::error::Refusing stale auto-deploy. main has advanced to $current since this run was queued (triggering SHA: $triggering). Approve the newer Deploy run instead."
+            exit 1
+          fi
+
+      # Post-wait operator-action re-check. Mirrors preflight's gate 4
+      # but runs AFTER environment approval / concurrency wait, where a
+      # successful manual production deploy (rollback, hotfix) could have
+      # landed. Without this, a queued auto-run could overwrite a
+      # deliberate operator action. Manual dispatch skips.
+      - name: Re-verify operator-action gate post-wait
+        if: ${{ github.event_name == 'workflow_run' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          trigger_at="${{ github.event.workflow_run.updated_at }}"
+          newer_ids=$(gh api "repos/${{ github.repository }}/deployments?environment=production&per_page=50" \
+            --jq "[.[] | select(.created_at > \"$trigger_at\") | .id] | .[]")
+          for dep_id in $newer_ids; do
+            dep_state=$(gh api "repos/${{ github.repository }}/deployments/$dep_id/statuses?per_page=1" --jq '.[0].state // "unknown"')
+            if [ "$dep_state" = "success" ]; then
+              echo "::error::Production deployment $dep_id reached success after this trigger ($trigger_at). Refusing to overwrite operator action."
+              exit 1
+            fi
+          done
 
       - name: Set up SSH agent with deploy key
         uses: webfactory/ssh-agent@v0.9.0
@@ -45,7 +221,10 @@ jobs:
         env:
           USER: ${{ secrets.DEPLOY_SSH_USER }}
           HOST: ${{ secrets.DEPLOY_SSH_HOST }}
-          TAG: ${{ inputs.tag }}
+          # Tag chosen by preflight: SHA on auto-trigger, inputs.tag on
+          # manual dispatch. Falls back to 'latest' only if preflight
+          # somehow returns empty (defensive — should not happen).
+          TAG: ${{ needs.preflight.outputs.tag || 'latest' }}
         # IMPORTANT: <<EOF (unquoted) — runner expands $TAG before sending.
         # Inside the heredoc, single quotes around the printf format
         # prevent the remote bash from re-interpreting %s.
