@@ -15,6 +15,11 @@ import type { ApiError } from './http';
 import type {
   AnalyticsOverview,
   IndexerEntry,
+  ImportReport,
+  ImportRowError,
+  ImportRowResult,
+  ImportRowStatus,
+  ImportSummary,
   Media,
   Method,
   PaginatedResponse,
@@ -59,6 +64,11 @@ export {
 export type {
   AnalyticsOverview,
   IndexerEntry,
+  ImportReport,
+  ImportRowError,
+  ImportRowResult,
+  ImportRowStatus,
+  ImportSummary,
   Media,
   Method,
   PaginatedResponse,

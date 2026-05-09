@@ -28,6 +28,11 @@ export interface StrainSampleRef {
   id: number;
   code: string;
   siteName?: string;
+  sampleType?: string;
+  subject?: string | null;
+  collectedAt?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export interface StrainPhenotype {
@@ -83,6 +88,10 @@ export interface Strain {
   storage?: StrainStorage[];
   media?: StrainMedia[];
   photos?: StrainPhoto[];
+
+  // Audit timestamps (returned by export endpoint)
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateStrainInput extends Omit<Partial<Strain>, 'phenotypes' | 'genetics'> {

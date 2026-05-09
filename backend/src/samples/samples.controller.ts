@@ -51,6 +51,48 @@ export class SamplesController {
     return this.samplesService.findAll(query);
   }
 
+  @Get('export')
+  @Public()
+  @CheckPolicies((ability) => ability.can('read', 'Sample'))
+  exportAll(
+    @Query(new ValidationPipe({ transform: true })) query: SampleQueryDto,
+  ) {
+    return this.samplesService.findAllForExport(query);
+  }
+
+  @Post('import/dry-run')
+  @CheckPolicies((ability) => ability.can('create', 'Sample'))
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async importSamplesDryRun(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required');
+    }
+    return this.samplesService.dryRunSamplesImport(file.buffer);
+  }
+
+  @Post('import/commit')
+  @CheckPolicies(
+    (ability) =>
+      ability.can('create', 'Sample') && ability.can('update', 'Sample'),
+  )
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async importSamplesCommit(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required');
+    }
+    return this.samplesService.commitSamplesImport(file.buffer);
+  }
+
   @Get(':id')
   @Public()
   @CheckPolicies((ability) => ability.can('read', 'Sample'))

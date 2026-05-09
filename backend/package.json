@@ -50,6 +50,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "connect-redis": "^7.1.1",
+    "csv-parse": "^6.2.1",
     "express-formidable": "^1.2.0",
     "express-session": "^1.18.2",
     "file-type": "^21.3.4",

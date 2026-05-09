@@ -47,6 +47,48 @@ export class StrainsController {
     return this.strainsService.findAll(query);
   }
 
+  @Get('export')
+  @Public()
+  @CheckPolicies((ability) => ability.can('read', 'Strain'))
+  exportAll(
+    @Query(new ValidationPipe({ transform: true })) query: StrainQueryDto,
+  ) {
+    return this.strainsService.findAllForExport(query);
+  }
+
+  @Post('import/dry-run')
+  @CheckPolicies((ability) => ability.can('create', 'Strain'))
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async importStrainsDryRun(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required');
+    }
+    return this.strainsService.dryRunStrainsImport(file.buffer);
+  }
+
+  @Post('import/commit')
+  @CheckPolicies(
+    (ability) =>
+      ability.can('create', 'Strain') && ability.can('update', 'Strain'),
+  )
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+    }),
+  )
+  async importStrainsCommit(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required');
+    }
+    return this.strainsService.commitStrainsImport(file.buffer);
+  }
+
   @Get(':id')
   @Public()
   @CheckPolicies((ability) => ability.can('read', 'Strain'))

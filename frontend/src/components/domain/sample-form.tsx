@@ -123,7 +123,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         name="sampleTypeId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{t('sampleType')}</FormLabel>
+                                <FormLabel required>{t('sampleType')}</FormLabel>
                                 <Select
                                     onValueChange={(value) => field.onChange(parseInt(value))}
                                     value={field.value?.toString()}
@@ -165,7 +165,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         name="siteName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{t('siteName')}</FormLabel>
+                                <FormLabel required>{t('siteName')}</FormLabel>
                                 <FormControl>
                                     <Input placeholder={t('collectionSitePlaceholder')} {...field} />
                                 </FormControl>
@@ -179,7 +179,7 @@ export function SampleForm({ initialData, isEdit = false }: SampleFormProps) {
                         name="collectedAt"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>{t('collectionDate')}</FormLabel>
+                                <FormLabel required>{t('collectionDate')}</FormLabel>
                                 <FormControl>
                                     <DatePickerInput
                                         value={field.value}

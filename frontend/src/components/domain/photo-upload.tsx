@@ -361,13 +361,13 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                     <DialogOverlay className="bg-black/90" />
                     <DialogPrimitive.Content
                         className="fixed inset-0 z-50 flex items-center justify-center p-4 focus:outline-none"
-                        aria-label={currentPhoto?.meta?.originalName || 'Photo viewer'}
+                        aria-label={currentPhoto?.meta?.originalName || t('photoViewer')}
                     >
                         {currentPhoto && (
                             <>
                                 {/* Close button */}
                                 <DialogClose
-                                    aria-label="Close photo"
+                                    aria-label={t('closePhoto')}
                                     className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
                                 >
                                     <X className="h-6 w-6" />
@@ -381,7 +381,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                 {/* Previous button */}
                                 {photos.length > 1 && (
                                     <button
-                                        aria-label="Previous photo"
+                                        aria-label={t('previousPhoto')}
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             goToPrevious()
@@ -401,7 +401,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                     />
                                     <Image
                                         src={getFullSizeUrl(currentPhoto.url)}
-                                        alt={currentPhoto.meta?.originalName || 'Sample photo'}
+                                        alt={currentPhoto.meta?.originalName || t('samplePhoto')}
                                         fill
                                         className="object-contain rounded-lg opacity-0"
                                         sizes="100vw"
@@ -416,7 +416,7 @@ export function PhotoUpload({ sampleId, existingPhotos = [], onPhotosChange, rea
                                 {/* Next button */}
                                 {photos.length > 1 && (
                                     <button
-                                        aria-label="Next photo"
+                                        aria-label={t('nextPhoto')}
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             goToNext()
