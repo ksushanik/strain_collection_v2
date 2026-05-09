@@ -31,7 +31,17 @@ import { useAuth } from "@/contexts/AuthContext"
 import { isPositiveLike } from "@/lib/trait-labels"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { ExportButton } from "@/components/export-button"
-import { CsvColumn } from "@/lib/export-data"
+import { ImportButton } from "@/components/import-button"
+import {
+    CsvColumn,
+    formatDate,
+    formatDateTime,
+    joinMedia,
+    joinPhenotypes,
+    joinPhotos,
+    joinStorage,
+    stripHtml,
+} from "@/lib/export-data"
 import { PhenotypeBadges } from "@/components/domain/phenotype-badges"
 
 interface StrainListProps {
@@ -251,19 +261,39 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
     const strainExportColumns = React.useMemo<CsvColumn<Strain>[]>(() => [
         { header: "Identifier", accessor: "identifier" },
         { header: "Sample Code", accessor: (s) => s.sample?.code ?? "" },
-        { header: "Taxonomy 16S", accessor: (s) => s.taxonomy16s ?? "" },
+        { header: "Sample Type", accessor: (s) => s.sample?.sampleType ?? "" },
+        { header: "Sample Site", accessor: (s) => s.sample?.siteName ?? "" },
+        { header: "Sample Subject", accessor: (s) => s.sample?.subject ?? "" },
+        { header: "Sample Collected At", accessor: (s) => formatDate(s.sample?.collectedAt) },
+        { header: "Sample Latitude", accessor: (s) => s.sample?.lat ?? "" },
+        { header: "Sample Longitude", accessor: (s) => s.sample?.lng ?? "" },
         { header: "NCBI Scientific Name", accessor: (s) => s.ncbiScientificName ?? "" },
-        { header: "Gram Stain", accessor: (s) => s.gramStainLabel ?? "" },
+        { header: "NCBI Taxonomy ID", accessor: (s) => s.ncbiTaxonomyId ?? "" },
+        { header: "Biosafety Level", accessor: (s) => s.biosafetyLevel ?? "" },
+        { header: "Stock Type", accessor: (s) => s.stockType ?? "" },
+        { header: "Passage Number", accessor: (s) => s.passageNumber ?? "" },
+        { header: "Taxonomy 16S", accessor: (s) => s.taxonomy16s ?? "" },
+        { header: "Other Taxonomy", accessor: (s) => s.otherTaxonomy ?? "" },
+        { header: "Collection RCAM", accessor: (s) => s.collectionRcam ?? "" },
+        { header: "Indexer Initials", accessor: (s) => s.indexerInitials ?? "" },
         { header: "Isolation Region", accessor: (s) => s.isolationRegion ?? "" },
-        { header: "Storage", accessor: (s) => (s.storage ?? []).map((st) => `${st.cell.box.displayName}: ${st.cell.cellCode}`).join("; ") },
-        { header: "Phenotypes", accessor: (s) => (s.phenotypes ?? []).map((p) => `${p.traitName}: ${p.result}`).join("; ") },
+        { header: "Gram Stain", accessor: (s) => s.gramStainLabel ?? "" },
         { header: "WGS Status", accessor: (s) => s.genetics?.wgsStatus ?? "" },
-        { header: "Features", accessor: (s) => s.features ?? "" },
-        { header: "Comments", accessor: (s) => s.comments ?? "" },
+        { header: "Assembly Accession", accessor: (s) => s.genetics?.assemblyAccession ?? "" },
+        { header: "16S Accession", accessor: (s) => s.genetics?.marker16sAccession ?? "" },
+        { header: "16S Sequence", accessor: (s) => s.genetics?.marker16sSequence ?? "" },
+        { header: "Phenotypes", accessor: (s) => joinPhenotypes(s.phenotypes) },
+        { header: "Storage", accessor: (s) => joinStorage(s.storage) },
+        { header: "Linked Media", accessor: (s) => joinMedia(s.media) },
+        { header: "Photos", accessor: (s) => joinPhotos(s.photos) },
+        { header: "Features", accessor: (s) => stripHtml(s.features) },
+        { header: "Comments", accessor: (s) => stripHtml(s.comments) },
+        { header: "Created At", accessor: (s) => formatDateTime(s.createdAt) },
+        { header: "Updated At", accessor: (s) => formatDateTime(s.updatedAt) },
     ], [])
 
     const fetchAllStrains = React.useCallback(() => {
-        return ApiService.getStrains({
+        return ApiService.getStrainsForExport({
             search,
             sampleCode: filters.sampleCode || undefined,
             taxonomy: filters.taxonomy || undefined,
@@ -276,8 +306,7 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
             pigmentSecretion: resolveBoolFilter(filters.pigment),
             sortBy,
             sortOrder,
-            limit: 10000,
-        }).then((res) => res.data)
+        })
     }, [filters, search, sortBy, sortOrder])
 
     // --- Field Pack Logic ---
@@ -350,6 +379,14 @@ export function StrainList({ enabledPacks, returnPath = "/strains" }: StrainList
                         columns={strainExportColumns}
                         filenamePrefix="strains"
                     />
+                    {user && (
+                        <ImportButton
+                            dryRun={ApiService.dryRunStrainsImport}
+                            commit={ApiService.commitStrainsImport}
+                            onCompleted={loadStrains}
+                            ignoredColumnsNote={t("importIgnoredNote")}
+                        />
+                    )}
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" onClick={() => setFiltersOpen((v) => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}

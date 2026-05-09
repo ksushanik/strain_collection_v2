@@ -76,3 +76,113 @@ export function downloadJson(data: unknown, filename: string) {
   const blob = new Blob([json], { type: "application/json;charset=utf-8;" })
   downloadBlob(blob, filename.endsWith(".json") ? filename : `${filename}.json`)
 }
+
+/* ------------------------------------------------------------------ */
+/*  Format helpers for nested export data                              */
+/* ------------------------------------------------------------------ */
+
+/** Strip HTML tags and decode common entities — used for rich-text fields */
+export function stripHtml(input: string | null | undefined): string {
+  if (!input) return ""
+  return input
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+/** ISO datetime → locale date string; empty for nullish */
+export function formatDate(value: string | Date | null | undefined): string {
+  if (!value) return ""
+  const d = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString()
+}
+
+/** ISO datetime → locale datetime string; empty for nullish */
+export function formatDateTime(value: string | Date | null | undefined): string {
+  if (!value) return ""
+  const d = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString()
+}
+
+interface PhenotypeLike {
+  traitName?: string
+  result?: string
+  method?: string
+  traitDefinition?: { code?: string; name?: string; units?: string | null } | null
+}
+
+/** Phenotypes → "Name=value (method); Name2=value2" */
+export function joinPhenotypes(phenotypes: PhenotypeLike[] | undefined): string {
+  if (!phenotypes || phenotypes.length === 0) return ""
+  return phenotypes
+    .map((p) => {
+      const name = p.traitDefinition?.name || p.traitName || p.traitDefinition?.code || "?"
+      const value = (p.result ?? "").trim() || "—"
+      const units = p.traitDefinition?.units ? ` ${p.traitDefinition.units}` : ""
+      const method = p.method ? ` (${p.method})` : ""
+      return `${name}=${value}${units}${method}`
+    })
+    .join("; ")
+}
+
+interface StorageLike {
+  isPrimary?: boolean
+  cell?: { cellCode?: string; box?: { displayName?: string } }
+}
+
+/** Storage allocations → "Box1:A1*; Box2:B3" (* = primary) */
+export function joinStorage(storage: StorageLike[] | undefined): string {
+  if (!storage || storage.length === 0) return ""
+  return storage
+    .map((s) => {
+      const box = s.cell?.box?.displayName ?? "?"
+      const cell = s.cell?.cellCode ?? "?"
+      const primary = s.isPrimary ? "*" : ""
+      return `${box}:${cell}${primary}`
+    })
+    .join("; ")
+}
+
+interface MediaLike {
+  notes?: string | null
+  media?: { name?: string }
+}
+
+/** Linked media → "Medium A [notes]; Medium B" */
+export function joinMedia(media: MediaLike[] | undefined): string {
+  if (!media || media.length === 0) return ""
+  return media
+    .map((m) => {
+      const name = m.media?.name ?? "?"
+      const notes = m.notes ? ` [${m.notes}]` : ""
+      return `${name}${notes}`
+    })
+    .join("; ")
+}
+
+interface PhotoLike {
+  url?: string
+  meta?: { originalName?: string } | null
+}
+
+/** Photos → "name1.jpg; name2.png" (or url tail if no original name) */
+export function joinPhotos(photos: PhotoLike[] | undefined): string {
+  if (!photos || photos.length === 0) return ""
+  return photos
+    .map((p) => p.meta?.originalName || p.url?.split("/").pop() || "")
+    .filter(Boolean)
+    .join("; ")
+}
+
+/** Strain identifiers attached to a sample → "Ott 1-23; Ott 2-23" */
+export function joinStrainIdentifiers(
+  strains: { identifier?: string }[] | undefined,
+): string {
+  if (!strains || strains.length === 0) return ""
+  return strains.map((s) => s.identifier ?? "").filter(Boolean).join("; ")
+}

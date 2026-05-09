@@ -457,8 +457,9 @@ function StrainDetailContent({ id }: { id: string }) {
 
 export default function StrainDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
     const { id } = React.use(params)
+    const tCommon = useTranslations('Common')
     return (
-        <Suspense fallback={<div className="p-8">Loading...</div>}>
+        <Suspense fallback={<div className="p-8">{tCommon('loading')}</div>}>
             <StrainDetailContent id={id} />
         </Suspense>
     )

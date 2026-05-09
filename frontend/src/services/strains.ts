@@ -1,5 +1,11 @@
 import { assertOk, request } from './http';
-import { PaginatedResponse, Strain, StrainPhoto, CreateStrainInput } from '../types/api';
+import {
+  ImportReport,
+  PaginatedResponse,
+  Strain,
+  StrainPhoto,
+  CreateStrainInput,
+} from '../types/api';
 
 export async function getStrains(params?: {
   search?: string;
@@ -51,6 +57,51 @@ export async function getStrains(params?: {
   const response = await request(`/api/v1/strains${qs ? `?${qs}` : ''}`);
   await assertOk(response, 'Failed to fetch strains');
   return response.json();
+}
+
+export type StrainExportFilters = Omit<
+  Parameters<typeof getStrains>[0] & object,
+  'page' | 'limit'
+>;
+
+export async function getStrainsForExport(
+  params?: StrainExportFilters,
+): Promise<Strain[]> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set('search', params.search);
+  if (params?.sampleCode) query.set('sampleCode', params.sampleCode);
+  if (params?.taxonomy) query.set('taxonomy', params.taxonomy);
+  if (params?.isolationRegion)
+    query.set('isolationRegion', params.isolationRegion);
+  if (params?.hasGenome !== undefined)
+    query.set('hasGenome', params.hasGenome ? 'true' : 'false');
+  if (params?.gramStain) query.set('gramStain', params.gramStain);
+  if (params?.amylase !== undefined)
+    query.set('amylase', params.amylase ? 'true' : 'false');
+  if (params?.phosphateSolubilization !== undefined)
+    query.set(
+      'phosphateSolubilization',
+      params.phosphateSolubilization ? 'true' : 'false',
+    );
+  if (params?.siderophoreProduction !== undefined)
+    query.set(
+      'siderophoreProduction',
+      params.siderophoreProduction ? 'true' : 'false',
+    );
+  if (params?.pigmentSecretion !== undefined)
+    query.set(
+      'pigmentSecretion',
+      params.pigmentSecretion ? 'true' : 'false',
+    );
+  if (params?.sortBy) query.set('sortBy', params.sortBy);
+  if (params?.sortOrder) query.set('sortOrder', params.sortOrder);
+  const qs = query.toString();
+  const response = await request(
+    `/api/v1/strains/export${qs ? `?${qs}` : ''}`,
+  );
+  await assertOk(response, 'Failed to fetch strains for export');
+  const body = (await response.json()) as { data: Strain[] };
+  return body.data;
 }
 
 export async function getStrain(id: number): Promise<Strain> {
@@ -138,4 +189,26 @@ export async function updateStrainPhoto(
   });
   await assertOk(response, 'Failed to update strain photo');
   return response.json();
+}
+
+async function postImportFile(
+  endpoint: string,
+  file: File,
+): Promise<ImportReport> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await request(endpoint, {
+    method: 'POST',
+    body: formData,
+  });
+  await assertOk(response, 'Import request failed');
+  return response.json();
+}
+
+export function dryRunStrainsImport(file: File): Promise<ImportReport> {
+  return postImportFile('/api/v1/strains/import/dry-run', file);
+}
+
+export function commitStrainsImport(file: File): Promise<ImportReport> {
+  return postImportFile('/api/v1/strains/import/commit', file);
 }

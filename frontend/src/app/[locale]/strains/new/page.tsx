@@ -107,8 +107,9 @@ function CreateStrainPageContent() {
 }
 
 export default function CreateStrainPage() {
+    const tCommon = useTranslations('Common')
     return (
-        <Suspense fallback={<div className="p-8">Loading...</div>}>
+        <Suspense fallback={<div className="p-8">{tCommon('loading')}</div>}>
             <CreateStrainPageContent />
         </Suspense>
     )

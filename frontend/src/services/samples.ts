@@ -1,5 +1,6 @@
 import { assertOk, request } from './http';
 import {
+  ImportReport,
   PaginatedResponse,
   Sample,
   SamplePhoto,
@@ -31,6 +32,31 @@ export async function getSamples(params?: {
   const response = await request(`/api/v1/samples${qs ? `?${qs}` : ''}`);
   await assertOk(response, 'Failed to fetch samples');
   return response.json();
+}
+
+export type SampleExportFilters = Omit<
+  Parameters<typeof getSamples>[0] & object,
+  'page' | 'limit'
+>;
+
+export async function getSamplesForExport(
+  params?: SampleExportFilters,
+): Promise<Sample[]> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set('search', params.search);
+  if (params?.sampleType) query.set('sampleType', params.sampleType);
+  if (params?.site) query.set('site', params.site);
+  if (params?.dateFrom) query.set('dateFrom', params.dateFrom);
+  if (params?.dateTo) query.set('dateTo', params.dateTo);
+  if (params?.sortBy) query.set('sortBy', params.sortBy);
+  if (params?.sortOrder) query.set('sortOrder', params.sortOrder);
+  const qs = query.toString();
+  const response = await request(
+    `/api/v1/samples/export${qs ? `?${qs}` : ''}`,
+  );
+  await assertOk(response, 'Failed to fetch samples for export');
+  const body = (await response.json()) as { data: Sample[] };
+  return body.data;
 }
 
 export async function getSample(id: number): Promise<Sample> {
@@ -90,4 +116,26 @@ export async function deleteSamplePhoto(photoId: number): Promise<void> {
     method: 'DELETE',
   });
   await assertOk(response, 'Failed to delete photo');
+}
+
+async function postImportFile(
+  endpoint: string,
+  file: File,
+): Promise<ImportReport> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await request(endpoint, {
+    method: 'POST',
+    body: formData,
+  });
+  await assertOk(response, 'Import request failed');
+  return response.json();
+}
+
+export function dryRunSamplesImport(file: File): Promise<ImportReport> {
+  return postImportFile('/api/v1/samples/import/dry-run', file);
+}
+
+export function commitSamplesImport(file: File): Promise<ImportReport> {
+  return postImportFile('/api/v1/samples/import/commit', file);
 }

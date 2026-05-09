@@ -69,7 +69,7 @@ function LoginForm() {
                         </Alert>
                     )}
                     <div className="space-y-2">
-                        <Label htmlFor="email">{t('email')}</Label>
+                        <Label htmlFor="email" required>{t('email')}</Label>
                         <Input
                             id="email"
                             type="email"
@@ -80,7 +80,7 @@ function LoginForm() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password">{t('password')}</Label>
+                        <Label htmlFor="password" required>{t('password')}</Label>
                         <Input
                             id="password"
                             type="password"
@@ -120,9 +120,10 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+    const tCommon = useTranslations('Common');
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 px-4">
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>{tCommon('loading')}</div>}>
                 <LoginForm />
             </Suspense>
         </div>

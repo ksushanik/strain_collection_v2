@@ -17,7 +17,15 @@ import { useAuth } from "@/contexts/AuthContext"
 import { formatSampleCodeForDisplay } from "@/lib/sample-code"
 import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { ExportButton } from "@/components/export-button"
-import { CsvColumn } from "@/lib/export-data"
+import { ImportButton } from "@/components/import-button"
+import {
+    CsvColumn,
+    formatDate,
+    formatDateTime,
+    joinPhotos,
+    joinStrainIdentifiers,
+    stripHtml,
+} from "@/lib/export-data"
 
 const SAMPLE_SORT_BY_VALUES = ["siteName", "createdAt", "collectedAt", "code"] as const
 type SampleSortBy = (typeof SAMPLE_SORT_BY_VALUES)[number]
@@ -110,13 +118,18 @@ export function SampleList() {
         { header: "Subject", accessor: (s) => s.subject ?? "" },
         { header: "Latitude", accessor: (s) => s.lat ?? "" },
         { header: "Longitude", accessor: (s) => s.lng ?? "" },
-        { header: "Collected At", accessor: (s) => s.collectedAt ? new Date(s.collectedAt).toLocaleDateString() : "" },
-        { header: "Description", accessor: (s) => s.description?.replace(/<[^>]*>/g, "") ?? "" },
-        { header: "Strains Count", accessor: (s) => s._count?.strains ?? "" },
+        { header: "Collected At", accessor: (s) => formatDate(s.collectedAt) },
+        { header: "Description", accessor: (s) => stripHtml(s.description) },
+        { header: "Strains Count", accessor: (s) => s._count?.strains ?? s.strains?.length ?? "" },
+        { header: "Strain Identifiers", accessor: (s) => joinStrainIdentifiers(s.strains) },
+        { header: "Photos Count", accessor: (s) => s._count?.photos ?? s.photos?.length ?? "" },
+        { header: "Photos", accessor: (s) => joinPhotos(s.photos) },
+        { header: "Created At", accessor: (s) => formatDateTime(s.createdAt) },
+        { header: "Updated At", accessor: (s) => formatDateTime(s.updatedAt) },
     ], [])
 
     const fetchAllSamples = React.useCallback(() => {
-        return ApiService.getSamples({
+        return ApiService.getSamplesForExport({
             search,
             site: filters.site || undefined,
             dateFrom: filters.dateFrom || undefined,
@@ -124,8 +137,7 @@ export function SampleList() {
             sampleType: filters.sampleType || undefined,
             sortBy,
             sortOrder,
-            limit: 10000,
-        }).then((res) => res.data)
+        })
     }, [filters, search, sortBy, sortOrder])
 
     if (loading && !meta) {
@@ -178,6 +190,14 @@ export function SampleList() {
                         columns={sampleExportColumns}
                         filenamePrefix="samples"
                     />
+                    {user && (
+                        <ImportButton
+                            dryRun={ApiService.dryRunSamplesImport}
+                            commit={ApiService.commitSamplesImport}
+                            onCompleted={loadSamples}
+                            ignoredColumnsNote={t("importIgnoredNote")}
+                        />
+                    )}
                     <Button variant={filtersOpen ? "default" : "outline"} size="sm" className="mr-2" onClick={() => setFiltersOpen(v => !v)}>
                         <Filter className="mr-2 h-4 w-4" />
                         {t('filters')}

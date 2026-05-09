@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Download, Loader2 } from "lucide-react"
+import { Upload, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -58,7 +58,7 @@ export function ExportButton<T>({
           {loading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <Download className="mr-2 h-4 w-4" />
+            <Upload className="mr-2 h-4 w-4" />
           )}
           {loading ? t("exporting") : t("export")}
         </Button>

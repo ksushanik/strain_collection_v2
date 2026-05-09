@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const pathWithoutLocale = pathname.replace(/^\/(ru|en)/, '') || '/';
     const isLoginPage = pathWithoutLocale === '/login' || pathname.endsWith('/login');
     const hasAccess = isAuthenticated || isGuest;
+    const t = useTranslations('Common');
 
     useEffect(() => {
         if (!isLoading && isAuthenticated && isLoginPage) {
@@ -23,7 +25,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }, [isLoading, isAuthenticated, hasAccess, isLoginPage, router]);
 
     if (isLoading) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return <div className="flex items-center justify-center min-h-screen">{t('loading')}</div>;
     }
 
     return <>{children}</>;

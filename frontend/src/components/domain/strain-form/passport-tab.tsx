@@ -47,7 +47,7 @@ export function StrainPassportTab() {
                     name="identifier"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('identifier')}</FormLabel>
+                            <FormLabel required>{t('identifier')}</FormLabel>
                             <FormControl>
                                 <Input placeholder={t('identifierPlaceholder')} {...field} />
                             </FormControl>
@@ -60,7 +60,7 @@ export function StrainPassportTab() {
                     name="sampleId"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{t('sourceSample')}</FormLabel>
+                            <FormLabel required>{t('sourceSample')}</FormLabel>
                             <FormControl>
                                 <SampleAutocomplete
                                     value={field.value}

@@ -5,6 +5,44 @@ import { CreateSampleDto } from './dto/create-sample.dto';
 import { UpdateSampleDto } from './dto/update-sample.dto';
 import { SampleQueryDto } from './dto/sample-query.dto';
 import { ImageKitService } from '../services/imagekit.service';
+import {
+  buildSummary,
+  formatImportError,
+  ImportReport,
+  ImportRowError,
+  ImportRowResult,
+  parseCsvBuffer,
+  parseOptionalDate,
+  parseOptionalNumber,
+} from '../common/csv-import';
+
+/**
+ * Optional fields use the convention:
+ *   - key absent (undefined) → CSV had no such column → don't touch on update
+ *   - key present with `null` → CSV column was empty → clear in DB
+ *   - key present with value → CSV column had value → set in DB
+ *
+ * Required fields (`sampleTypeId`, `siteName`, `collectedAt`) are always
+ * present; `code` is optional but, when present, drives the upsert key.
+ */
+interface PreparedSampleData {
+  code?: string;
+  sampleTypeId: number;
+  sampleTypeSlug: string;
+  subject?: string | null;
+  siteName: string;
+  lat?: number | null;
+  lng?: number | null;
+  description?: string | null;
+  collectedAt: Date;
+}
+
+interface PreparedSampleRow {
+  rowNum: number;
+  identifier?: string;
+  errors: ImportRowError[];
+  data: PreparedSampleData | null;
+}
 
 @Injectable()
 export class SamplesService implements OnModuleInit {
@@ -80,7 +118,7 @@ export class SamplesService implements OnModuleInit {
     return nextSuffix <= 0 ? base : `${base}-${nextSuffix}`;
   }
 
-  async findAll(query: SampleQueryDto) {
+  private buildSamplesWhere(query: SampleQueryDto): Prisma.SampleWhereInput {
     const {
       sampleType,
       sampleTypeId,
@@ -93,10 +131,6 @@ export class SamplesService implements OnModuleInit {
       latMax,
       lngMin,
       lngMax,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-      page = 1,
-      limit = 50,
     } = query;
 
     const where: Prisma.SampleWhereInput = {};
@@ -149,10 +183,20 @@ export class SamplesService implements OnModuleInit {
       ];
     }
 
-    // Dynamic sorting
-    const orderBy: Prisma.SampleOrderByWithRelationInput = {
-      [sortBy]: sortOrder,
-    };
+    return where;
+  }
+
+  private buildSamplesOrderBy(
+    query: SampleQueryDto,
+  ): Prisma.SampleOrderByWithRelationInput {
+    const { sortBy = 'createdAt', sortOrder = 'desc' } = query;
+    return { [sortBy]: sortOrder } as Prisma.SampleOrderByWithRelationInput;
+  }
+
+  async findAll(query: SampleQueryDto) {
+    const { page = 1, limit = 50 } = query;
+    const where = this.buildSamplesWhere(query);
+    const orderBy = this.buildSamplesOrderBy(query);
 
     const [samples, total] = await Promise.all([
       this.prisma.sample.findMany({
@@ -178,6 +222,31 @@ export class SamplesService implements OnModuleInit {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async findAllForExport(query: SampleQueryDto) {
+    const where = this.buildSamplesWhere(query);
+    const orderBy = this.buildSamplesOrderBy(query);
+
+    const samples = await this.prisma.sample.findMany({
+      where,
+      include: {
+        strains: {
+          select: { id: true, identifier: true },
+          orderBy: { identifier: 'asc' },
+        },
+        photos: {
+          select: { id: true, url: true, meta: true },
+          orderBy: { id: 'asc' },
+        },
+        _count: {
+          select: { strains: true, photos: true },
+        },
+      },
+      orderBy,
+    });
+
+    return { data: samples };
   }
 
   async findOne(id: number) {
@@ -301,9 +370,7 @@ export class SamplesService implements OnModuleInit {
 
       if (shouldRebuildCode) {
         if (!sampleTypeId || !sampleTypeSlug) {
-          throw new NotFoundException(
-            `Sample Type for Sample ${id} not found`,
-          );
+          throw new NotFoundException(`Sample Type for Sample ${id} not found`);
         }
 
         const nextSubject =
@@ -394,6 +461,343 @@ export class SamplesService implements OnModuleInit {
   async getSampleTypes() {
     return this.prisma.sampleTypeDictionary.findMany({
       orderBy: { name: 'asc' },
+    });
+  }
+
+  /* ----------------------------------------------------------------- */
+  /*  CSV import                                                        */
+  /* ----------------------------------------------------------------- */
+
+  /**
+   * Validate and normalise a single CSV row against the Sample schema.
+   * Pure function — does not touch the database; returns errors instead
+   * of throwing so the caller can collect them per-row.
+   */
+  private validateSampleRow(
+    raw: Record<string, string>,
+    rowNum: number,
+    sampleTypeIndex: Map<string, { id: number; slug: string }>,
+    headerSet: Set<string>,
+  ): PreparedSampleRow {
+    const errors: ImportRowError[] = [];
+    const code = (raw['Code'] ?? '').trim() || undefined;
+    const identifier = code;
+
+    const sampleTypeInput = (raw['Sample Type'] ?? '').trim();
+    let sampleTypeRecord: { id: number; slug: string } | undefined;
+    if (!sampleTypeInput) {
+      errors.push({ field: 'Sample Type', message: 'Required' });
+    } else {
+      sampleTypeRecord = sampleTypeIndex.get(sampleTypeInput.toLowerCase());
+      if (!sampleTypeRecord) {
+        errors.push({
+          field: 'Sample Type',
+          message: `Unknown sample type "${sampleTypeInput}"`,
+        });
+      }
+    }
+
+    const siteName = (raw['Site Name'] ?? '').trim();
+    if (!siteName) {
+      errors.push({ field: 'Site Name', message: 'Required' });
+    }
+
+    const collectedAtRaw = (raw['Collected At'] ?? '').trim();
+    const collectedAt = parseOptionalDate(collectedAtRaw);
+    if (!collectedAtRaw) {
+      errors.push({ field: 'Collected At', message: 'Required' });
+    } else if (collectedAt === null) {
+      errors.push({
+        field: 'Collected At',
+        message: `Invalid date "${collectedAtRaw}"`,
+      });
+    }
+
+    // Optional numeric fields with absence-vs-empty distinction.
+    let lat: number | null | undefined;
+    if (headerSet.has('Latitude')) {
+      const v = (raw['Latitude'] ?? '').trim();
+      if (!v) {
+        lat = null;
+      } else {
+        const parsed = parseOptionalNumber(v);
+        if (parsed === null) {
+          errors.push({ field: 'Latitude', message: `Invalid number "${v}"` });
+          lat = null;
+        } else if (parsed !== undefined && (parsed < -90 || parsed > 90)) {
+          errors.push({ field: 'Latitude', message: 'Out of range (-90..90)' });
+          lat = null;
+        } else {
+          lat = parsed ?? null;
+        }
+      }
+    }
+
+    let lng: number | null | undefined;
+    if (headerSet.has('Longitude')) {
+      const v = (raw['Longitude'] ?? '').trim();
+      if (!v) {
+        lng = null;
+      } else {
+        const parsed = parseOptionalNumber(v);
+        if (parsed === null) {
+          errors.push({
+            field: 'Longitude',
+            message: `Invalid number "${v}"`,
+          });
+          lng = null;
+        } else if (parsed !== undefined && (parsed < -180 || parsed > 180)) {
+          errors.push({
+            field: 'Longitude',
+            message: 'Out of range (-180..180)',
+          });
+          lng = null;
+        } else {
+          lng = parsed ?? null;
+        }
+      }
+    }
+
+    if (errors.length > 0 || !sampleTypeRecord || !collectedAt) {
+      return { rowNum, identifier, errors, data: null };
+    }
+
+    const data: PreparedSampleData = {
+      code,
+      sampleTypeId: sampleTypeRecord.id,
+      sampleTypeSlug: sampleTypeRecord.slug,
+      siteName,
+      collectedAt,
+    };
+
+    // Conditional spread for absence-aware optional fields.
+    if (headerSet.has('Subject')) {
+      const v = (raw['Subject'] ?? '').trim();
+      data.subject = v || null;
+    }
+    if (lat !== undefined) data.lat = lat;
+    if (lng !== undefined) data.lng = lng;
+    if (headerSet.has('Description')) {
+      const v = (raw['Description'] ?? '').trim();
+      data.description = v || null;
+    }
+
+    return {
+      rowNum,
+      identifier,
+      errors: [],
+      data,
+    };
+  }
+
+  private async loadSampleTypeIndex(): Promise<
+    Map<string, { id: number; slug: string }>
+  > {
+    const types = await this.prisma.sampleTypeDictionary.findMany({
+      select: { id: true, slug: true, name: true },
+    });
+    const index = new Map<string, { id: number; slug: string }>();
+    // Index by slug, name, and uppercase enum form so users can paste
+    // either format the export produces or what they see in the UI.
+    for (const t of types) {
+      index.set(t.slug.toLowerCase(), { id: t.id, slug: t.slug });
+      index.set(t.name.toLowerCase(), { id: t.id, slug: t.slug });
+      index.set(t.slug.toUpperCase().toLowerCase(), {
+        id: t.id,
+        slug: t.slug,
+      });
+    }
+    return index;
+  }
+
+  private async prepareSamplesImport(
+    buffer: Buffer,
+  ): Promise<PreparedSampleRow[]> {
+    const { headers, rows } = parseCsvBuffer(buffer);
+    const headerSet = new Set(headers);
+    const sampleTypeIndex = await this.loadSampleTypeIndex();
+    return rows.map((row, idx) =>
+      this.validateSampleRow(row, idx + 1, sampleTypeIndex, headerSet),
+    );
+  }
+
+  async dryRunSamplesImport(buffer: Buffer): Promise<ImportReport> {
+    const prepared = await this.prepareSamplesImport(buffer);
+
+    // Resolve which codes already exist to differentiate create vs update
+    const codes = prepared
+      .map((p) => p.data?.code)
+      .filter((c): c is string => Boolean(c));
+    const existing = codes.length
+      ? await this.prisma.sample.findMany({
+          where: { code: { in: codes } },
+          select: { code: true },
+        })
+      : [];
+    const existingCodes = new Set(existing.map((e) => e.code));
+
+    const result: ImportRowResult[] = prepared.map((r) => {
+      if (r.errors.length > 0 || !r.data) {
+        return {
+          rowNum: r.rowNum,
+          identifier: r.identifier,
+          status: 'error',
+          errors: r.errors,
+        };
+      }
+      const isUpdate = r.data.code ? existingCodes.has(r.data.code) : false;
+      return {
+        rowNum: r.rowNum,
+        identifier: r.identifier ?? r.data.code,
+        status: isUpdate ? 'update' : 'create',
+        errors: [],
+      };
+    });
+
+    return { summary: buildSummary(result), rows: result };
+  }
+
+  async commitSamplesImport(buffer: Buffer): Promise<ImportReport> {
+    const prepared = await this.prepareSamplesImport(buffer);
+    const result: ImportRowResult[] = [];
+
+    for (const r of prepared) {
+      if (r.errors.length > 0 || !r.data) {
+        result.push({
+          rowNum: r.rowNum,
+          identifier: r.identifier,
+          status: 'error',
+          errors: r.errors,
+        });
+        continue;
+      }
+
+      try {
+        const wasUpdate = await this.applySampleImportRow(r.data);
+        result.push({
+          rowNum: r.rowNum,
+          identifier: r.identifier ?? r.data.code,
+          status: wasUpdate ? 'update' : 'create',
+          errors: [],
+        });
+      } catch (err) {
+        console.error(
+          `[samples-import] row ${r.rowNum} (${r.identifier}) failed:`,
+          err,
+        );
+        result.push({
+          rowNum: r.rowNum,
+          identifier: r.identifier,
+          status: 'error',
+          errors: [{ message: formatImportError(err) }],
+        });
+      }
+    }
+
+    return { summary: buildSummary(result), rows: result };
+  }
+
+  /**
+   * Apply a single validated row inside its own transaction. Returns true
+   * if the existing record was updated, false if a new one was created.
+   * Errors propagate; the caller wraps them in row-level error reports.
+   *
+   * Idempotency rules:
+   *  - If `code` is present in CSV and matches an existing record → update.
+   *  - If `code` is present but does NOT match → create the new record
+   *    with that exact code preserved (round-trip into another database
+   *    works, repeat-import is a no-op on the second pass).
+   *  - If `code` is absent → fall through to canonical code generation.
+   *
+   * Code uniqueness is enforced by the DB; if a foreign code happens to
+   * collide with an unrelated record, Prisma raises P2002 which the
+   * row-level error handler surfaces verbatim.
+   */
+  private async applySampleImportRow(
+    data: PreparedSampleData,
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      const existing = data.code
+        ? await tx.sample.findUnique({
+            where: { code: data.code },
+            select: { id: true },
+          })
+        : null;
+
+      if (existing) {
+        // Build update payload from required fields plus only the optional
+        // fields whose CSV columns were actually present. Absent columns
+        // stay out of the payload so Prisma leaves them untouched.
+        // Use UncheckedUpdateInput so we can set the raw `sampleTypeId`
+        // FK alongside the enum `sampleType`, mirroring the existing
+        // controller-level `update()` flow.
+        const updateData: Prisma.SampleUncheckedUpdateInput = {
+          sampleTypeId: data.sampleTypeId,
+          sampleType: data.sampleTypeSlug.toUpperCase() as SampleType,
+          siteName: data.siteName,
+          collectedAt: data.collectedAt,
+        };
+        if ('subject' in data) updateData.subject = data.subject;
+        if ('lat' in data) updateData.lat = data.lat;
+        if ('lng' in data) updateData.lng = data.lng;
+        if ('description' in data) updateData.description = data.description;
+
+        await tx.sample.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
+        return true;
+      }
+
+      // Preserve provided code on create — required for export/import
+      // round-trip and for re-import idempotency.
+      if (data.code) {
+        await tx.sample.create({
+          data: {
+            code: data.code,
+            sampleTypeId: data.sampleTypeId,
+            sampleType: data.sampleTypeSlug.toUpperCase() as SampleType,
+            subject: data.subject,
+            siteName: data.siteName,
+            lat: data.lat,
+            lng: data.lng,
+            description: data.description,
+            collectedAt: data.collectedAt,
+          },
+        });
+        return false;
+      }
+
+      // No code in CSV — generate canonical `${id}_${displayCode}` via the
+      // existing reservation logic. Two-step (temp code → final code) is
+      // the same dance that `create()` does for fresh records.
+      const base = this.buildDisplayBase(data.sampleTypeSlug, data.subject);
+      const displayCode = await this.reserveDisplayCode(
+        tx,
+        data.sampleTypeId,
+        base,
+      );
+      const tempCode = `TEMP_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(7)}`;
+      const created = await tx.sample.create({
+        data: {
+          code: tempCode,
+          sampleTypeId: data.sampleTypeId,
+          sampleType: data.sampleTypeSlug.toUpperCase() as SampleType,
+          subject: data.subject,
+          siteName: data.siteName,
+          lat: data.lat,
+          lng: data.lng,
+          description: data.description,
+          collectedAt: data.collectedAt,
+        },
+      });
+      await tx.sample.update({
+        where: { id: created.id },
+        data: { code: `${created.id}_${displayCode}` },
+      });
+      return false;
     });
   }
 }

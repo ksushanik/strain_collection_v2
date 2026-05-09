@@ -4,10 +4,11 @@ import * as React from "react"
 import dynamic from 'next/dynamic'
 import { ApiService, Sample } from "@/services/api"
 
-import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit, Trash2 } from "lucide-react"
+import { Loader2, ArrowLeft, MapPin, Calendar, Leaf, Microscope, Edit, Trash2, ChevronLeft, ChevronRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { useRouter, Link } from "@/i18n/routing"
 import { PhotoUpload } from "@/components/domain/photo-upload"
 import { useTranslations } from "next-intl"
@@ -50,6 +51,9 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
     const [sample, setSample] = React.useState<SampleWithStrains | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [deleting, setDeleting] = React.useState(false)
+    const [strainsPage, setStrainsPage] = React.useState(0)
+    const [strainsQuery, setStrainsQuery] = React.useState("")
+    const STRAINS_PAGE_SIZE = 8
 
     const loadSample = React.useCallback(() => {
         if (!id) return;
@@ -247,27 +251,97 @@ export default function SampleDetailPage({ params }: { params: Promise<{ locale:
                         </CardHeader>
                         <CardContent>
                             {sample.strains && sample.strains.length > 0 ? (
-                                <div className="space-y-3">
-                                    {sample.strains.map(strain => (
-                                        <Link
-                                            key={strain.id}
-                                            href={`/strains/${strain.id}`}
-                                            className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-                                        >
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="font-medium">{strain.identifier}</span>
-                                                {strain.seq && <Badge className="text-[10px] h-5">{tStrains('seqBadge')}</Badge>}
-                                            </div>
-                                            <div className="flex gap-2 text-xs text-muted-foreground">
-                                                {strain.gramStain && (
-                                                    <Badge variant="outline" className="text-[10px] h-5">
-                                                        {tStrains('gramStain')} {strain.gramStain === 'POSITIVE' ? '+' : '-'}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
+                                (() => {
+                                    const totalAll = sample.strains.length
+                                    const showSearch = totalAll > STRAINS_PAGE_SIZE
+                                    const normalizedQuery = strainsQuery.trim().toLowerCase()
+                                    const filteredStrains = normalizedQuery
+                                        ? sample.strains.filter(s => s.identifier.toLowerCase().includes(normalizedQuery))
+                                        : sample.strains
+
+                                    const totalStrains = filteredStrains.length
+                                    const totalPages = Math.max(1, Math.ceil(totalStrains / STRAINS_PAGE_SIZE))
+                                    const currentPage = Math.min(strainsPage, totalPages - 1)
+                                    const start = currentPage * STRAINS_PAGE_SIZE
+                                    const visibleStrains = filteredStrains.slice(start, start + STRAINS_PAGE_SIZE)
+                                    const showPager = totalStrains > STRAINS_PAGE_SIZE
+
+                                    return (
+                                        <div className="space-y-3">
+                                            {showSearch && (
+                                                <div className="relative">
+                                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                                    <Input
+                                                        value={strainsQuery}
+                                                        onChange={(e) => {
+                                                            setStrainsQuery(e.target.value)
+                                                            setStrainsPage(0)
+                                                        }}
+                                                        placeholder={tStrains('searchPlaceholder')}
+                                                        className="pl-8 h-9"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {visibleStrains.length > 0 ? (
+                                                visibleStrains.map(strain => (
+                                                    <Link
+                                                        key={strain.id}
+                                                        href={`/strains/${strain.id}`}
+                                                        className="block p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                                                    >
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="font-medium">{strain.identifier}</span>
+                                                            {strain.seq && <Badge className="text-[10px] h-5">{tStrains('seqBadge')}</Badge>}
+                                                        </div>
+                                                        <div className="flex gap-2 text-xs text-muted-foreground">
+                                                            {strain.gramStain && (
+                                                                <Badge variant="outline" className="text-[10px] h-5">
+                                                                    {tStrains('gramStain')} {strain.gramStain === 'POSITIVE' ? '+' : '-'}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground text-center py-6">
+                                                    {tStrains('searchNoResults')}
+                                                </p>
+                                            )}
+
+                                            {showPager && (
+                                                <div className="flex items-center justify-between pt-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        onClick={() => setStrainsPage(p => Math.max(0, p - 1))}
+                                                        disabled={currentPage === 0}
+                                                        aria-label={tCommon('prev')}
+                                                    >
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="text-xs text-muted-foreground tabular-nums">
+                                                        {currentPage + 1} / {totalPages}
+                                                        <span className="ml-2 hidden sm:inline">
+                                                            ({totalStrains})
+                                                        </span>
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        onClick={() => setStrainsPage(p => Math.min(totalPages - 1, p + 1))}
+                                                        disabled={currentPage >= totalPages - 1}
+                                                        aria-label={tCommon('next')}
+                                                    >
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })()
                             ) : (
                                 <p className="text-sm text-muted-foreground text-center py-8">
                                     {t('noStrainsIsolated')}

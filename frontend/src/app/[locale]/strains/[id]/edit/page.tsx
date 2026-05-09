@@ -74,6 +74,7 @@ function EditStrainContent({ id }: { id: string }) {
     const router = useRouter()
     const pathname = usePathname()
     const t = useTranslations('Strains')
+    const tCommon = useTranslations('Common')
     const returnTo = searchParams?.get("returnTo") || undefined
     const normalizedReturnTo = normalizeReturnPath(returnTo ?? null, pathname) ?? undefined
     const { handleError } = useApiError()
@@ -372,7 +373,7 @@ function EditStrainContent({ id }: { id: string }) {
                                             className="text-destructive"
                                             onClick={() => handleUnallocate(s.cell.box.id, s.cell.cellCode)}
                                             disabled={allocatingStorage}
-                                            title="Remove"
+                                            title={tCommon('delete')}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -443,7 +444,7 @@ function EditStrainContent({ id }: { id: string }) {
                                 disabled={!storageForm.boxId || !storageForm.cellCode || allocatingStorage}
                             >
                                 {allocatingStorage ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
-                                Add allocation
+                                {t('addAllocation')}
                             </Button>
                         </div>
                         {!hasPrimary && strain.storage && strain.storage.length > 0 && (
@@ -486,7 +487,7 @@ function EditStrainContent({ id }: { id: string }) {
                     onClick={() => {
                         const el = document.getElementById("strain-form-edit")
                         if (!(el instanceof HTMLFormElement)) {
-                            toast.error("Form not found")
+                            toast.error(tCommon('anErrorOccurred'))
                             return
                         }
                         el.requestSubmit()

@@ -312,7 +312,7 @@ export default function MethodsPage() {
                   onValueChange={(val) => setFormData({ ...formData, category: val })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t("selectCategoryPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MORPHOLOGY">MORPHOLOGY</SelectItem>
@@ -333,7 +333,7 @@ export default function MethodsPage() {
                   placeholder="e.g. Microscopy"
                 />
                 <p className="text-[0.8rem] text-muted-foreground">
-                  Auto-filled when selecting this trait
+                  {t("defaultMethodHint")}
                 </p>
               </div>
 
@@ -372,10 +372,10 @@ export default function MethodsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={TraitDataType.BOOLEAN}>Boolean (Yes/No)</SelectItem>
-                  <SelectItem value={TraitDataType.CATEGORICAL}>Categorical (Select)</SelectItem>
-                  <SelectItem value={TraitDataType.NUMERIC}>Numeric</SelectItem>
-                  <SelectItem value={TraitDataType.TEXT}>Text</SelectItem>
+                  <SelectItem value={TraitDataType.BOOLEAN}>{t("dataTypeBoolean")}</SelectItem>
+                  <SelectItem value={TraitDataType.CATEGORICAL}>{t("dataTypeCategorical")}</SelectItem>
+                  <SelectItem value={TraitDataType.NUMERIC}>{t("dataTypeNumeric")}</SelectItem>
+                  <SelectItem value={TraitDataType.TEXT}>{t("dataTypeText")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -387,14 +387,14 @@ export default function MethodsPage() {
                   <Input
                     value={optionInput}
                     onChange={(e) => setOptionInput(e.target.value)}
-                    placeholder="Add option..."
+                    placeholder={t("addOptionPlaceholder")}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
                   />
-                  <Button type="button" onClick={addOption} variant="secondary">Add</Button>
+                  <Button type="button" onClick={addOption} variant="secondary">{t("addOptionButton")}</Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2 p-2 border rounded-md bg-muted/50 min-h-[40px]">
                   {formData.options.length === 0 && (
-                    <span className="text-xs text-muted-foreground italic p-1">No options added</span>
+                    <span className="text-xs text-muted-foreground italic p-1">{t("noOptionsAdded")}</span>
                   )}
                   {formData.options.map((opt) => (
                     <Badge key={opt} variant="secondary" className="pl-2 pr-1 py-1 flex items-center gap-1">
@@ -439,7 +439,7 @@ export default function MethodsPage() {
               <RichTextEditor
                 value={formData.description}
                 onChange={(value) => setFormData({ ...formData, description: value })}
-                placeholder="Instructions for lab technician..."
+                placeholder={t("descriptionRichPlaceholder")}
               />
             </div>
 
