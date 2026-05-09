@@ -370,9 +370,7 @@ export class SamplesService implements OnModuleInit {
 
       if (shouldRebuildCode) {
         if (!sampleTypeId || !sampleTypeSlug) {
-          throw new NotFoundException(
-            `Sample Type for Sample ${id} not found`,
-          );
+          throw new NotFoundException(`Sample Type for Sample ${id} not found`);
         }
 
         const nextSubject =
@@ -475,12 +473,12 @@ export class SamplesService implements OnModuleInit {
    * Pure function — does not touch the database; returns errors instead
    * of throwing so the caller can collect them per-row.
    */
-  private async validateSampleRow(
+  private validateSampleRow(
     raw: Record<string, string>,
     rowNum: number,
     sampleTypeIndex: Map<string, { id: number; slug: string }>,
     headerSet: Set<string>,
-  ): Promise<PreparedSampleRow> {
+  ): PreparedSampleRow {
     const errors: ImportRowError[] = [];
     const code = (raw['Code'] ?? '').trim() || undefined;
     const identifier = code;
@@ -548,10 +546,7 @@ export class SamplesService implements OnModuleInit {
             message: `Invalid number "${v}"`,
           });
           lng = null;
-        } else if (
-          parsed !== undefined &&
-          (parsed < -180 || parsed > 180)
-        ) {
+        } else if (parsed !== undefined && (parsed < -180 || parsed > 180)) {
           errors.push({
             field: 'Longitude',
             message: 'Out of range (-180..180)',
@@ -621,10 +616,8 @@ export class SamplesService implements OnModuleInit {
     const { headers, rows } = parseCsvBuffer(buffer);
     const headerSet = new Set(headers);
     const sampleTypeIndex = await this.loadSampleTypeIndex();
-    return Promise.all(
-      rows.map((row, idx) =>
-        this.validateSampleRow(row, idx + 1, sampleTypeIndex, headerSet),
-      ),
+    return rows.map((row, idx) =>
+      this.validateSampleRow(row, idx + 1, sampleTypeIndex, headerSet),
     );
   }
 

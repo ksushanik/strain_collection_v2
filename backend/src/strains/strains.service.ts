@@ -166,9 +166,7 @@ export class StrainsService {
     }
 
     if (amylase !== undefined) {
-      andFilters.push(
-        this.buildTraitFilter('amylase', ['Amylase'], amylase),
-      );
+      andFilters.push(this.buildTraitFilter('amylase', ['Amylase'], amylase));
     }
 
     if (phosphateSolubilization !== undefined) {
@@ -733,7 +731,9 @@ export class StrainsService {
 
       const meta = (photo.meta ?? {}) as Prisma.JsonObject;
       const nextMeta: Prisma.InputJsonValue =
-        trimmedName !== undefined ? { ...meta, originalName: trimmedName } : meta;
+        trimmedName !== undefined
+          ? { ...meta, originalName: trimmedName }
+          : meta;
 
       return tx.strainPhoto.update({
         where: { id: photoId },
@@ -771,15 +771,16 @@ export class StrainsService {
     }
   }
 
-  private getTaxonomyRule(
-    scientificName?: string | null,
-  ): TaxonomyRule | null {
+  private getTaxonomyRule(scientificName?: string | null): TaxonomyRule | null {
     if (!scientificName) return null;
     const name = scientificName.toLowerCase();
     return TAXONOMY_RULES.find((rule) => name.includes(rule.genus)) ?? null;
   }
 
-  private async getGramStainTrait(): Promise<{ id: number; name: string } | null> {
+  private async getGramStainTrait(): Promise<{
+    id: number;
+    name: string;
+  } | null> {
     if (this.gramStainTraitCache !== undefined) {
       return this.gramStainTraitCache;
     }
@@ -883,10 +884,7 @@ export class StrainsService {
         some: {
           AND: [
             {
-              OR: [
-                { traitDefinition: { is: { code } } },
-                ...nameMatches,
-              ],
+              OR: [{ traitDefinition: { is: { code } } }, ...nameMatches],
             },
             resultFilter,
           ],
@@ -1003,10 +1001,7 @@ export class StrainsService {
       'Isolation Region',
       ISOLATION_REGION_VALUES,
     );
-    const wgsStatus = readEnum<WgsStatusEnum>(
-      'WGS Status',
-      WGS_STATUS_VALUES,
-    );
+    const wgsStatus = readEnum<WgsStatusEnum>('WGS Status', WGS_STATUS_VALUES);
 
     // Phenotypes: parse aggregated column, look up trait definitions by name.
     // `phenotypes: undefined` signals "no Phenotypes column in CSV", which the
@@ -1068,10 +1063,7 @@ export class StrainsService {
         Boolean(marker16sSequence);
       if (anyValue) {
         genetics = {
-          wgsStatus:
-            wgsStatus && wgsStatus !== null
-              ? (wgsStatus as WgsStatusEnum)
-              : 'NONE',
+          wgsStatus: wgsStatus && wgsStatus !== null ? wgsStatus : 'NONE',
           assemblyAccession: assemblyAccession || undefined,
           marker16sAccession: marker16sAccession || undefined,
           marker16sSequence: marker16sSequence || undefined,
@@ -1080,7 +1072,12 @@ export class StrainsService {
     }
 
     if (errors.length > 0 || !identifier || sampleId === undefined) {
-      return { rowNum, identifier: identifier || undefined, errors, data: null };
+      return {
+        rowNum,
+        identifier: identifier || undefined,
+        errors,
+        data: null,
+      };
     }
 
     // Build the prepared payload using conditional spread so absent columns
@@ -1106,20 +1103,9 @@ export class StrainsService {
     };
 
     setOpt('ncbiScientificName', readString('NCBI Scientific Name'));
-    setOpt(
-      'ncbiTaxonomyId',
-      ncbiTaxonomyId === null ? null : ncbiTaxonomyId,
-    );
-    setOpt(
-      'biosafetyLevel',
-      biosafetyLevel === null
-        ? null
-        : (biosafetyLevel as BiosafetyLevelEnum | undefined),
-    );
-    setOpt(
-      'stockType',
-      stockType === null ? null : (stockType as StockTypeEnum | undefined),
-    );
+    setOpt('ncbiTaxonomyId', ncbiTaxonomyId === null ? null : ncbiTaxonomyId);
+    setOpt('biosafetyLevel', biosafetyLevel === null ? null : biosafetyLevel);
+    setOpt('stockType', stockType === null ? null : stockType);
     setOpt('passageNumber', passageNumber === null ? null : passageNumber);
     setOpt('taxonomy16s', readString('Taxonomy 16S'));
     setOpt('otherTaxonomy', readString('Other Taxonomy'));
@@ -1127,9 +1113,7 @@ export class StrainsService {
     setOpt('indexerInitials', readString('Indexer Initials'));
     setOpt(
       'isolationRegion',
-      isolationRegion === null
-        ? null
-        : (isolationRegion as IsolationRegionEnum | undefined),
+      isolationRegion === null ? null : isolationRegion,
     );
     setOpt('features', readString('Features'));
     setOpt('comments', readString('Comments'));
@@ -1339,18 +1323,13 @@ export class StrainsService {
 
     if ('ncbiScientificName' in data)
       payload.ncbiScientificName = data.ncbiScientificName;
-    if ('ncbiTaxonomyId' in data)
-      payload.ncbiTaxonomyId = data.ncbiTaxonomyId;
-    if ('biosafetyLevel' in data)
-      payload.biosafetyLevel = data.biosafetyLevel;
+    if ('ncbiTaxonomyId' in data) payload.ncbiTaxonomyId = data.ncbiTaxonomyId;
+    if ('biosafetyLevel' in data) payload.biosafetyLevel = data.biosafetyLevel;
     if ('stockType' in data) payload.stockType = data.stockType;
-    if ('passageNumber' in data)
-      payload.passageNumber = data.passageNumber;
+    if ('passageNumber' in data) payload.passageNumber = data.passageNumber;
     if ('taxonomy16s' in data) payload.taxonomy16s = data.taxonomy16s;
-    if ('otherTaxonomy' in data)
-      payload.otherTaxonomy = data.otherTaxonomy;
-    if ('collectionRcam' in data)
-      payload.collectionRcam = data.collectionRcam;
+    if ('otherTaxonomy' in data) payload.otherTaxonomy = data.otherTaxonomy;
+    if ('collectionRcam' in data) payload.collectionRcam = data.collectionRcam;
     if ('indexerInitials' in data)
       payload.indexerInitials = data.indexerInitials;
     if ('isolationRegion' in data)

@@ -62,7 +62,7 @@ export function parseCsvBuffer(buffer: Buffer): {
     trim: true,
     relax_column_count: true,
     bom: true,
-  }) as string[][];
+  });
 
   if (matrix.length === 0) {
     return { headers: [], rows: [] };
@@ -256,15 +256,15 @@ export function formatImportError(err: unknown): string {
           : typeof target === 'string'
             ? target
             : 'unknown';
-        const model = typeof e.meta?.modelName === 'string'
-          ? ` (${e.meta.modelName})`
-          : '';
+        const model =
+          typeof e.meta?.modelName === 'string' ? ` (${e.meta.modelName})` : '';
         return `Conflict on ${fields}${model}: a record with these values already exists`;
       }
       case 'P2003': {
-        const field = typeof e.meta?.field_name === 'string'
-          ? ` on ${e.meta.field_name}`
-          : '';
+        const field =
+          typeof e.meta?.field_name === 'string'
+            ? ` on ${e.meta.field_name}`
+            : '';
         return `Foreign key constraint failed${field}: referenced record does not exist`;
       }
       case 'P2025':
