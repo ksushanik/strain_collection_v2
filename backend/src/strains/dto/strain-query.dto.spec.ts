@@ -61,13 +61,12 @@ describe('StrainQueryDto transform — regression: implicit conversion is a trap
     // This block documents WHY enableImplicitConversion stays OFF in main.ts.
     // If anyone re-enables it, these expectations should change — but they
     // would also silently invert every "No" filter in production. Don't.
-    async function withImplicit(payload: Record<string, unknown>) {
-        const obj = plainToInstance(StrainQueryDto, payload, { enableImplicitConversion: true });
-        return obj;
+    function withImplicit(payload: Record<string, unknown>) {
+        return plainToInstance(StrainQueryDto, payload, { enableImplicitConversion: true });
     }
 
-    it('Boolean("false") truthy-cast wins over @Transform — DO NOT enable implicit conversion', async () => {
-        const obj = await withImplicit({ phosphateSolubilization: 'false' });
+    it('Boolean("false") truthy-cast wins over @Transform — DO NOT enable implicit conversion', () => {
+        const obj = withImplicit({ phosphateSolubilization: 'false' });
         // Bug: should be false, but JS Boolean('false') is true and runs before @Transform.
         expect(obj.phosphateSolubilization).toBe(true);
     });

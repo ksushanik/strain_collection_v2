@@ -161,7 +161,7 @@ export class StrainsService {
               result: true,
               traitName: true,
               traitDefinition: {
-                select: { code: true },
+                select: { code: true, name: true, dataType: true },
               },
             },
           },
