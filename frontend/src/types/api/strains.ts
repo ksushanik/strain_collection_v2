@@ -46,6 +46,7 @@ export interface StrainPhenotype {
       code: string
       name?: string
       dataType?: TraitDataType
+      units?: string | null
     } | null
 }
 

@@ -101,16 +101,18 @@ function StrainDetailContent({ id }: { id: string }) {
         return String(raw).trim()
     }, [gramPhenotype, t])
 
-    const detailChipCodes = React.useMemo(
-        () => [
-            "siderophore_production",
-            "pigment_secretion",
-            "phosphate_solubilization",
-            "sequenced_seq",
-            "amylase",
-        ],
-        [],
-    )
+    const detailChipCodes = React.useMemo(() => {
+        const seen = new Set<string>()
+        const codes: string[] = []
+        for (const p of strain?.phenotypes ?? []) {
+            const code = p?.traitCode || p?.traitDefinition?.code
+            if (!code || code === "gram_stain") continue
+            if (seen.has(code)) continue
+            seen.add(code)
+            codes.push(code)
+        }
+        return codes
+    }, [strain?.phenotypes])
 
     const detailChips = React.useMemo(
         () => buildPhenotypeChips(strain?.phenotypes, t, detailChipCodes),
