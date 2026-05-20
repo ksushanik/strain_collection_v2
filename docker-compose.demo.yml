@@ -5,6 +5,15 @@
 # Reuses the same backend/frontend images as prod. IMAGE_REGISTRY and IMAGE_TAG
 # come from the prod .env (see scripts/deploy-demo.sh).
 
+# CRITICAL: explicit project `name:` isolates this stack from the prod compose
+# project (which inherits its name from the directory `bio_collection`). Without
+# this, both compose files would share the same project namespace — and any
+# `docker compose -f` invocation against one of the two YAMLs would try to
+# reconcile its service definitions against ALL containers in the project,
+# silently REPLACING the other stack's containers. Found the hard way:
+# 2026-05-20 prod outage during first demo bootstrap.
+name: strain_v2_demo
+
 services:
   postgres:
     image: postgres:16-alpine
