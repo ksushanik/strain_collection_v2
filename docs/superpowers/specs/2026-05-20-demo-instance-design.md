@@ -45,7 +45,7 @@
 | D5 | Reset через systemd-timer на хосте, не через GitHub Actions | Меньше внешних зависимостей. Если GH Actions упадёт, демо продолжит ресетиться. |
 | D6 | Demo использует **те же** backend/frontend образы, что и prod, но **разные .env-файлы** на сервере | Не вводим build-time флаги вроде `NEXT_PUBLIC_DEMO_MODE` в основной CI. Demo-banner управляется runtime env. |
 | D7 | Resource limits на demo-контейнерах (`mem_limit: 512m`, `cpus: 0.5` на backend; postgres `mem_limit: 256m`) | Гарантируем, что demo не задушит prod при нагрузке/CSV-импорте. |
-| D8 | Self-signup на demo **включён**; на login-странице показываются готовые креды (`demo@example.com / demo123`, `admin@example.com / admin123`) | Снижает порог входа. Любые созданные посетителями учётки сметаются reset'ом. |
+| D8 | Self-signup на demo **включён**; на login-странице показываются готовые креды (`admin@example.com / admin123` и `manager@example.com / manager123` из существующего `seed.ts`) | Снижает порог входа. Любые созданные посетителями учётки сметаются reset'ом. |
 | D9 | AdminJS на демо **включён** | Это часть продукта; демо без админки была бы неполной. |
 | D10 | ImageKit для demo: отдельный `IMAGEKIT_URL_ENDPOINT` (та же учётка, другая папка `/demo-uploads`). При отсутствии — local-uploads mode | Не загрязняем prod-папку и не путаем биллинг. |
 | D11 | Demo-banner рендерится на фронте при `NEXT_PUBLIC_DEMO_MODE=1` | Прозрачно для пользователя: «Это демо. Данные сбрасываются каждую ночь в 03:00 МСК». |
@@ -91,7 +91,6 @@ Demo-стек использует ровно те же образы `ghcr.io/ks
                  docker compose -f docker-compose.demo.yml pull
                  docker exec strain_v2_demo_backend npx prisma migrate reset --force --skip-seed
                  docker exec strain_v2_demo_backend node dist/prisma/seed.js
-                 docker exec strain_v2_demo_backend node dist/prisma/seed-demo.js
                  docker logs strain_v2_demo_backend --tail 50 >> /var/log/strain-demo-reset.log
             ►  Health-probe (как в deploy-prod.sh): 90s timeout
                  ▼
@@ -163,11 +162,10 @@ docker compose -f docker-compose.demo.yml up -d
 # 3. Wait for backend container to be running (not healthy yet — DB might be empty)
 sleep 5
 
-# 4. Wipe DB and reapply migrations + seeds
+# 4. Wipe DB and reapply migrations + seed (already creates demo users, samples, strains, boxes)
 docker exec strain_v2_demo_backend sh -c '
   npx prisma migrate reset --force --skip-seed &&
-  node dist/prisma/seed.js &&
-  node dist/prisma/seed-demo.js
+  node dist/prisma/seed.js
 '
 
 # 5. Health-check (90s timeout, same loop as deploy-prod.sh)
@@ -176,25 +174,24 @@ docker exec strain_v2_demo_backend sh -c '
 echo "=== $(date -Iseconds) demo reset done ==="
 ```
 
-### `backend/prisma/seed-demo.ts` (новый)
+### Demo-данные — реюз существующего `backend/prisma/seed.ts`
 
-Расширение поверх `seed.ts`. Создаёт:
+Отдельный `seed-demo.ts` **не создаётся.** Существующий `seed.ts` уже даёт ровно то, что нужно для демо:
 
-- **Demo-пользователи:**
-  - `demo@example.com` / `demo123` — роль USER
-  - `admin@example.com` / `admin123` — роль ADMIN
-  - (используют `bcrypt.hash`, как в основном `seed.ts`)
-- **Storage:** 1 storage-box `Demo-Box-A`, 30 ячеек (5×6), ~15 из них заняты штаммами.
-- **Taxonomy:** ~10 видов из разных родов (Bacillus, Pseudomonas, Lactobacillus, Saccharomyces и т.д.).
-- **Штаммы:** 30-50 штук с разнообразием:
-  - Часть с полным набором phenotype-результатов (положительные + отрицательные + текстовые).
-  - Часть только с базовой taxonomy (для UI «пустого» состояния).
-  - Часть с привязанными media и trait-definitions.
-- **Sample'ы:** 5-10 с GPS-координатами по разным регионам России (для проверки карт), 2-3 с фото-плейсхолдерами.
-- **StrainGenetics:** ~10 штаммов с заполненными гено-полями.
-- **AuditLog:** пара записей создаётся естественным образом во время seed'а.
+- **3 пользователя с bcrypt-паролями:**
+  - `admin@example.com` / `admin123` — роль `ADMIN`
+  - `manager@example.com` / `manager123` — роль `MANAGER`
+  - `viewer@example.com` / `viewer123` — роль `VIEWER`
+- **40 sample'ов** с lat/lng вокруг Москвы (55.0+, 37.0+) — карта Leaflet что-то покажет.
+- **20 штаммов** с фенотипами (Gram Stain, Phosphate Solubilization, Siderophore, Pigment Secretion) — есть и положительные, и отрицательные результаты.
+- **Genetics-блок** на половине штаммов (WgsStatus, assembly accession).
+- **16 storage-боксов** (чередуются 9×9 и 10×10) с реальными ячейками.
+- **Аллокации:** первые 15 штаммов уже распределены по ячейкам первого бокса.
+- **Trait definitions** для системных traits (gram_stain, amylase и т.д.).
 
-Компиляция: `npx tsc prisma/seed-demo.ts --outDir dist/prisma --module commonjs --esModuleInterop --skipLibCheck` — добавляется в `backend/Dockerfile` рядом с уже существующей компиляцией `seed.ts`.
+Этого хватает для презентации без отдельного demo-расширения. На login-странице будут показаны креды `admin@example.com / admin123` и `manager@example.com / manager123` через `DemoBanner` (см. ниже).
+
+Dockerfile уже компилирует `seed.ts` в `dist/prisma/seed.js` (строка `RUN npx tsc prisma/seed.ts --outDir dist/prisma ...`). Никаких правок Dockerfile **не требуется**.
 
 ### `frontend/src/components/.../DemoBanner.tsx` (новый, опц.)
 
@@ -207,7 +204,7 @@ export function DemoBanner() {
   return (
     <div className="bg-yellow-100 text-yellow-900 text-sm py-2 px-4 text-center border-b">
       Это демо-инстанс. Данные сбрасываются каждую ночь в 03:00 MSK.
-      {' '}Войти: <code>demo@example.com / demo123</code> или <code>admin@example.com / admin123</code>.
+      {' '}Войти: <code>admin@example.com / admin123</code> или <code>manager@example.com / manager123</code>.
     </div>
   );
 }
@@ -307,12 +304,10 @@ WantedBy=timers.target
 
 1. **Локально:**
    - Создать `docker-compose.demo.yml`.
-   - Написать `seed-demo.ts` (тесты что seed гоняется через `prisma db seed`).
    - Написать `scripts/deploy-demo.sh`, `scripts/reset-demo.sh`.
    - Добавить `DemoBanner` компонент + переводы.
-   - Добавить компиляцию `seed-demo.ts` в `backend/Dockerfile`.
    - Создать `backend/.env.demo.example`, `frontend/.env.demo.example`.
-   - PR в main (Codex review **обязателен** — затрагивает риск-зоны: deploy automation + CSV/seed + auth env config).
+   - PR в main (Codex review **обязателен** — затрагивает риск-зоны: deploy automation + auth env config).
 
 2. **На сервере `4feb`** (после merge):
    - Регистрация DuckDNS-сабдомена (через GitHub-логин).
@@ -322,13 +317,13 @@ WantedBy=timers.target
    - `certbot --nginx -d culturedb-demo.duckdns.org` — TLS.
    - Положить `nginx/demo.conf` в `/etc/nginx/sites-enabled/`, `nginx -t && systemctl reload nginx`.
    - Установить systemd unit-ы, `systemctl enable --now strain-demo-reset.timer`.
-   - Проверка: открыть `https://culturedb-demo.duckdns.org` в браузере, залогиниться `demo/demo123`, проверить что список штаммов содержит мок-данные, создать штамм, выйти, выждать ночной reset, проверить что штамм исчез.
+   - Проверка: открыть `https://culturedb-demo.duckdns.org` в браузере, залогиниться `admin@example.com / admin123`, проверить что список штаммов содержит мок-данные, создать штамм, выйти, выждать ночной reset, проверить что штамм исчез.
 
 ## Testing strategy
 
 Поскольку demo — это операционная инфраструктура, а не код-фича, тестирование смещено в сторону smoke-проверок:
 
-- **Unit:** для `seed-demo.ts` — один Jest-spec, который запускает seed против тест-Postgres'а и проверяет количество созданных сущностей. Минимально: «после `seed + seed-demo` есть ≥30 штаммов, ≥1 storage-box, ≥1 пользователь с email `demo@example.com`».
+- **Unit:** `seed.ts` уже проверяется в существующих spec'ах (косвенно). Дополнительных unit-тестов для demo не требуется — мы не добавляем нового кода seed'а.
 - **Integration:** не требуется — demo-стек проверяется в проде вручную smoke-листом.
 - **CI:** существующие lint+build+test+e2e гоняются как обычно; demo-специфичный код (банер + seed) проходит через стандартный CI.
 - **Production smoke:** ручной чек-лист после первого деплоя (см. § Build sequence шаг 2 финальный пункт).
