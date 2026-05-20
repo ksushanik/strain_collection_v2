@@ -1,0 +1,61 @@
+# Demo / sandbox compose for strain_collection_v2.
+# Runs alongside docker-compose.prod.yml on the same host (4feb), in a separate
+# docker network with separate containers, ports, and volumes.
+#
+# Reuses the same backend/frontend images as prod. IMAGE_REGISTRY and IMAGE_TAG
+# come from the prod .env (see scripts/deploy-demo.sh).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: strain_v2_demo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: strain_collection_v2_demo
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+    volumes:
+      - postgres_v2_demo_data:/var/lib/postgresql/data
+    networks: [strain_v2_demo]
+    mem_limit: 256m
+    cpus: 0.5
+
+  redis:
+    image: redis:7-alpine
+    container_name: strain_v2_demo_redis
+    restart: unless-stopped
+    networks: [strain_v2_demo]
+    mem_limit: 128m
+    cpus: 0.25
+
+  backend:
+    image: ${IMAGE_REGISTRY:-ghcr.io/ksushanik}/strain-collection-v2-backend:${IMAGE_TAG:-latest}
+    container_name: strain_v2_demo_backend
+    restart: unless-stopped
+    depends_on: [postgres, redis]
+    env_file: ./backend/.env.demo
+    # No `migrate deploy` here — reset-demo.sh handles schema + seed.
+    # Backend just starts; first run waits for the first reset-demo.sh
+    # invocation to populate the DB.
+    command: ["node", "dist/src/main.js"]
+    networks: [strain_v2_demo]
+    ports: ["3011:3000"]
+    mem_limit: 512m
+    cpus: 0.5
+
+  frontend:
+    image: ${IMAGE_REGISTRY:-ghcr.io/ksushanik}/strain-collection-v2-frontend:${IMAGE_TAG:-latest}
+    container_name: strain_v2_demo_frontend
+    restart: unless-stopped
+    env_file: ./frontend/.env.demo
+    networks: [strain_v2_demo]
+    ports: ["8083:3001"]
+    mem_limit: 256m
+    cpus: 0.5
+
+volumes:
+  postgres_v2_demo_data:
+
+networks:
+  strain_v2_demo:
+    driver: bridge
