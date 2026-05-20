@@ -144,7 +144,8 @@ export default function SettingsPage() {
                   variant="default"
                   onClick={async () => {
                     try {
-                      const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010'
+                      // Use same-origin so this works for both prod and demo from one image.
+                      const base = process.env.NEXT_PUBLIC_API_URL || window.location.origin
                       const data = await ApiService.startAdminSso()
                       if (data?.nonce) {
                         window.location.href = `${base}/api/v1/admin-sso/sso/complete?nonce=${encodeURIComponent(data.nonce)}`

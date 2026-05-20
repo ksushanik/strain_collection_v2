@@ -65,8 +65,10 @@ jobs:
           context: .   # frontend Dockerfile expects repo root for docs/wiki copy
           file: frontend/Dockerfile
           push: true
-          build-args: |
-            NEXT_PUBLIC_API_URL=https://culturedb.elcity.ru
+          # Intentionally NOT passing NEXT_PUBLIC_API_URL: the empty default in
+          # frontend/Dockerfile lets the bundle resolve API_URL at runtime from
+          # window.location.origin, so one image works for both prod and demo
+          # hosts without rebuilding.
           tags: |
             ghcr.io/ksushanik/strain-collection-v2-frontend:latest
             ghcr.io/ksushanik/strain-collection-v2-frontend:${{ github.sha }}

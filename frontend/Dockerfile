@@ -12,7 +12,11 @@ RUN npm ci
 FROM deps AS build
 COPY frontend ./
 COPY docs/wiki ./docs/wiki
-ARG NEXT_PUBLIC_API_URL=http://localhost
+# Empty by default so the bundle uses `window.location.origin` at runtime —
+# this lets one image serve multiple hostnames (prod culturedb.elcity.ru and
+# demo culturedb-demo.duckdns.org) without rebuilding. Override only if you
+# need to point the client at a different origin than the page itself.
+ARG NEXT_PUBLIC_API_URL=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PRIVATE_SKIP_TURBOPACK=1
 ENV TURBOPACK=0
