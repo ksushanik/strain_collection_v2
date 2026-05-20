@@ -43,6 +43,29 @@ docker compose pull
 echo ">>> Recreating containers..."
 docker compose up -d
 
+# Wait for Postgres to actually accept connections before letting the backend's
+# `prisma migrate deploy` run. `docker compose up -d` returns when containers
+# are *started*, not when Postgres is ready — on a cold recreate Postgres can
+# take 5-15s to init, and on a degraded host (disk pressure, etc.) much longer.
+# Without this loop the backend hits `P1001: Can't reach database server` and
+# exits, restart-loops, and burns through the 90s health timeout for nothing.
+# Found the hard way: 2026-05-20 prod incident.
+echo ">>> Waiting up to 30s for Postgres to accept connections..."
+pg_ready=0
+for _ in $(seq 1 30); do
+    if docker exec strain_v2_db pg_isready -U postgres -d strain_collection_v2 -t 2 >/dev/null 2>&1; then
+        echo ">>> postgres is ready"
+        pg_ready=1
+        break
+    fi
+    sleep 1
+done
+if [ "$pg_ready" -ne 1 ]; then
+    echo "ERROR: postgres did not become ready within 30s" >&2
+    docker logs --tail 50 strain_v2_db >&2 || true
+    exit 1
+fi
+
 cid=$(docker compose ps -q backend)
 if [ -z "$cid" ]; then
     echo "ERROR: could not resolve backend container id" >&2
@@ -109,5 +132,18 @@ else
     rm -f "$tmp"
     echo "WARN: AdminJS bundle missing or empty — keeping previous host file (non-fatal)"
 fi
+
+# Reclaim disk from images no longer referenced by any container. Each prod
+# deploy pulls a new <sha>-tagged image (kept alongside :latest), so without
+# pruning the local image cache grows by ~500-700MB per deploy until the
+# host disk fills and the next deploy fails to even pull. Running this only
+# AFTER a successful health-gate means a failed deploy still has its image
+# present for debugging / quick redeploy. Rollback re-pulls from GHCR, so
+# losing the previous local copy is acceptable.
+# Found the hard way: 2026-05-20 prod incident (disk hit 100%).
+echo ">>> Pruning unused images..."
+docker image prune -a -f 2>&1 | tail -2
+echo ">>> Free disk after prune:"
+df -h / | tail -1
 
 echo ">>> Deploy complete."
