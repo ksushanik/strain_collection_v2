@@ -52,6 +52,24 @@ if [ "$state" != "running" ]; then
     exit 1
 fi
 
+# `running` on the backend container doesn't mean Postgres is accepting
+# connections yet. On a cold start the DB container can take ~5-10s to
+# initialise, and Prisma would otherwise hit ECONNREFUSED. Wait for
+# pg_isready before continuing.
+echo ">>> Waiting for demo Postgres to accept connections..."
+for _ in $(seq 1 30); do
+    if docker exec strain_v2_demo_db pg_isready -U demo -d strain_collection_v2_demo -t 2 >/dev/null 2>&1; then
+        echo ">>> demo postgres is ready"
+        break
+    fi
+    sleep 1
+done
+if ! docker exec strain_v2_demo_db pg_isready -U demo -d strain_collection_v2_demo -t 2 >/dev/null 2>&1; then
+    echo "ERROR: demo postgres did not become ready within 30s"
+    docker logs --tail 50 strain_v2_demo_db
+    exit 1
+fi
+
 echo ">>> Resetting demo DB and re-seeding via existing seed.ts..."
 # --skip-seed because Prisma's automatic seed hook isn't reliable in
 # production-mode containers; we invoke the compiled seed.js explicitly.
