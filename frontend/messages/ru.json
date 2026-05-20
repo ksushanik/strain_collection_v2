@@ -99,6 +99,11 @@
         "importRowLabel": "Строка {row}",
         "importSuccessRowsHint": "Успешно обработано строк: {count}"
     },
+    "DemoBanner": {
+        "notice": "Это демо-инстанс. База данных очищается и заполняется заново каждую ночь в 03:00 MSK.",
+        "credentials": "Войти под:",
+        "or": "или"
+    },
     "DynamicPages": {
         "myCollection": "Моя коллекция",
         "storage": "Хранилище",

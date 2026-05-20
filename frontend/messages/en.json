@@ -99,6 +99,11 @@
         "importRowLabel": "Row {row}",
         "importSuccessRowsHint": "Successfully processed rows: {count}"
     },
+    "DemoBanner": {
+        "notice": "This is a demo instance. The database is wiped and reseeded every night at 03:00 MSK.",
+        "credentials": "Log in with:",
+        "or": "or"
+    },
     "DynamicPages": {
         "myCollection": "My Collection",
         "storage": "Storage",

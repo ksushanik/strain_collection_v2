@@ -214,8 +214,19 @@ jobs:
           USER: ${{ secrets.DEPLOY_SSH_USER }}
           HOST: ${{ secrets.DEPLOY_SSH_HOST }}
         run: |
+          # Prod files (existing behaviour — do not touch).
           scp docker-compose.prod.yml "$USER@$HOST:/home/deploy/bio_collection/docker-compose.yml"
           scp scripts/deploy-prod.sh   "$USER@$HOST:/home/deploy/bio_collection/scripts/deploy-prod.sh"
+          # Demo sandbox files — kept in sync so the demo stack picks them up
+          # on next manual deploy-demo.sh / cron reset-demo.sh. Not invoked
+          # from this workflow; demo lifecycle is operator/cron driven.
+          scp docker-compose.demo.yml  "$USER@$HOST:/home/deploy/bio_collection/docker-compose.demo.yml"
+          scp scripts/deploy-demo.sh   "$USER@$HOST:/home/deploy/bio_collection/scripts/deploy-demo.sh"
+          scp scripts/reset-demo.sh    "$USER@$HOST:/home/deploy/bio_collection/scripts/reset-demo.sh"
+          scp backend/.env.demo.example  "$USER@$HOST:/home/deploy/bio_collection/backend/.env.demo.example"
+          scp frontend/.env.demo.example "$USER@$HOST:/home/deploy/bio_collection/frontend/.env.demo.example"
+          # scp does not preserve +x; set it explicitly on the demo scripts.
+          ssh "$USER@$HOST" "chmod +x /home/deploy/bio_collection/scripts/deploy-demo.sh /home/deploy/bio_collection/scripts/reset-demo.sh"
 
       - name: Deploy
         env:
