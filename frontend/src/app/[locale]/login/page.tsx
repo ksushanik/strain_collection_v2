@@ -12,7 +12,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3010';
+// Resolve at call time so the bundle can serve any host (prod + demo) from one image.
+// process.env.NEXT_PUBLIC_API_URL is inlined at build; if empty, fall back to the
+// current origin so the form posts to the same host it was loaded from.
+const getApiUrl = () =>
+    process.env.NEXT_PUBLIC_API_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3010');
 
 function LoginForm() {
     const [email, setEmail] = useState('');
@@ -32,7 +37,7 @@ function LoginForm() {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/login`, {
+            const response = await fetch(`${getApiUrl()}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
